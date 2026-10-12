@@ -112,6 +112,32 @@ function Test-SupervisorHealthy {
     } catch { return $false }
 }
 
+function Ensure-MiniQmtGuardTask {
+    # XtMiniQmt.exe can remain alive after its RPC session has died.  The QMT
+    # guard performs the session probe, while this independent one-minute
+    # watchdog makes sure the long-running guard itself did not disappear.
+    $TaskName = "MoneyMore MiniQMT"
+    try {
+        $Task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+        if ($Task -and [string]$Task.State -ne "Running") {
+            Start-ScheduledTask -TaskName $TaskName
+            [pscustomobject]@{
+                observed_at = [DateTimeOffset]::Now.ToString("o")
+                event = "MINIQMT_GUARD_RECOVERY_REQUESTED"
+                component = "watchdog"
+                previous_state = [string]$Task.State
+            } | ConvertTo-Json -Compress | Add-Content -LiteralPath $SupervisorEventLog
+        }
+    } catch {
+        [pscustomobject]@{
+            observed_at = [DateTimeOffset]::Now.ToString("o")
+            event = "MINIQMT_GUARD_RECOVERY_FAILED"
+            component = "watchdog"
+            error = $_.Exception.Message
+        } | ConvertTo-Json -Compress | Add-Content -LiteralPath $SupervisorEventLog
+    }
+}
+
 function Repair-VinextWindowsStaticPaths {
     & $Node (Join-Path $ProjectRoot "apps\dashboard\scripts\patch-vinext-windows.mjs")
     if ($LASTEXITCODE -ne 0) { throw "Could not prepare the dashboard production server." }
@@ -119,6 +145,7 @@ function Repair-VinextWindowsStaticPaths {
 
 switch ($Action) {
     "Ensure" {
+        Ensure-MiniQmtGuardTask
         if (Test-SupervisorHealthy) {
             Write-Output "MoneyMore supervisor heartbeat is healthy."
             break

@@ -21,7 +21,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 SDK = Path(
-    os.getenv("MONEYMORE_XTQUANT_SDK", ROOT / ".runtime" / "xtquant_230825b")
+    os.getenv("MONEYMORE_XTQUANT_SDK", ROOT / ".runtime" / "xtquant_250807")
 )
 sys.path.insert(0, str(SDK))
 
@@ -34,7 +34,8 @@ def _connect():
         from xtquant import xtdata
 
         xtdata.enable_hello = False
-        client = xtdata.connect()
+        port = os.getenv("MONEYMORE_XTQUANT_PORT")
+        client = xtdata.connect("127.0.0.1", int(port)) if port else xtdata.connect()
     if not client:
         raise RuntimeError("unable to connect to the logged-in MiniQMT client")
     return xtdata
@@ -235,6 +236,9 @@ def main() -> None:
     args = parser.parse_args()
     xtdata = _connect()
     if args.action == "probe":
+        ticks = xtdata.get_full_tick(["600036.SH"]) or {}
+        if not ticks.get("600036.SH"):
+            raise RuntimeError("QMT RPC connected but market-data function returned no tick")
         stocks = xtdata.get_stock_list_in_sector("沪深A股")
         detail = xtdata.get_instrument_detail("600036.SH") or {}
         result: object = {

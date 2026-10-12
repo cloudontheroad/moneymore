@@ -13,7 +13,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 SDK = Path(
-    os.getenv("MONEYMORE_XTQUANT_SDK", ROOT / ".runtime" / "xtquant_230825b")
+    os.getenv("MONEYMORE_XTQUANT_SDK", ROOT / ".runtime" / "xtquant_250807")
 )
 sys.path.insert(0, str(SDK))
 

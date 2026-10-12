@@ -12,7 +12,10 @@ $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $RuntimeDir = Join-Path $ProjectRoot "state\runtime"
 $LogFile = Join-Path $RuntimeDir "miniqmt-guard.log"
+$StatusFile = Join-Path $RuntimeDir "miniqmt-guard-status.json"
 $WorkingDirectory = Join-Path (Split-Path -Parent (Split-Path -Parent $Launcher)) "config\tradingtime"
+$MiniLauncher = Join-Path (Split-Path -Parent $Launcher) "XtMiniQmt.exe"
+if (Test-Path -LiteralPath $MiniLauncher) { $Launcher = $MiniLauncher }
 $QmtPython = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
 $QmtBridge = Join-Path $ProjectRoot "scripts\qmt_data_bridge.py"
 $QmtSdk = Join-Path $ProjectRoot ".runtime\xtquant_250807"
@@ -22,6 +25,27 @@ New-Item -ItemType Directory -Force -Path $RuntimeDir | Out-Null
 function Write-GuardLog([string]$Message) {
     $Line = "{0} {1}" -f [DateTimeOffset]::Now.ToString("o"), $Message
     Add-Content -LiteralPath $LogFile -Value $Line -Encoding UTF8
+}
+
+function Write-GuardStatus([string]$Status, [string]$Message, $Process = $null) {
+    $Payload = [pscustomobject]@{
+        observed_at = [DateTimeOffset]::Now.ToString("o")
+        status = $Status
+        message = $Message
+        guard_pid = $PID
+        qmt_pid = if ($Process) { $Process.Id } else { $null }
+        consecutive_probe_failures = $ConsecutiveProbeFailures
+    }
+    $Temporary = "$StatusFile.$PID.tmp"
+    $Payload | ConvertTo-Json -Compress | Set-Content -LiteralPath $Temporary -Encoding UTF8
+    Move-Item -LiteralPath $Temporary -Destination $StatusFile -Force
+}
+
+function Test-RecoveryWindow {
+    $Now = Get-Date
+    return $Now.DayOfWeek -notin @([DayOfWeek]::Saturday, [DayOfWeek]::Sunday) -and
+        $Now.TimeOfDay -ge ([TimeSpan]::FromHours(8.75)) -and
+        $Now.TimeOfDay -le ([TimeSpan]::FromHours(15.25))
 }
 
 function Get-QmtMainProcess {
@@ -78,6 +102,7 @@ function Restart-QmtSession {
         Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 3
     Start-Process -FilePath $Launcher -WorkingDirectory $WorkingDirectory -WindowStyle Minimized
+    Start-Sleep -Seconds $StartupGraceSeconds
 }
 
 if (-not (Test-Path -LiteralPath $Launcher)) {
@@ -90,6 +115,7 @@ if (-not (Test-Path -LiteralPath $WorkingDirectory)) {
 Write-GuardLog "guard started launcher=$Launcher"
 $LastProbeAt = [DateTimeOffset]::MinValue
 $ConsecutiveProbeFailures = 0
+$LastSessionRestartAt = [DateTimeOffset]::MinValue
 while ($true) {
     try {
         if (-not (Get-QmtMainProcess)) {
@@ -103,8 +129,10 @@ while ($true) {
             $Started = Get-QmtMainProcess
             if ($Started) {
                 Write-GuardLog "main process restored pid=$($Started.Id)"
+                Write-GuardStatus "PROCESS_RESTORED" "QMT process restored; session verification pending" $Started
             } else {
                 Write-GuardLog "official launcher returned but XtMiniQmt is still absent"
+                Write-GuardStatus "PROCESS_MISSING" "Official launcher returned without XtMiniQmt" $null
             }
         } elseif (([DateTimeOffset]::Now - $LastProbeAt).TotalSeconds -ge $ProbeSeconds) {
             $LastProbeAt = [DateTimeOffset]::Now
@@ -113,18 +141,26 @@ while ($true) {
                     Write-GuardLog "session probe recovered"
                 }
                 $ConsecutiveProbeFailures = 0
+                Write-GuardStatus "HEALTHY" "XtQuant RPC session is reachable" (Get-QmtMainProcess)
             } else {
                 $ConsecutiveProbeFailures += 1
                 Write-GuardLog "session probe unhealthy count=$ConsecutiveProbeFailures threshold=$FailureThreshold"
+                Write-GuardStatus "SESSION_UNHEALTHY" "XtMiniQmt exists but XtQuant RPC is unreachable" (Get-QmtMainProcess)
                 # A history download can temporarily monopolize XtQuant's
                 # local RPC service.  Process liveness remains authoritative;
                 # probing is observational unless explicitly opted into the
                 # old destructive recovery behaviour.
-                if ($RestartOnProbeFailure -and
+                # Recovery is the safe default during the trading window.  The
+                # legacy scheduled task did not pass RestartOnProbeFailure,
+                # which left a dead RPC session alive indefinitely.
+                if ((Test-RecoveryWindow) -and
+                    ([DateTimeOffset]::Now - $LastSessionRestartAt).TotalMinutes -ge 30 -and
                     $ConsecutiveProbeFailures -ge $FailureThreshold) {
+                    $LastSessionRestartAt = [DateTimeOffset]::Now
                     Restart-QmtSession
                     $ConsecutiveProbeFailures = 0
-                    $LastProbeAt = [DateTimeOffset]::Now.AddSeconds($StartupGraceSeconds)
+                    $LastProbeAt = [DateTimeOffset]::MinValue
+                    Write-GuardStatus "SESSION_RESTARTED" "Restarted the complete QMT process chain after repeated RPC failures" (Get-QmtMainProcess)
                 }
             }
         }
