@@ -107,7 +107,7 @@ if ($Action -in @("Install", "RepairQmt")) {
     }
 
     $CurrentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-    $QmtArguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -Launcher "{1}" -RestartOnProbeFailure' -f $QmtGuardScript, $QmtLauncher
+    $QmtArguments = '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}" -Launcher "{1}"' -f $QmtGuardScript, $QmtLauncher
     $QmtAction = New-ScheduledTaskAction -Execute $PowerShell -Argument $QmtArguments
     $QmtTrigger = New-ScheduledTaskTrigger -AtLogOn -User $CurrentUser
     $QmtPrincipal = New-ScheduledTaskPrincipal -UserId $CurrentUser -LogonType Interactive -RunLevel Highest

@@ -16,7 +16,7 @@ $StatusFile = Join-Path $RuntimeDir "miniqmt-guard-status.json"
 $WorkingDirectory = Join-Path (Split-Path -Parent (Split-Path -Parent $Launcher)) "config\tradingtime"
 $MiniLauncher = Join-Path (Split-Path -Parent $Launcher) "XtMiniQmt.exe"
 if (Test-Path -LiteralPath $MiniLauncher) { $Launcher = $MiniLauncher }
-$QmtPython = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
+$QmtPython = Join-Path $ProjectRoot ".runtime\qmt-py311\Scripts\python.exe"
 $QmtBridge = Join-Path $ProjectRoot "scripts\qmt_data_bridge.py"
 $QmtSdk = Join-Path $ProjectRoot ".runtime\xtquant_250807"
 
@@ -54,15 +54,6 @@ function Get-QmtMainProcess {
         Select-Object -First 1
 }
 
-function Remove-OrphanQuoteProcesses {
-    if (Get-QmtMainProcess) { return }
-    $Quotes = @(Get-Process -Name "miniquote" -ErrorAction SilentlyContinue)
-    foreach ($Quote in $Quotes) {
-        Write-GuardLog "stopping orphan miniquote pid=$($Quote.Id)"
-        Stop-Process -Id $Quote.Id -Force -ErrorAction SilentlyContinue
-    }
-}
-
 function Test-QmtSession {
     if (-not (Test-Path -LiteralPath $QmtPython) -or
         -not (Test-Path -LiteralPath $QmtBridge)) { return $false }
@@ -96,15 +87,6 @@ function Test-QmtSession {
     }
 }
 
-function Restart-QmtSession {
-    Write-GuardLog "session unhealthy; restarting official client processes"
-    Get-Process -Name "XtMiniQmt", "XtItClient", "miniquote" -ErrorAction SilentlyContinue |
-        Stop-Process -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 3
-    Start-Process -FilePath $Launcher -WorkingDirectory $WorkingDirectory -WindowStyle Minimized
-    Start-Sleep -Seconds $StartupGraceSeconds
-}
-
 if (-not (Test-Path -LiteralPath $Launcher)) {
     throw "MiniQMT official launcher not found: $Launcher"
 }
@@ -112,19 +94,35 @@ if (-not (Test-Path -LiteralPath $WorkingDirectory)) {
     throw "MiniQMT working directory not found: $WorkingDirectory"
 }
 
-Write-GuardLog "guard started launcher=$Launcher"
+$GuardMutex = [System.Threading.Mutex]::new($false, "Local\MoneyMoreMiniQmtGuard")
+$OwnsMutex = $false
+try { $OwnsMutex = $GuardMutex.WaitOne(0) } catch [System.Threading.AbandonedMutexException] { $OwnsMutex = $true }
+if (-not $OwnsMutex) { $GuardMutex.Dispose(); exit 0 }
+Write-GuardLog "guard started pid=$PID launcher=$Launcher policy=OBSERVE_SESSION_RELAUNCH_MISSING_ONLY"
 $LastProbeAt = [DateTimeOffset]::MinValue
 $ConsecutiveProbeFailures = 0
-$LastSessionRestartAt = [DateTimeOffset]::MinValue
+$LaunchRecord = Join-Path $RuntimeDir "miniqmt-last-launch.json"
+$LastLaunchAt = [DateTimeOffset]::MinValue
+if (Test-Path -LiteralPath $LaunchRecord) {
+    try { $LastLaunchAt = [DateTimeOffset]::Parse((Get-Content -LiteralPath $LaunchRecord -Raw | ConvertFrom-Json).observed_at) } catch {}
+}
+try {
 while ($true) {
     try {
         if (-not (Get-QmtMainProcess)) {
-            # XtMiniQmt can leave miniquote behind after its main window exits.
-            # The orphan holds shared-memory/config files and destabilizes the
-            # next login, so remove it only after confirming the main process is gone.
-            Remove-OrphanQuoteProcesses
+            # Never kill broker processes: a quote process may belong to the
+            # ordinary client or an in-progress login. Persist the launch
+            # cooldown so restarting the guard cannot reset retry frequency.
+            if (([DateTimeOffset]::Now - $LastLaunchAt).TotalMinutes -lt 5) {
+                Write-GuardStatus "WAITING_FOR_LOGIN" "QMT absent; waiting for login or five-minute launch cooldown" $null
+                Start-Sleep -Seconds $PollSeconds
+                continue
+            }
+            $LastLaunchAt = [DateTimeOffset]::Now
+            @{ observed_at = $LastLaunchAt.ToString("o"); guard_pid = $PID } | ConvertTo-Json -Compress | Set-Content -LiteralPath $LaunchRecord -Encoding UTF8
             Write-GuardLog "main process missing; launching official client"
-            Start-Process -FilePath $Launcher -WorkingDirectory $WorkingDirectory -WindowStyle Minimized
+            $Launched = Start-Process -FilePath $Launcher -WorkingDirectory $WorkingDirectory -WindowStyle Hidden -PassThru
+            Write-GuardLog "launch requested pid=$($Launched.Id) reason=MAIN_PROCESS_MISSING"
             Start-Sleep -Seconds $StartupGraceSeconds
             $Started = Get-QmtMainProcess
             if ($Started) {
@@ -146,26 +144,17 @@ while ($true) {
                 $ConsecutiveProbeFailures += 1
                 Write-GuardLog "session probe unhealthy count=$ConsecutiveProbeFailures threshold=$FailureThreshold"
                 Write-GuardStatus "SESSION_UNHEALTHY" "XtMiniQmt exists but XtQuant RPC is unreachable" (Get-QmtMainProcess)
-                # A history download can temporarily monopolize XtQuant's
-                # local RPC service.  Process liveness remains authoritative;
-                # probing is observational unless explicitly opted into the
-                # old destructive recovery behaviour.
-                # Recovery is the safe default during the trading window.  The
-                # legacy scheduled task did not pass RestartOnProbeFailure,
-                # which left a dead RPC session alive indefinitely.
-                if ((Test-RecoveryWindow) -and
-                    ([DateTimeOffset]::Now - $LastSessionRestartAt).TotalMinutes -ge 30 -and
-                    $ConsecutiveProbeFailures -ge $FailureThreshold) {
-                    $LastSessionRestartAt = [DateTimeOffset]::Now
-                    Restart-QmtSession
-                    $ConsecutiveProbeFailures = 0
-                    $LastProbeAt = [DateTimeOffset]::MinValue
-                    Write-GuardStatus "SESSION_RESTARTED" "Restarted the complete QMT process chain after repeated RPC failures" (Get-QmtMainProcess)
-                }
+                # Missing ticks, SDK errors and slow downloads do not prove
+                # the client is dead. Leave the logged-in client untouched;
+                # the trading health gate already blocks stale-data execution.
             }
         }
     } catch {
         Write-GuardLog "guard iteration failed: $($_.Exception.GetType().Name): $($_.Exception.Message)"
     }
     Start-Sleep -Seconds $PollSeconds
+}
+} finally {
+    if ($OwnsMutex) { $GuardMutex.ReleaseMutex() }
+    $GuardMutex.Dispose()
 }
