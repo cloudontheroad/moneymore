@@ -1,9 +1,10 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import DesktopExecution from "./DesktopExecution";
 
 type Row = Record<string, unknown>;
-type Page = "overview" | "sectors" | "research" | "risk" | "leveraged" | "challenger" | "data" | "operations";
+type Page = "overview" | "sectors" | "research" | "risk" | "leveraged" | "challenger" | "data" | "operations" | "desktop";
 type Bank = {
   latest_date: string; latest_scores: Row[]; latest_holdings: Row[];
   scheduler: { enabled: boolean; time: string; timezone: string; next_run?: string };
@@ -129,6 +130,7 @@ const nav: { id: Page; label: string; note: string }[] = [
   { id: "challenger", label: "Qlib挑战者", note: "AI LAB" },
   { id: "data", label: "数据健康", note: "QUALITY" },
   { id: "operations", label: "运行与对账", note: "PAPER" },
+  { id: "desktop", label: "桌面执行", note: "LOCAL AGENT" },
 ];
 const meta: Record<string, { label: string; color: string; thesis: string }> = {
   bank: { label: "银行", color: "#a8e063", thesis: "估值 · 防御 · 动量" },
@@ -270,7 +272,7 @@ export default function Dashboard() {
       <div className="aside-foot"><i/> PAPER ONLY<br/><small>{bank.scheduler.time} · {bank.scheduler.timezone}</small></div>
     </aside>
     <main className="workspace">
-      <header><div><small>MONEYMORE / {current.note}</small><h1>{current.label}</h1></div><div className="header-actions"><span><i/> {live?.quote_source==="QMT_REALTIME"?"实时 · "+live.observed_at.slice(11,19):"数据日 "+sectors.latest_date}</span><button onClick={() => { void refresh(); void refreshLive(); }}>刷新</button><button className="primary" disabled={busy} onClick={() => void run()}>{busy ? "恢复中…" : "恢复并重算"}</button></div></header>
+      <header><div><small>MONEYMORE / {current.note}</small><h1>{current.label}</h1></div><div className="header-actions"><span><i/> {live&&["QMT_REALTIME","ALPHAFEED_REALTIME"].includes(live.quote_source)?(live.quote_source==="ALPHAFEED_REALTIME"?"AlphaFeed":"QMT")+" · "+live.observed_at.slice(11,19):"数据日 "+sectors.latest_date}</span><button onClick={() => { void refresh(); void refreshLive(); }}>刷新</button><button className="primary" disabled={busy} onClick={() => void run()}>{busy ? "恢复中…" : "恢复并重算"}</button></div></header>
       {systemHealth&&<SystemHealthBar health={systemHealth}/>}
       {error && <div className="error">{error}</div>}
       {page === "overview" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Overview sectors={sectors} execution={displayedExecution}/></SecurityAccountContext.Provider>}
@@ -280,6 +282,7 @@ export default function Dashboard() {
       {page === "leveraged" && <LeveragedEtfPage account={leveragedEtf}/>}
       {page === "challenger" && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live}/><ChallengerEvidence challenger={challenger}/><PointInTimeEvidence challenger={challenger}/><GovernanceEvidence challenger={challenger}/><LongTermReview challenger={challenger}/></SecurityAccountContext.Provider>}
       {page === "data" && <DataHealth quality={quality}/>}
+      {page === "desktop" && <DesktopExecution names={sectors.symbol_names}/>}
       {page === "operations" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Operations bank={bank} execution={displayedExecution} operations={operations} acceptance={acceptance} intraday={intraday} live={live} names={sectors.symbol_names} onRefresh={refresh}/></SecurityAccountContext.Provider>}
     </main>
   </div>{(securityDetailLoading||securityDetailError||securityDetail)&&<SecurityHistoryModal detail={securityDetail} initialAccountId={securityDetailAccount} loading={securityDetailLoading} error={securityDetailError} onClose={()=>{setSecurityDetail(null);setSecurityDetailError("");}}/>}</SecurityNavigationContext.Provider>;

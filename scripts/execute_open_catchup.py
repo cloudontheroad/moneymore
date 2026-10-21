@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from moneymore.bank_daily import BANK_ACCOUNT
 from moneymore.baseline_exposure_daily import BASELINE_EXPOSURE_ACCOUNT
 from moneymore.config import BacktestConfig
-from moneymore.data.qmt_provider import QmtTushareProvider
+from moneymore.data.realtime import create_realtime_provider
 from moneymore.execution.paper import PaperBroker
 from moneymore.open_execution import execute_accounts_at_qmt_open
 
@@ -35,7 +35,7 @@ def main() -> None:
 
     account_ids = [ACCOUNT_ALIASES[value] for value in args.account]
     result = execute_accounts_at_qmt_open(
-        provider=QmtTushareProvider(root=ROOT),
+        provider=create_realtime_provider(root=ROOT),
         broker=PaperBroker(ROOT / "state" / "paper_orders.sqlite3"),
         config=BacktestConfig.from_yaml(ROOT / "configs" / "default.yaml"),
         trade_date=args.trade_date,

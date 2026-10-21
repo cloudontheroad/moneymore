@@ -4,7 +4,17 @@ MoneyMore 是一个面向个人投资者的A股量化研究与模拟交易系统
 
 当前模式：`PAPER_ONLY`。系统不连接任何真实券商账户，也不会自动发送真实委托。
 
+### 2026-10-21 实时行情迁移
+
+本机实时行情已切换为AlphaFeed（报价、五档、VWAP、实时估值及日内模拟），日线/基本面继续Tushare；不再依赖MiniQMT登录。研究和模型仍在本机，不迁入QMT。
+
+配置：`.env` 中 `MONEYMORE_REALTIME_DATA_SOURCE=alphafeed`、`MONEYMORE_MARKET_DATA_SOURCE=tushare`。SDK安装使用项目可选依赖 `[alphafeed]`；Key放在Git忽略目录 `state/private/alphafeed.env`，变量名 `ALPHAFEED_API_KEY`。健康接口 `/api/health` 返回实际选择，`/api/live-accounts` 返回实际行情来源；最新质量摘要在 `state/runtime/alphafeed-health.json`。
+
+缺失/过期盘口、报价与盘口时间不同步或非连续交易时段，模拟执行采取阻断保护。收盘后接口与47标的已验证；盘中连续稳定性仍待验收。见 [验收记录](docs/ALPHAFEED_ACCEPTANCE_20261021.md)。切换不会重写历史收益，也不恢复真实交易能力。
+
 ## 当前能力
+
+新增“桌面执行”页：由网页触发本机只读UIA代理、配置普通交易客户端并准备关联计划；不抢焦点、不输入密码、不发送真实委托。客户端后台读取和券商回执解析尚待验收，详见[桌面执行说明](docs/DESKTOP_EXECUTION.md)。
 
 - Tushare历史行情、估值、财务和分红数据；
 - 原始数据不可变快照与Parquet研究表；

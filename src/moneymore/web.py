@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import re
 import shutil
 import sqlite3
@@ -40,9 +41,11 @@ from .data.fundamental_sync import (
     sync_daily_basic_universe,
     sync_missing_target_fundamentals,
 )
-from .data.qmt_provider import QmtTushareProvider, create_market_data_provider
+from .data.qmt_provider import create_market_data_provider
+from .data.realtime import create_realtime_provider
 from .data.research import load_total_return_stock_bars
 from .data.store import ParquetStore
+from .desktop_routes import router as desktop_router
 from .execution.paper import PaperBroker
 from .factors import build_default_registry, build_qmt_candidate_registry
 from .intraday_execution import (
@@ -147,6 +150,7 @@ def _live_account_snapshot() -> dict[str, object]:
         marks: dict[str, float] = {}
         quote_rows: list[dict[str, object]] = []
         quote_source = "DAILY_FALLBACK"
+        quote_error = None
         if symbols:
             try:
                 daily = ParquetStore(DATA).read(
@@ -167,7 +171,7 @@ def _live_account_snapshot() -> dict[str, object]:
                 pass
             try:
                 load_dotenv(ROOT / ".env")
-                quotes = QmtTushareProvider(root=ROOT, timeout_seconds=15).intraday_quotes(
+                quotes = create_realtime_provider(root=ROOT).intraday_quotes(
                     symbols
                 )
                 quote_rows = [
@@ -182,9 +186,9 @@ def _live_account_snapshot() -> dict[str, object]:
                     }
                 )
                 if quote_rows:
-                    quote_source = "QMT_REALTIME"
-            except Exception:  # noqa: BLE001 - retain last official close on QMT outage
-                pass
+                    quote_source = str(quote_rows[0].get("source") or "QMT_REALTIME")
+            except Exception as error:  # noqa: BLE001 - retain official close on outage
+                quote_error = type(error).__name__  # Never expose credential-bearing SDK errors.
         all_orders = broker.orders()
         today = now.strftime("%Y%m%d")
         accounts: dict[str, object] = {}
@@ -224,6 +228,7 @@ def _live_account_snapshot() -> dict[str, object]:
         payload: dict[str, object] = {
             "observed_at": now.isoformat(),
             "quote_source": quote_source,
+            "quote_error": quote_error,
             "symbol_count": len(symbols),
             "quotes": quote_rows,
             "accounts": accounts,
@@ -289,7 +294,7 @@ def _append_live_nav_points(
         # Do not manufacture a new trading-day point from stale closing prices
         # on weekends or during a QMT outage.  A real fill is sufficient evidence
         # that the account changed even if the quote request itself degraded.
-        if live.get("quote_source") != "QMT_REALTIME" and not account.get("today_fills"):
+        if live.get("quote_source") not in {"QMT_REALTIME", "ALPHAFEED_REALTIME"} and not account.get("today_fills"):
             continue
         series = [row for row in result if row.get("strategy_id") == strategy_id]
         if not series:
@@ -407,18 +412,20 @@ def _runtime_health_bus() -> dict[str, object]:
         time(9, 30) <= now.time() <= time(11, 30)
         or time(13, 0) <= now.time() <= time(15, 0)
     )
-    qmt_ok = live.get("quote_source") == "QMT_REALTIME" and (
+    qmt_ok = live.get("quote_source") in {"QMT_REALTIME", "ALPHAFEED_REALTIME"} and (
         not in_session or (quote_age is not None and quote_age <= 120)
     )
+    if in_session and live.get("quote_source") == "ALPHAFEED_REALTIME":
+        qmt_ok = qmt_ok and bool(quotes) and all(row.get("execution_ready") for row in quotes)
     add(
         "QMT_MARKET_DATA",
         "PASS" if qmt_ok else "BLOCK" if in_session else "WARN",
         (
-            f"QMT行情正常，最新行情延迟 {quote_age:.0f} 秒"
+            f"{live.get('quote_source')}行情可用，最新行情延迟 {quote_age:.0f} 秒"
             if quote_age is not None and qmt_ok
-            else "交易时段QMT行情缺失或延迟超过120秒"
+            else "交易时段实时行情缺失或延迟超过120秒"
             if in_session
-            else "非交易时段未取得QMT实时行情，使用正式收盘数据"
+            else "非交易时段未取得实时行情，使用正式收盘数据"
         ),
         quote_source=live.get("quote_source"),
         quote_age_seconds=quote_age,
@@ -1096,7 +1103,7 @@ class TaskService:
                     prepare_intraday_branch_orders(broker, trade_date)
                     prepare_exposure_intraday_branch_orders(broker, trade_date)
                     result = execute_accounts_at_qmt_open(
-                        provider=QmtTushareProvider(root=ROOT),
+                        provider=create_realtime_provider(root=ROOT),
                         broker=broker,
                         config=BacktestConfig.from_yaml(ROOT / "configs" / "default.yaml"),
                         trade_date=trade_date,
@@ -1150,9 +1157,9 @@ class TaskService:
                         audit_subdirectory="baseline-pysystemtrade-intraday-execution",
                     ))
                     for result in intraday_results:
-                        if result.get("status") in {"QMT_QUOTES_EMPTY", "PARTIAL_COMPENSATION"}:
+                        if result.get("status") in {"QMT_QUOTES_EMPTY", "REALTIME_QUOTES_EMPTY", "PARTIAL_COMPENSATION"}:
                             self._notify(
-                                "ERROR" if result["status"] == "QMT_QUOTES_EMPTY" else "WARN",
+                                "ERROR" if result["status"] in {"QMT_QUOTES_EMPTY", "REALTIME_QUOTES_EMPTY"} else "WARN",
                                 "INTRADAY_TARGET_GAP",
                                 "日内目标仓位未补齐",
                                 f"{result['account_id']}: {result['status']}; "
@@ -1873,6 +1880,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="MoneyMore API", version="0.2.0", lifespan=lifespan)
+app.include_router(desktop_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
@@ -1887,6 +1895,8 @@ def health() -> dict[str, object]:
     return {
         "status": "ok",
         "mode": "PAPER_ONLY",
+        "realtime_data_source": os.getenv("MONEYMORE_REALTIME_DATA_SOURCE", "qmt"),
+        "research_data_source": os.getenv("MONEYMORE_MARKET_DATA_SOURCE", "qmt"),
         "scheduler": bool(task_service._thread and task_service._thread.is_alive()),
         "weekly_training_scheduler": bool(
             weekly_training_service._thread and weekly_training_service._thread.is_alive()
@@ -2152,7 +2162,7 @@ def _append_live_daily_bar(bars: pd.DataFrame, symbol: str) -> pd.DataFrame:
         )
         if quotes.empty:
             load_dotenv(ROOT / ".env")
-            quotes = QmtTushareProvider(root=ROOT, timeout_seconds=15).intraday_quotes(
+            quotes = create_realtime_provider(root=ROOT).intraday_quotes(
                 [symbol]
             )
     except Exception:  # noqa: BLE001 - stale charts are preferable to a failed detail view
@@ -2238,7 +2248,7 @@ def _open_execution_status(trade_date: str) -> dict[str, object]:
         else {
             "trade_date": trade_date,
             "status": "WAITING_FOR_OPEN",
-            "price_source": "QMT_SESSION_OPEN",
+            "price_source": f"{os.getenv('MONEYMORE_REALTIME_DATA_SOURCE', 'qmt').upper()}_SESSION_OPEN",
             "accounts": [],
         }
     )

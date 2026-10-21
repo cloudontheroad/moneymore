@@ -16,6 +16,10 @@ async function proxy(request: NextRequest, context: RouteContext) {
     method: request.method,
     headers: {
       "Content-Type": request.headers.get("Content-Type") ?? "application/json",
+      ...(path[0] === "desktop-execution" ? {
+        "Origin": request.headers.get("Origin") ?? "",
+        "X-MoneyMore-Desktop": request.headers.get("X-MoneyMore-Desktop") ?? "",
+      } : {}),
     },
     body,
     cache: "no-store",

@@ -108,6 +108,10 @@ if (Test-Path -LiteralPath $LaunchRecord) {
 }
 try {
 while ($true) {
+    if (Test-Path -LiteralPath (Join-Path $ProjectRoot "state\private\disable-miniqmt-guard")) {
+        Write-GuardStatus "DISABLED_BY_DATA_SOURCE_MIGRATION" "MiniQMT guard disabled; no launch or session probes" $null
+        break
+    }
     try {
         if (-not (Get-QmtMainProcess)) {
             # Never kill broker processes: a quote process may belong to the

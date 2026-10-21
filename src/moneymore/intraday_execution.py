@@ -9,15 +9,15 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
+from .baseline_exposure_daily import BASELINE_EXPOSURE_ACCOUNT
 from .config import BacktestConfig
 from .corporate_actions import process_corporate_actions
-from .data.qmt_provider import QmtTushareProvider
+from .costs import execution_price, transaction_fee
+from .data.realtime import create_realtime_provider
 from .data.store import ParquetStore
 from .execution.paper import ExecutionBar, PaperBroker
-from .costs import execution_price, transaction_fee
 from .models import Side
 from .multi_sector_daily import MULTI_SECTOR_ACCOUNT
-from .baseline_exposure_daily import BASELINE_EXPOSURE_ACCOUNT
 
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 POLICY_ID = "adaptive_vwap_sniper_v1"
@@ -322,10 +322,10 @@ def run_baseline_intraday_once(
     if not symbols:
         payload["account"] = empty_account
         return payload
-    provider = QmtTushareProvider(root=root)
+    provider = create_realtime_provider(root=root)
     quotes = provider.intraday_quotes(symbols)
     if quotes.empty:
-        payload["status"] = "QMT_QUOTES_EMPTY"
+        payload["status"] = "REALTIME_QUOTES_EMPTY"
         return payload
     store = ParquetStore(root / "data")
     quotes["trade_date"] = trade_date
@@ -346,6 +346,10 @@ def run_baseline_intraday_once(
     for order in sorted(pending, key=lambda row: (row.get("side") != "SELL", row["symbol"])):
         quote = quote_map.get(str(order["symbol"]))
         if not quote:
+            continue
+        if "execution_ready" in quote and not quote["execution_ready"]:
+            blocked.append({"symbol": order["symbol"], "reason": quote.get("quality_reasons"),
+                            "source": quote.get("source")})
             continue
         decision = decide_intraday_execution(
             symbol=str(order["symbol"]),

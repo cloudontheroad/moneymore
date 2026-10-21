@@ -113,6 +113,7 @@ function Test-SupervisorHealthy {
 }
 
 function Ensure-MiniQmtGuardTask {
+    if (Test-Path -LiteralPath (Join-Path $ProjectRoot "state\private\disable-miniqmt-guard")) { return }
     # XtMiniQmt.exe can remain alive after its RPC session has died.  The QMT
     # guard performs the session probe, while this independent one-minute
     # watchdog makes sure the long-running guard itself did not disappear.

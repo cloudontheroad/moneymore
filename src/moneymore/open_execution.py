@@ -152,12 +152,14 @@ def execute_accounts_at_qmt_open(
             bars={},
             missing=[],
             audit_dir=audit_dir,
-            price_source="QMT_SESSION_OPEN",
+            price_source=f"{getattr(provider, 'name', 'qmt').upper()}_SESSION_OPEN",
         )
     quotes = provider.intraday_quotes(symbols)
     bars: dict[str, ExecutionBar] = {}
     if quotes is not None and not quotes.empty:
         for row in quotes.to_dict("records"):
+            if "execution_ready" in row and not row["execution_ready"]:
+                continue
             symbol = str(row["symbol"])
             open_price = float(row.get("open", 0) or 0)
             if open_price <= 0:
@@ -182,5 +184,5 @@ def execute_accounts_at_qmt_open(
         bars=bars,
         missing=missing,
         audit_dir=audit_dir,
-        price_source="QMT_SESSION_OPEN",
+        price_source=f"{getattr(provider, 'name', 'qmt').upper()}_SESSION_OPEN",
     )

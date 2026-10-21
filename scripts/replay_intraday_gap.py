@@ -16,9 +16,11 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pandas as pd
+from dotenv import load_dotenv
 
 from moneymore.config import BacktestConfig
 from moneymore.data.store import ParquetStore
+from moneymore.data.realtime import create_realtime_provider
 from moneymore.execution.paper import ExecutionBar, PaperBroker
 from moneymore.intraday_execution import (
     INTRADAY_ACCOUNT, EXPOSURE_INTRADAY_ACCOUNT, decide_intraday_execution,
@@ -65,6 +67,16 @@ def source_target(database: Path, trade_date: str, plan_date: str,
 
 
 def historical_bars(symbols: list[str], start: str, end: str) -> pd.DataFrame:
+    provider = create_realtime_provider(ROOT)
+    if getattr(provider, "name", "") == "alphafeed":
+        start_dt = datetime.strptime(start if len(start) == 14 else start + "000000", "%Y%m%d%H%M%S")
+        end_dt = datetime.strptime(end if len(end) == 14 else end + "235959", "%Y%m%d%H%M%S")
+        frame = provider.minute_history(symbols, start_dt.isoformat(), end_dt.isoformat())
+        if frame.empty:
+            raise RuntimeError("AlphaFeed returned no historical minute bars")
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], unit="ms", utc=True).dt.tz_convert(
+            SHANGHAI).dt.strftime("%Y%m%d%H%M%S")
+        return frame.sort_values(["timestamp", "symbol"])
     command = [
         str(ROOT / ".runtime/qmt-py311/Scripts/python.exe"),
         str(ROOT / "scripts/qmt_data_bridge.py"), "minute-history",
@@ -209,7 +221,7 @@ def replay_day(broker: PaperBroker, bars: pd.DataFrame, trade_date: str,
         }
         (audit_dir / f"{trade_date}.json").write_text(json.dumps({
         "trade_date": trade_date, "status": "HISTORICAL_REPLAY_ESTIMATED",
-        "provenance": PROVENANCE, "price_source": "QMT_1M_CLOSE",
+        "provenance": PROVENANCE, "price_source": str(day.iloc[-1].get("source") or "QMT_1M_CLOSE"),
         "limitations": "No historical bid/ask, queue or true tick VWAP; 1m close and cumulative 1m VWAP used.",
         "plan_date": plan_date, "intents": intents, "events": events,
         "account": account, "observations": [observation],
@@ -221,6 +233,7 @@ def replay_day(broker: PaperBroker, bars: pd.DataFrame, trade_date: str,
 
 
 def main() -> None:
+    load_dotenv(ROOT / ".env")
     parser = argparse.ArgumentParser()
     parser.add_argument("--commit", action="store_true")
     parser.add_argument("--account", choices=["baseline", "controlled", "all"],
