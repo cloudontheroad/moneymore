@@ -114,6 +114,30 @@ def test_permission_errors_not_silently_fallback(tmp_path):
         p.intraday_quotes(["600036.SH"])
 
 
+@pytest.mark.parametrize("error", [TimeoutError("isolated timeout"), RuntimeError("isolated 429")])
+def test_isolated_failure_releases_lock_without_retry_and_next_call_recovers(tmp_path, error):
+    q, d, i = sample()
+    calls = []
+
+    def quotes(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise error
+        return [q]
+
+    client = SimpleNamespace(
+        quotes=SimpleNamespace(get=quotes),
+        depth=SimpleNamespace(batch=lambda *args, **kw: {q["symbol"]: d}),
+        instruments=SimpleNamespace(get=lambda symbols: [i]),
+    )
+    provider = AlphaFeedProvider(tmp_path, client=client, now=lambda: NOW)
+    with pytest.raises(type(error)):
+        provider.intraday_quotes([q["symbol"]])
+    assert len(calls) == 1
+    assert provider.intraday_quotes([q["symbol"]]).iloc[0].execution_ready
+    assert len(calls) == 2
+
+
 def test_bounded_minute_history(tmp_path):
     q, _, _ = sample()
 

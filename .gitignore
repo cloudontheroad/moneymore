@@ -18,3 +18,4 @@ test-tmp-*/
 .test-artifacts/
 state/
 mlruns/
+external_research/easyths-upstream/

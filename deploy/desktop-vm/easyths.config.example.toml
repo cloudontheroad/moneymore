@@ -1,0 +1,24 @@
+# Guest Windows only. Do not start EasyTHS on the everyday host desktop.
+# Copy outside Git; replace the placeholder with a privately stored strong token.
+[app]
+save_error_captcha_image = false
+
+[trading]
+app_path = "C:/同花顺远航版/transaction/xiadan.exe"
+
+[queue]
+max_size = 20
+operation_timeout = 10.0
+
+[api]
+host = "127.0.0.1"
+port = 7648
+rate_limit = 10
+cors_origins = "http://127.0.0.1:7648"
+key = "REPLACE_WITH_PRIVATE_RANDOM_TOKEN_BEFORE_START"
+ip_whitelist = "127.0.0.1"
+mcp_server_type = "streamable-http"
+
+[logging]
+level = "INFO"
+file = ""
