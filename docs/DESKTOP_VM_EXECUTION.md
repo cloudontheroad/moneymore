@@ -2,6 +2,17 @@
 
 决策日期：2026-10-21。状态：完成选型、主机只读盘点、安全配置样例与健康检查模块；虚拟机未安装，客户端与回执未验收，真实提交未实现。
 
+## 2026-10-22 安装进展（优先于下文初始盘点）
+
+14:49续记：用户已完成guest Windows安装、本地MoneyMore用户登录与VMware Tools安装重启。宿主vmware.log的ToolsUpdateVersionState与VMXVmdb_SetToolsVersionStatus记录版本13349、ok/current。后续按用户确认采用同花顺客户端并首先验证现有华泰账户，不等同于换券商。官网 https://download.10jqka.com.cn/ 免费版下载已发起；尚未验收guest客户端安装、登录或EasyTHS兼容性。原早期Tools超时与“未安装Windows”记录仅描述历史阶段。
+
+- 用户已安装VMware Workstation 26H1u1；实际程序 `D:\Program Files\VMware\VMware Workstation\vmware.exe`，版本26.0.1 build-25688693，Authenticode签名Valid、签名者Broadcom Inc。
+- 用户明确选择微软官方评估版做兼容性验收，到期前另行授权。Windows 11 Enterprise评估期90天，过期每小时关机；不是长期生产授权，不假定可以直接原地转为任意零售版本，需提前规划合法迁移。
+- 官方入口：https://www.microsoft.com/en-us/evalcenter/evaluate-windows-11-enterprise 。微软公开下载页的简体中文x64链接指向 `software-static.download.prss.microsoft.com`。
+- 下载目标 `D:\MoneyMoreVM\media\Windows11-Enterprise-Eval-26H2-zh-cn-x64.iso.part`，约7.96GiB。本次记录时仍在下载，`.part`不能挂载或用于安装；下载完成与ISO完整性尚未验收。
+- VMware首页为空库；已打开新建向导，但未确认创建任何虚拟机。computer-use能读到向导树，索引操作却报缓存控件不可用，截图曾误返回其他应用；停止坐标盲点，不声称已设置CPU、内存、磁盘或TPM。
+- 后续：下载完成并核对镜像→创建4vCPU/8GiB/100GiB虚拟机→用户处理安装协议、认证与必要安全配置→官方同花顺账户支持及只读回执验收。不得将ISO安装到宿主或启动宿主升级程序。
+
 ## 选型
 
 选择 EasyTHS 作为专用 Windows 虚拟机内的 GUI 执行适配底座，不作为完整订单管理系统。

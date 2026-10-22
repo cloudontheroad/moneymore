@@ -113,13 +113,15 @@ def normalize_quote(
 class AlphaFeedProvider:
     name = "alphafeed"
 
-    def __init__(self, root: str | Path | None = None, *, client=None, now=None):
+    def __init__(self, root: str | Path | None = None, *, client=None, now=None, monotonic=None):
         self.root = Path(root or Path(__file__).resolve().parents[3])
         self._now = now or (lambda: datetime.now(SHANGHAI))
         self._lock = threading.Lock()
         self._cached = None
         self._metadata = {}
         self._sample_count = 0
+        self._monotonic = monotonic or time.monotonic
+        self._retry_after = 0.0
         if client is None:
             from alphafeed import AlphaFeed
 
@@ -136,6 +138,39 @@ class AlphaFeedProvider:
             )
         self._client = client
 
+    def _write_health(self, status: dict) -> None:
+        path = self.root / "state/runtime/alphafeed-health.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_suffix(f".{os.getpid()}.tmp")
+        temporary.write_text(json.dumps(status, ensure_ascii=False), encoding="utf-8")
+        temporary.replace(path)
+
+    def _fetch_batch(self, batch: list[str]):
+        try:
+            raw = self._client.quotes.get(symbols=batch)
+            depths = self._client.depth.batch(batch, max_workers=1)
+            missing = [s for s in batch
+                       if s not in self._metadata or time.monotonic() - self._metadata[s][0] > 300]
+            if missing:
+                for item in self._client.instruments.get(missing):
+                    self._metadata[item["symbol"]] = (time.monotonic(), item)
+            return raw, depths
+        except Exception as error:
+            # Never retry a failed provider call inside the polling operation.
+            # SDK APIError exposes status_code; no credential-bearing text parsing.
+            code = getattr(error, "status_code", None)
+            cooldown = 300 if code in (401, 403) else 60 if code == 429 else 5
+            self._retry_after = self._monotonic() + cooldown
+            self._cached = None
+            self._write_health({
+                "source": "ALPHAFEED_REALTIME", "observed_at": self._now().isoformat(),
+                "status": "UNAVAILABLE", "execution_ready_count": 0,
+                "error_type": type(error).__name__,
+                "http_status": code if isinstance(code, int) else None,
+                "retry_after_seconds": cooldown,
+            })
+            raise
+
     def intraday_quotes(self, symbols: list[str]) -> pd.DataFrame:
         symbols = sorted(set(symbols))
         if not symbols:
@@ -143,6 +178,8 @@ class AlphaFeedProvider:
         if len(symbols) > 1000:
             raise ValueError("AlphaFeed real-time request exceeds 1000 symbols")
         with self._lock:
+            if self._monotonic() < self._retry_after:
+                raise RuntimeError("AlphaFeed cooling down after provider failure; no request sent")
             if (
                 self._cached
                 and self._cached[0] == symbols
@@ -153,16 +190,9 @@ class AlphaFeedProvider:
                 raw, depths = [], {}
                 for start in range(0, len(symbols), 100):
                     batch = symbols[start : start + 100]
-                    raw.extend(self._client.quotes.get(symbols=batch))
-                    depths.update(self._client.depth.batch(batch, max_workers=1))
-                    missing = [
-                        s
-                        for s in batch
-                        if s not in self._metadata or time.monotonic() - self._metadata[s][0] > 300
-                    ]
-                    if missing:
-                        for item in self._client.instruments.get(missing):
-                            self._metadata[item["symbol"]] = (time.monotonic(), item)
+                    batch_quotes, batch_depths = self._fetch_batch(batch)
+                    raw.extend(batch_quotes)
+                    depths.update(batch_depths)
                 self._cached = (symbols, time.monotonic(), raw, depths)
             rows = []
             for item in raw:
@@ -182,6 +212,7 @@ class AlphaFeedProvider:
             self._sample_count += 1
             status = {
                 "source": "ALPHAFEED_REALTIME",
+                "status": "AVAILABLE" if all(row["execution_ready"] for row in rows) and len(rows) == len(symbols) else "QUALITY_BLOCKED",
                 "observed_at": self._now().isoformat(),
                 "sample_count_this_process": self._sample_count,
                 "requested_symbols": len(symbols),
@@ -208,11 +239,7 @@ class AlphaFeedProvider:
                     default=None,
                 ),
             }
-            path = self.root / "state/runtime/alphafeed-health.json"
-            path.parent.mkdir(parents=True, exist_ok=True)
-            temporary = path.with_suffix(f".{os.getpid()}.tmp")
-            temporary.write_text(json.dumps(status, ensure_ascii=False), encoding="utf-8")
-            temporary.replace(path)
+            self._write_health(status)
             return frame
 
     def minute_history(self, symbols: list[str], start: str, end: str) -> pd.DataFrame:

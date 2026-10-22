@@ -10,6 +10,9 @@ import re
 import sys
 from pathlib import Path
 
+from moneymore.easyths_compatibility import audit_inventory
+from moneymore.huatai_readonly import normalize_funds
+
 
 def probe(root: Path):
     config = root / "state/private/desktop-client.json"
@@ -48,20 +51,36 @@ def probe(root: Path):
             windows.append({"title": "认证窗口（跳过读取）", "status": "USER_LOGIN_REQUIRED"})
             continue
         controls = []
+        funds_controls = []
         for item in window.descendants()[:300]:
-            if item.element_info.control_type in {"Edit", "Document", "Password"}:
+            if item.element_info.control_type in {"Document", "Password"}:
                 continue
+            if item.element_info.control_type == "Text":
+                funds_controls.append({
+                    "type": "Text", "class_name": item.element_info.class_name,
+                    "automation_id": item.element_info.automation_id,
+                    "name": item.window_text(),
+                })
             # Inventory is not a verified broker-order or trade parser.
             controls.append(
                 {
                     "type": item.element_info.control_type,
-                    "name": re.sub(r"\d{5,}", "***", item.window_text())[:100],
+                    "class_name": item.element_info.class_name,
+                    "automation_id": item.element_info.automation_id,
+                    "name": "[编辑内容未读取]" if item.element_info.control_type == "Edit"
+                    else re.sub(r"\d{5,}", "***", item.window_text())[:100],
                 }
             )
+        funds = normalize_funds(funds_controls)
+        # Diagnostics report capability only, never actual monetary amounts.
+        for field in funds["fields"].values():
+            field.pop("value", None)
         windows.append(
             {
                 "title": re.sub(r"\d{5,}", "***", title),
                 "controls": controls,
+                "easyths_audit": audit_inventory(controls),
+                "funds_read_audit": funds,
                 "status": "READ_ONLY_INVENTORY",
             }
         )

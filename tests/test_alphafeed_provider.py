@@ -130,10 +130,15 @@ def test_isolated_failure_releases_lock_without_retry_and_next_call_recovers(tmp
         depth=SimpleNamespace(batch=lambda *args, **kw: {q["symbol"]: d}),
         instruments=SimpleNamespace(get=lambda symbols: [i]),
     )
-    provider = AlphaFeedProvider(tmp_path, client=client, now=lambda: NOW)
+    elapsed = [0.0]
+    provider = AlphaFeedProvider(tmp_path, client=client, now=lambda: NOW, monotonic=lambda: elapsed[0])
     with pytest.raises(type(error)):
         provider.intraday_quotes([q["symbol"]])
     assert len(calls) == 1
+    with pytest.raises(RuntimeError, match="cooling down"):
+        provider.intraday_quotes([q["symbol"]])
+    assert len(calls) == 1
+    elapsed[0] += 6
     assert provider.intraday_quotes([q["symbol"]]).iloc[0].execution_ready
     assert len(calls) == 2
 
@@ -150,6 +155,44 @@ def test_bounded_minute_history(tmp_path):
     assert len(frame) == 1
     with pytest.raises(ValueError):
         p.minute_history([q["symbol"]], "2026-10-01", "2026-10-21")
+
+
+@pytest.mark.parametrize("code,cooldown", [(429, 60), (401, 300), (403, 300)])
+def test_provider_status_cooldown_prevents_repeated_requests(tmp_path, code, cooldown):
+    import json
+
+    class ProviderFailure(Exception):
+        status_code = code
+
+    q, d, i = sample()
+    elapsed, calls = [0.0], []
+
+    def quotes(**kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            raise ProviderFailure("private diagnostic not for health output")
+        return [q]
+
+    provider = AlphaFeedProvider(tmp_path, monotonic=lambda: elapsed[0], now=lambda: NOW,
+        client=SimpleNamespace(
+            quotes=SimpleNamespace(get=quotes),
+            depth=SimpleNamespace(batch=lambda *args, **kw: {q["symbol"]: d}),
+            instruments=SimpleNamespace(get=lambda symbols: [i]),
+        ))
+    with pytest.raises(ProviderFailure):
+        provider.intraday_quotes([q["symbol"]])
+    health_path = tmp_path / "state/runtime/alphafeed-health.json"
+    health = json.loads(health_path.read_text(encoding="utf-8"))
+    assert health["status"] == "UNAVAILABLE"
+    assert health["retry_after_seconds"] == cooldown
+    assert "private diagnostic" not in health_path.read_text(encoding="utf-8")
+    elapsed[0] = cooldown - 0.01
+    with pytest.raises(RuntimeError, match="cooling down"):
+        provider.intraday_quotes([q["symbol"]])
+    assert len(calls) == 1
+    elapsed[0] = cooldown
+    assert provider.intraday_quotes([q["symbol"]]).iloc[0].execution_ready
+    assert json.loads(health_path.read_text(encoding="utf-8"))["status"] == "AVAILABLE"
 
 
 def test_same_inputs_keep_same_strategy_decision():
