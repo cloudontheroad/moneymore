@@ -5,9 +5,8 @@ remain local to the caller and must not be included in diagnostic logs.
 """
 from __future__ import annotations
 
-from decimal import Decimal, InvalidOperation
 import re
-
+from decimal import Decimal, InvalidOperation
 
 FIELDS = {
     "balance": "1012", "frozen_amount": "1013", "market_value": "1014",

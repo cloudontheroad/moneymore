@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -34,6 +35,62 @@ class PrepareBody(BaseModel):
 
 class ClientBody(BaseModel):
     executable: str = Field(min_length=1, max_length=500)
+
+
+class ExportBody(BaseModel):
+    filename: str = Field(min_length=1, max_length=180)
+    kind: str = Field(pattern="^(positions|orders|trades)$")
+    account_ref: str = Field(pattern="^[A-Za-z0-9_-]{1,64}$")
+    trade_date: str = Field(pattern="^[0-9]{8}$")
+
+
+class ReceiptLinkBody(BaseModel):
+    intent_id: str = Field(pattern="^[a-f0-9]{32}$")
+    snapshot_id: str = Field(pattern="^[a-f0-9]{64}$")
+    broker_order_id: str = Field(pattern="^[A-Za-z0-9_-]{1,64}$")
+    note: str = Field(min_length=1, max_length=200)
+    acknowledge_observation_only: Literal[True]
+
+
+class CaptureBody(BaseModel):
+    allow_foreground_once: Literal[True]
+    read_only_only: Literal[True]
+
+
+@router.post("/capture")
+def desktop_capture(body: CaptureBody, request: Request):
+    require_local_action(request)
+    try:
+        return service().capture_service.start()
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from None
+
+
+@router.post("/capture/{job_id}/stop")
+def desktop_capture_stop(job_id: str, request: Request):
+    require_local_action(request)
+    try:
+        return service().capture_service.stop(job_id)
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from None
+
+
+@router.post("/receipts/link")
+def desktop_link_receipt(body: ReceiptLinkBody, request: Request):
+    require_local_action(request)
+    try:
+        return service().bind_receipt(**body.model_dump(exclude={"acknowledge_observation_only"}))
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from None
+
+
+@router.post("/exports/import")
+def desktop_import_export(body: ExportBody, request: Request):
+    require_local_action(request)
+    try:
+        return service().import_exports(**body.model_dump())
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from None
 
 
 @router.post("/client")

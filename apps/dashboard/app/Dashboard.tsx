@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import DesktopExecution from "./DesktopExecution";
 
 type Row = Record<string, unknown>;
@@ -181,7 +181,7 @@ const duration = (v: unknown) => {
   return `${Math.floor(seconds / 3600)}小时${Math.floor((seconds % 3600) / 60)}分`;
 };
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { cache: "no-store", ...init });
+  const response = await fetch(url, { cache: "no-store", signal:AbortSignal.timeout(45000), ...init });
   if (!response.ok) throw new Error(`${response.status} ${await response.text()}`);
   return response.json() as Promise<T>;
 }
@@ -207,7 +207,11 @@ export default function Dashboard() {
   const [securityDetailError,setSecurityDetailError]=useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const refreshing = useRef(false);
+  const refreshingLive = useRef(false);
   const refresh = useCallback(async () => {
+    if(refreshing.current)return;
+    refreshing.current=true;
     try {
       const [b, s, e, q, o, m, a, c, i, r, l] = await Promise.all([
         json<Bank>("/api/bank-dashboard"), json<Sectors>("/api/sector-portfolio"), json<Execution>("/api/multi-sector-execution"), json<DataQuality>("/api/data-quality"), json<OperationsCenter>("/api/operations-center"), json<ModelRegistry>("/api/model-registry"), json<MonthlyAcceptance>("/api/monthly-acceptance"), json<Challenger>("/api/qlib-challenger"),
@@ -217,8 +221,11 @@ export default function Dashboard() {
       ]);
       setBank(b); setSectors(s); setExecution(e); setQuality(q); setOperations(o); setModels(m); setAcceptance(a); setChallenger(c); setIntraday(i); setMarketRisk(r); setLeveragedEtf(l); setError("");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "服务暂不可用"); }
+    finally { refreshing.current=false; }
   }, []);
   const refreshLive = useCallback(async () => {
+    if(refreshingLive.current)return;
+    refreshingLive.current=true;
     try {
       const [accounts,health]=await Promise.all([
         json<LiveAccounts>("/api/live-accounts"),
@@ -227,6 +234,7 @@ export default function Dashboard() {
       setLive(accounts); setSystemHealth(health);
     }
     catch { /* retain the last valid live snapshot */ }
+    finally { refreshingLive.current=false; }
   }, []);
   useEffect(() => {
     const initial = window.setTimeout(refresh, 0);
@@ -260,7 +268,7 @@ export default function Dashboard() {
     },10_000);
     return ()=>clearInterval(id);
   },[securityDetail?.symbol]);
-  if (!bank || !sectors || !execution || !quality || !operations || !models || !acceptance || !challenger || !intraday || !marketRisk || !leveragedEtf) return <main className="loading"><span>M</span><b>MoneyMore</b><p>{error || "正在装载综合组合…"}</p><button onClick={() => void refresh()}>重新连接</button></main>;
+  if (!bank || !sectors || !execution || !quality || !operations || !models || !acceptance || !challenger || !intraday || !marketRisk || !leveragedEtf) return <main className="loading"><span>M</span><b>MoneyMore</b><p>{error || "正在装载综合组合…"}</p><button onClick={() => void refresh()}>重新连接</button><a href="/desktop-execution">独立打开桌面执行（不等待报表）</a></main>;
   const current = nav.find((item) => item.id === page)!;
   const liveBaseline=live?.accounts[execution.account_id];
   const displayedExecution=liveBaseline?{...execution,portfolio:liveBaseline.portfolio,positions:liveBaseline.positions,orders:liveBaseline.orders,fills:liveBaseline.fills}:execution;

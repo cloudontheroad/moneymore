@@ -59,7 +59,8 @@ def main():
             break
         if index < 2:
             time.sleep(15)
-    path = ROOT / "state/private/alphafeed-intraday-20261022.json"
+    stamp = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y%m%d-%H%M%S")
+    path = ROOT / f"state/private/alphafeed-intraday-{stamp}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 

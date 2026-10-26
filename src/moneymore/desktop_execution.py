@@ -15,6 +15,10 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
+from .desktop_capture import DesktopCaptureService
+from .desktop_exports import DesktopExportStore
+from .desktop_receipts import DesktopReceiptStore
+
 
 class DesktopExecutionService:
     def __init__(self, root: Path):
@@ -33,6 +37,9 @@ class DesktopExecutionService:
                 quantity INTEGER NOT NULL, signal_date TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'PREPARED_ONLY', created_at TEXT NOT NULL,
                 UNIQUE(source_account, source_order_key, source_fingerprint))""")
+        self.exports = DesktopExportStore(self.root)
+        self.receipts = DesktopReceiptStore(self.root)
+        self.capture_service = DesktopCaptureService(self.root)
 
     def _connect(self):
         db = sqlite3.connect(self.database, timeout=5)
@@ -72,6 +79,12 @@ class DesktopExecutionService:
         )
         temporary.replace(target)
         return {"status": "CONFIGURED_READ_ONLY", "launched": False}
+
+    def import_exports(self, **kwargs):
+        return self.exports.ingest(**kwargs)
+
+    def bind_receipt(self, **kwargs):
+        return self.receipts.bind(**kwargs)
 
     def prepare(self, source_account: str):
         orders = [o for o in self._source_orders() if o["account_id"] == source_account]
@@ -173,12 +186,19 @@ class DesktopExecutionService:
             ]
         for job in jobs:
             job["result"] = json.loads(job["result"]) if job["result"] else None
+        receipt_links = self.receipts.snapshot()
+        by_intent = {r["intent_id"]: r for r in receipt_links["links"]}
         for intent in intents:
             if intent["source_fingerprint"] not in fingerprints:
                 intent["status"] = "SOURCE_STALE"
             intent["broker_order_id"] = None
             intent["confirmed_filled_quantity"] = None
             intent["receipt_status"] = "未取得券商回执，不能认定已委托或成交"
+            if intent["id"] in by_intent:
+                link = by_intent[intent["id"]]
+                intent["broker_order_id"] = link["broker_order_id"]
+                intent["receipt_reconciliation"] = link["reconciliation"]
+                intent["receipt_status"] = "已有人工观察关联，未核验券商身份；不自动补单"
         return {
             "mode": "READ_ONLY_AND_PREPARATION",
             "foreground_input_allowed": False,
@@ -187,6 +207,9 @@ class DesktopExecutionService:
             "jobs": jobs,
             "intents": intents,
             "source_orders": source_orders,
+            "broker_exports": self.exports.snapshot(),
+            "receipt_links": receipt_links,
+            "foreground_capture": self.capture_service.snapshot(),
             "configured_client": json.loads(
                 (self.root / "state/private/desktop-client.json").read_text(encoding="utf-8")
             )
