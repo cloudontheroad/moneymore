@@ -114,6 +114,8 @@ type Challenger = {
     orders: Row[]; fills: Row[]; reconciliation?: Row;
     comparison: Row & { metrics?: Row[]; histories?: Record<string, Row[]> };
     candidates?: (Row & { candidate_tag:string; account_id:string; latest:Row & { portfolio?:Bank["shadow"]["portfolio"] }; orders:Row[]; fills:Row[]; comparison:Challenger["comparison"] })[];
+    archived_candidates?: NonNullable<Challenger["candidate_observation"]>["candidates"];
+    archived_leaderboard?: Row[];
     global_strategy_view?: Challenger["comparison"] & { strategy_count?:number };
   };
 };
@@ -130,7 +132,7 @@ const nav: { id: Page; label: string; note: string }[] = [
   { id: "challenger", label: "Qlib挑战者", note: "AI LAB" },
   { id: "data", label: "数据健康", note: "QUALITY" },
   { id: "operations", label: "运行与对账", note: "PAPER" },
-  { id: "desktop", label: "桌面执行", note: "LOCAL AGENT" },
+  { id: "desktop", label: "券商工作台", note: "BROKER WORKSPACE" },
 ];
 const meta: Record<string, { label: string; color: string; thesis: string }> = {
   bank: { label: "银行", color: "#a8e063", thesis: "估值 · 防御 · 动量" },
@@ -167,6 +169,9 @@ const reviewStatusName = (value: unknown) => ({
   FORMAL_REVIEW_DUE:"等待正式评审",
   PROMOTED:"已晋级",
   REJECTED:"已淘汰",
+  GATE_REJECTED:"研究门禁淘汰",
+  REVIEW_EXPIRED:"评审到期归档",
+  REVIEW_HOLD:"证据不足·暂停",
   EXPERIMENTAL_PAPER:"模拟观察中",
   AWAITING_OBSERVATION:"等待首次观察",
 }[text(value)]??text(value));
@@ -421,9 +426,9 @@ function Research({ sectors, models }: { sectors: Sectors; models: ModelRegistry
 }
 
 function ChallengerPage({ challenger, names, live }: { challenger: Challenger; names: Record<string, string>; live:LiveAccounts|null }) {
-  const candidateVersions = challenger.candidate_observation?.candidates??[];
+  const candidateVersions = [...(challenger.candidate_observation?.candidates??[]),...(challenger.candidate_observation?.archived_candidates??[])];
   const [selectedCandidateTag,setSelectedCandidateTag] = useState("");
-  const selectedCandidate = candidateVersions.find((row)=>row.candidate_tag===selectedCandidateTag)??candidateVersions.find((row)=>Boolean(row.latest_trade_date))??candidateVersions[0];
+  const selectedCandidate = candidateVersions.find((row)=>row.candidate_tag===selectedCandidateTag)??challenger.candidate_observation?.candidates?.find((row)=>Boolean(row.latest_trade_date))??challenger.candidate_observation?.candidates?.[0];
   const metrics = challenger.research.metrics??[];
   const researchGate = (challenger.research.gate??{}) as Row;
   const selected = new Set(challenger.latest.selected??[]);
@@ -470,18 +475,22 @@ function AccountColumn({ title, badge, accountId, status, equity, portfolio, tar
 }
 
 function CandidateSwitcher({ observation, selectedTag, onSelect }: { observation:Challenger["candidate_observation"]; selectedTag:string; onSelect:(tag:string)=>void }) {
+  const [showArchived,setShowArchived]=useState(false);
   if (!observation) return null;
-  return <div className="candidate-switcher"><b>第三列候选策略</b><select value={selectedTag} onChange={(event)=>onSelect(event.target.value)}>{(observation.candidates??[]).map((row)=><option key={row.candidate_tag} value={row.candidate_tag}>{row.candidate_tag} · {row.latest_trade_date?`${reviewStatusName(row.review_stage)} · ${text(row.common_observation_days)}日`:"等待首次收盘观察"}</option>)}</select><span>默认展示最近已有真实委托的候选；新模型在训练完成后的首个收盘流水线开始观察</span></div>;
+  const active=observation.candidates??[];
+  const rows=[...active,...(showArchived?(observation.archived_candidates??[]):[])];
+  return <div className="candidate-switcher"><b>第三列候选策略</b><select aria-label="候选策略版本" value={selectedTag} onChange={(event)=>onSelect(event.target.value)}>{rows.length===0&&<option value="">暂无活跃候选</option>}{rows.map((row)=><option key={row.candidate_tag} value={row.candidate_tag}>{row.archived?"[已归档] ":""}{row.candidate_tag} · {reviewStatusName(row.review_stage)} · {text(row.common_observation_days)}日</option>)}</select><label><input type="checkbox" checked={showArchived} onChange={(event)=>{setShowArchived(event.target.checked);if(!event.target.checked&&!active.some(row=>row.candidate_tag===selectedTag))onSelect(active[0]?.candidate_tag??"");}}/> 查看归档（{observation.archived_candidates?.length??0}）</label><span>默认仅展示有效候选；20 / 40 / 60共同日评审，退出版本保留收益、委托与成交</span></div>;
 }
 
 function CandidateObservation({ challenger, selectedTag }: { challenger: Challenger; selectedTag:string }) {
   const observation = challenger.candidate_observation;
   if (!observation) return null;
-  const selected = observation.candidates?.find((row)=>row.candidate_tag===selectedTag);
+  const selected = [...(observation.candidates??[]),...(observation.archived_candidates??[])].find((row)=>row.candidate_tag===selectedTag);
   const commonDays = Number(selected?.common_observation_days??observation.comparison?.common_observation_days??0);
   return <>
-    <section className="kpis"><Kpi label="候选队列" value={String(observation.candidates?.length??0)} note="各版本独立账户持续运行"/><Kpi label="初评门槛" value="20共同日" note="候选与两个对照均有快照"/><Kpi label="正式评审" value="60共同日" note="达到后冻结证据等待人工评审"/><Kpi label="当前选择" value={selectedTag} note={`${commonDays} 个共同日`}/></section>
-    <Panel title="每周候选模型排行榜" subtitle="离线测试按训练版本永久留档；未通过研究门禁的候选仍可隔离观察，但绝不会自动替换当前模型"><Table rows={observation.leaderboard} columns={[["candidate_tag","候选版本"],["data_cutoff","数据截止"],["rank_ic","Rank IC"],["rank_ic_ir","ICIR"],["cost_adjusted_top_k_excess_return","成本后Top-K超额"],["positive_seed_ratio","正种子率"],["average_turnover","换手率"],["research_gate_passed","研究门禁"],["observation_days","观察日"],["review_stage","评审阶段"],["latest_status","运行状态"]]} format={{rank_ic:num,rank_ic_ir:num,cost_adjusted_top_k_excess_return:pct,positive_seed_ratio:pct,average_turnover:pct,research_gate_passed:(v)=>v?"通过":"未通过",review_stage:reviewStatusName,latest_status:reviewStatusName}}/></Panel>
+    <section className="kpis"><Kpi label="有效候选 / 归档" value={`${observation.candidates?.length??0} / ${observation.archived_candidates?.length??0}`} note="退出版本不再生成新委托"/><Kpi label="固定检查点" value="20 / 40 / 60日" note="对两个固定对照，校正多重检验"/><Kpi label="正式评审" value="60共同日" note="冻结新交易；10个市场交易日未评审则归档"/><Kpi label="当前选择" value={selectedTag} note={`${commonDays} 个共同日 · ${text(selected?.review_reason)}`}/></section>
+    <Panel title="有效候选模型排行榜" subtitle="固定检查点显著落后两个对照才提前淘汰；研究门禁失败直接退出。新版本加入不重置旧版本计数，也不自动晋级"><Table rows={observation.leaderboard} columns={[["candidate_tag","候选版本"],["data_cutoff","数据截止"],["rank_ic","Rank IC"],["rank_ic_ir","ICIR"],["cost_adjusted_top_k_excess_return","成本后Top-K超额"],["research_gate_passed","研究门禁"],["common_observation_days","运行共同日"],["eligible_observation_days","可信评审日"],["checkpoint","已评审检查点"],["review_stage","评审阶段"],["review_reason","评审结论"]]} format={{rank_ic:num,rank_ic_ir:num,cost_adjusted_top_k_excess_return:pct,research_gate_passed:(v)=>v?"通过":"未通过",review_stage:reviewStatusName}}/></Panel>
+    <details className="panel"><summary>归档候选与淘汰记录（{observation.archived_leaderboard?.length??0}）</summary><p>停止新交易，撤销未成交委托；账本及原有持仓保留，不虚构清仓。勾选顶部“查看归档”可查看持仓与成交详情。</p><Table rows={observation.archived_leaderboard??[]} columns={[["candidate_tag","版本"],["review_stage","退出类型"],["review_date","评审日"],["checkpoint","检查点"],["review_reason","退出原因"]]} format={{review_stage:reviewStatusName}}/></details>
   </>;
 }
 
@@ -503,8 +512,10 @@ function ChallengerEvidence({ challenger }: { challenger: Challenger }) {
   const commonEnd = text(challenger.comparison.common_end_date);
   const replayRows = (challenger.historical_execution.strategies??[]).map((row)=>({strategy_id:row.strategy_id,...(row.summary??{})}));
   const globalView=challenger.candidate_observation?.global_strategy_view??challenger.comparison;
-  const strategyCount=Number(globalView.strategy_count??globalView.metrics?.length??0);
-  return <><section className="kpis"><Kpi label="候选评审口径" value="版本独立" note="每个候选分别与两个固定对照计算"/><Kpi label="当前候选共同日" value={String(commonDays)} note="不受其他候选加入影响"/><Kpi label="当前共同区间" value={commonStart==="—"?"等待重叠数据":`${commonStart} → ${commonEnd}`} note="用于候选20/60日门禁"/><Kpi label="全局策略数量" value={String(strategyCount)} note="图表与全局表不隐藏历史策略"/></section><Panel title="M5.3 完整历史执行重放" subtitle={`${text(challenger.historical_execution.start_date)} → ${text(challenger.historical_execution.end_date)} · ${text(challenger.historical_execution.evidence_status)} · 与模拟盘共用 PaperBroker`}><Table rows={replayRows} columns={[["strategy_id","策略"],["observation_days","交易日"],["total_return","累计收益"],["average_gross_exposure","平均仓位"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"],["order_count","订单"],["fill_count","成交"],["transaction_cost","交易成本"],["reconciled","对账"]]} format={{total_return:pct,average_gross_exposure:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct,transaction_cost:money}}/></Panel><div className="two-col"><Panel title="前瞻观察证据" subtitle="预测生成5个交易日后自动成熟标签"><Table rows={challenger.forward.daily??[]} columns={[["observation_date","观察日"],["maturity_date","成熟日"],["rank_ic","Rank IC"],["selected_excess_return","Top-K超额"],["sample_count","样本"]]} format={{rank_ic:num,selected_excess_return:pct}}/></Panel><Panel title={`${strategyCount}策略公平 PK`} subtitle="全局表展示每个策略自身完整运行区间；候选晋级仍使用各版本独立共同日"><Table rows={globalView.metrics??[]} columns={[["account_id","账户"],["start_date","开始日"],["end_date","结束日"],["observation_days","运行日"],["total_return","累计收益"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"]]} format={{total_return:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct}}/></Panel></div></>;
+  const archivedAccounts=new Set((challenger.candidate_observation?.archived_candidates??[]).map(row=>row.account_id));
+  const globalMetrics=(globalView.metrics??[]).filter(row=>!archivedAccounts.has(text(row.account_id)));
+  const strategyCount=globalMetrics.length;
+  return <><section className="kpis"><Kpi label="候选评审口径" value="版本独立" note="每个候选分别与两个固定对照计算"/><Kpi label="当前候选共同日" value={String(commonDays)} note="不受其他候选加入影响"/><Kpi label="当前共同区间" value={commonStart==="—"?"等待重叠数据":`${commonStart} → ${commonEnd}`} note="用于候选20/60日门禁"/><Kpi label="全局策略数量" value={String(strategyCount)} note="仅含有效策略；退出版本在归档中保留"/></section><Panel title="M5.3 完整历史执行重放" subtitle={`${text(challenger.historical_execution.start_date)} → ${text(challenger.historical_execution.end_date)} · ${text(challenger.historical_execution.evidence_status)} · 与模拟盘共用 PaperBroker`}><Table rows={replayRows} columns={[["strategy_id","策略"],["observation_days","交易日"],["total_return","累计收益"],["average_gross_exposure","平均仓位"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"],["order_count","订单"],["fill_count","成交"],["transaction_cost","交易成本"],["reconciled","对账"]]} format={{total_return:pct,average_gross_exposure:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct,transaction_cost:money}}/></Panel><div className="two-col"><Panel title="前瞻观察证据" subtitle="预测生成5个交易日后自动成熟标签"><Table rows={challenger.forward.daily??[]} columns={[["observation_date","观察日"],["maturity_date","成熟日"],["rank_ic","Rank IC"],["selected_excess_return","Top-K超额"],["sample_count","样本"]]} format={{rank_ic:num,selected_excess_return:pct}}/></Panel><Panel title={`${strategyCount}策略公平 PK`} subtitle="全局表展示每个策略自身完整运行区间；候选晋级仍使用各版本独立共同日"><Table rows={globalMetrics} columns={[["account_id","账户"],["start_date","开始日"],["end_date","结束日"],["observation_days","运行日"],["total_return","累计收益"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"]]} format={{total_return:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct}}/></Panel></div></>;
 }
 
 const chartPalette: Record<string, { label: string; color: string }> = {

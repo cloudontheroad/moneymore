@@ -7,6 +7,8 @@ import math
 import os
 import threading
 import time
+import uuid
+from collections import Counter
 from datetime import datetime
 from datetime import time as clock
 from pathlib import Path
@@ -122,6 +124,7 @@ class AlphaFeedProvider:
         self._sample_count = 0
         self._monotonic = monotonic or time.monotonic
         self._retry_after = 0.0
+        self._fetch_timings = []
         if client is None:
             from alphafeed import AlphaFeed
 
@@ -141,34 +144,49 @@ class AlphaFeedProvider:
     def _write_health(self, status: dict) -> None:
         path = self.root / "state/runtime/alphafeed-health.json"
         path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = path.with_suffix(f".{os.getpid()}.tmp")
+        temporary = path.with_suffix(f".{os.getpid()}.{uuid.uuid4().hex}.tmp")
         temporary.write_text(json.dumps(status, ensure_ascii=False), encoding="utf-8")
         temporary.replace(path)
+        # Persist actual upstream observations, not every cached dashboard read.
+        if status.get("fresh_fetch") or status.get("status") == "UNAVAILABLE":
+            journal = path.parent / ("alphafeed-quality-" + self._now().strftime("%Y%m%d") + ".jsonl")
+            with journal.open("a", encoding="utf-8") as target:
+                target.write(json.dumps(status, ensure_ascii=False) + "\n")
+
+    def _provider_failure(self, error):
+        code = getattr(error, "status_code", None)
+        cooldown = 300 if code in (401, 403) else 60 if code == 429 else 5
+        self._retry_after = self._monotonic() + cooldown
+        self._cached = None
+        self._write_health({
+            "source": "ALPHAFEED_REALTIME", "observed_at": self._now().isoformat(),
+            "status": "UNAVAILABLE", "execution_ready_count": 0,
+            "error_type": type(error).__name__, "http_status": code if isinstance(code, int) else None,
+            "retry_after_seconds": cooldown,
+        })
 
     def _fetch_batch(self, batch: list[str]):
         try:
-            raw = self._client.quotes.get(symbols=batch)
-            depths = self._client.depth.batch(batch, max_workers=1)
             missing = [s for s in batch
-                       if s not in self._metadata or time.monotonic() - self._metadata[s][0] > 300]
+                       if s not in self._metadata or self._monotonic() - self._metadata[s][0] > 300]
             if missing:
                 for item in self._client.instruments.get(missing):
-                    self._metadata[item["symbol"]] = (time.monotonic(), item)
+                    self._metadata[item["symbol"]] = (self._monotonic(), item)
+            started = self._monotonic()
+            raw = self._client.quotes.get(symbols=batch)
+            quote_received = self._monotonic()
+            quote_received_at = self._now().isoformat()
+            depths = self._client.depth.batch(batch, max_workers=1)
+            self._fetch_timings.append({"symbols": len(batch),
+                "quotes_request_seconds": round(quote_received - started, 4),
+                "depth_request_seconds": round(self._monotonic() - quote_received, 4),
+                "quote_received_at": quote_received_at,
+                "depth_received_at": self._now().isoformat()})
             return raw, depths
         except Exception as error:
             # Never retry a failed provider call inside the polling operation.
             # SDK APIError exposes status_code; no credential-bearing text parsing.
-            code = getattr(error, "status_code", None)
-            cooldown = 300 if code in (401, 403) else 60 if code == 429 else 5
-            self._retry_after = self._monotonic() + cooldown
-            self._cached = None
-            self._write_health({
-                "source": "ALPHAFEED_REALTIME", "observed_at": self._now().isoformat(),
-                "status": "UNAVAILABLE", "execution_ready_count": 0,
-                "error_type": type(error).__name__,
-                "http_status": code if isinstance(code, int) else None,
-                "retry_after_seconds": cooldown,
-            })
+            self._provider_failure(error)
             raise
 
     def intraday_quotes(self, symbols: list[str]) -> pd.DataFrame:
@@ -180,22 +198,27 @@ class AlphaFeedProvider:
         with self._lock:
             if self._monotonic() < self._retry_after:
                 raise RuntimeError("AlphaFeed cooling down after provider failure; no request sent")
-            if (
+            cached = bool(
                 self._cached
                 and self._cached[0] == symbols
-                and time.monotonic() - self._cached[1] < 2
-            ):
+                and self._monotonic() - self._cached[1] < 2
+            )
+            if cached:
                 raw, depths = self._cached[2:]
             else:
                 raw, depths = [], {}
+                self._fetch_timings = []
                 for start in range(0, len(symbols), 100):
                     batch = symbols[start : start + 100]
                     batch_quotes, batch_depths = self._fetch_batch(batch)
                     raw.extend(batch_quotes)
                     depths.update(batch_depths)
-                self._cached = (symbols, time.monotonic(), raw, depths)
+                self._cached = (symbols, self._monotonic(), raw, depths)
             rows = []
+            counts = Counter(item.get("symbol") for item in raw if isinstance(item, dict))
             for item in raw:
+                if not isinstance(item, dict) or item.get("symbol") not in symbols or counts[item.get("symbol")] != 1:
+                    continue
                 try:
                     rows.append(
                         normalize_quote(
@@ -215,10 +238,18 @@ class AlphaFeedProvider:
                 "status": "AVAILABLE" if all(row["execution_ready"] for row in rows) and len(rows) == len(symbols) else "QUALITY_BLOCKED",
                 "observed_at": self._now().isoformat(),
                 "sample_count_this_process": self._sample_count,
+                "fresh_fetch": not cached,
+                "fetch_timings": self._fetch_timings,
                 "requested_symbols": len(symbols),
                 "returned_symbols": len(frame),
                 "missing_symbols": sorted(set(symbols) - {row["symbol"] for row in rows}),
+                "duplicate_symbols": sorted(s for s in symbols if counts[s] > 1),
                 "execution_ready_count": sum(row["execution_ready"] for row in rows),
+                "blocked_symbols": [{"symbol": row["symbol"], "reasons": row["quality_reasons"]}
+                                    for row in rows if not row["execution_ready"]],
+                "max_quote_depth_skew_seconds": max(
+                    (abs(row["timestamp"] - row["depth_timestamp"]) / 1000
+                     for row in rows if row["depth_timestamp"]), default=None),
                 "quality_reasons": sorted(
                     {
                         reason
@@ -255,16 +286,17 @@ class AlphaFeedProvider:
             raise ValueError("Minute probe is limited to 7 days and 100 symbols")
         frames = []
         with self._lock:
+            if self._monotonic() < self._retry_after:
+                raise RuntimeError("AlphaFeed cooling down after provider failure; no request sent")
             for symbol in sorted(set(symbols)):
-                frame = self._client.klines.get(
-                    symbol,
-                    period="1m",
-                    adjust="none",
-                    count=2000,
-                    start_time=int(start_dt.timestamp() * 1000),
-                    end_time=int(end_dt.timestamp() * 1000),
-                    to_dataframe=True,
-                )
+                try:
+                    frame = self._client.klines.get(
+                        symbol, period="1m", adjust="none", count=2000,
+                        start_time=int(start_dt.timestamp() * 1000),
+                        end_time=int(end_dt.timestamp() * 1000), to_dataframe=True)
+                except Exception as error:
+                    self._provider_failure(error)
+                    raise
                 if frame.empty:
                     continue
                 frame = frame.copy()

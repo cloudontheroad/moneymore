@@ -24,3 +24,16 @@ def test_missing_duplicate_invalid_and_empty_are_not_success():
     for left, right in [([], []), ([row(0)], []), ([row(0), row(0)], [row(0)]),
                         ([row(0)], [row(0, close=float("nan"))]), ([row(0)], [row(0, volume=101)])]:
         assert module.compare_minutes(left, right, start)["status"] == "BLOCKED_OR_INCOMPLETE"
+
+
+def test_amount_precision_difference_is_diagnostic_not_silent_acceptance():
+    result = module.compare_minutes([row(0, amount=100000.41)], [row(0, amount=100000)], row(5)["timestamp"])
+    assert result["status"] == "BLOCKED_OR_INCOMPLETE"
+    assert result["field_mismatch_counts"]["amount"] == 1
+    assert result["field_mismatch_counts"]["close"] == 0
+    assert 0.40 < result["max_field_deltas"]["amount"] < 0.42
+
+
+def test_shared_missing_slots_are_reported_even_when_interfaces_match():
+    result = module.compare_minutes([row(0)], [row(0)], row(5)["timestamp"])
+    assert result["missing_regular_session_slots"]

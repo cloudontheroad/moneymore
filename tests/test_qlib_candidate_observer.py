@@ -86,3 +86,28 @@ def test_candidate_queue_keeps_older_versions_running(monkeypatch, tmp_path: Pat
     )
 
     assert calls == ["20260805", "20260812"]
+
+
+def test_archived_candidate_remains_in_catalog_but_queue_cannot_restart_it(monkeypatch, tmp_path):
+    import sqlite3
+
+    _write_config(tmp_path)
+    _write_candidate(tmp_path, "20260812", 0.03)
+    state = tmp_path / "state"
+    with sqlite3.connect(state / "candidate-lifecycle.sqlite3") as connection:
+        connection.execute("CREATE TABLE candidate_state(candidate_tag TEXT PRIMARY KEY, payload TEXT)")
+        connection.execute("INSERT INTO candidate_state VALUES (?, ?)",
+                           ("20260812", json.dumps({"status": "GATE_REJECTED"})))
+    assert candidate_catalog(tmp_path)[0]["archived"]
+    assert latest_candidate(tmp_path) is None
+
+    calls = []
+    class Broker:
+        def cancel_pending(self, *args):
+            calls.append(args)
+    def forbidden(**kwargs):
+        raise AssertionError("retired candidate was run")
+    monkeypatch.setattr("moneymore.qlib_candidate_observer.run_candidate_daily", forbidden)
+    assert run_candidate_queue_daily(root=tmp_path, store=object(), broker=Broker(),
+                                     config=object(), trade_date="20261026") == []
+    assert calls

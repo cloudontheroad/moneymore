@@ -67,6 +67,11 @@ training_policy:
   automatic_promotion: false
   candidate_only: true
 candidate_observation_policy:
+  enabled: true
+  version: candidate_lifecycle_v1
+  effective_date: '20261026'
+  checkpoints: [20, 40, 60]
+  review_expiry_trading_days: 10
   preliminary_review_days: 20
   formal_review_days: 60
   new_candidate_resets_existing: false

@@ -109,7 +109,8 @@ def test_permission_errors_not_silently_fallback(tmp_path):
     def denied(**kwargs):
         raise PermissionError("No permission")
 
-    p = AlphaFeedProvider(tmp_path, client=SimpleNamespace(quotes=SimpleNamespace(get=denied)))
+    p = AlphaFeedProvider(tmp_path, client=SimpleNamespace(quotes=SimpleNamespace(get=denied),
+                         instruments=SimpleNamespace(get=lambda symbols: [])))
     with pytest.raises(PermissionError):
         p.intraday_quotes(["600036.SH"])
 
@@ -233,3 +234,67 @@ def test_factory_selects_alpha_without_qmt(monkeypatch, tmp_path):
     _provider.cache_clear()
     assert create_realtime_provider(tmp_path) is sentinel
     _provider.cache_clear()
+
+
+def test_metadata_before_quotes_and_cached_reads_not_journaled_as_upstream(tmp_path):
+    import json
+    q, d, i = sample()
+    calls = []
+    elapsed = [0.0]
+    client = SimpleNamespace(
+        instruments=SimpleNamespace(get=lambda symbols: calls.append("metadata") or [i]),
+        quotes=SimpleNamespace(get=lambda **kw: calls.append("quotes") or [q]),
+        depth=SimpleNamespace(batch=lambda *args, **kw: calls.append("depth") or {q["symbol"]: d}))
+    p = AlphaFeedProvider(tmp_path, client=client, now=lambda: NOW, monotonic=lambda: elapsed[0])
+    p.intraday_quotes([q["symbol"]])
+    p.intraday_quotes([q["symbol"]])
+    assert calls == ["metadata", "quotes", "depth"]
+    journal = tmp_path / "state/runtime/alphafeed-quality-20261021.jsonl"
+    assert len(journal.read_text().splitlines()) == 1
+    assert json.loads(journal.read_text())["fresh_fetch"]
+    elapsed[0] = 3
+    p.intraday_quotes([q["symbol"]])
+    assert calls == ["metadata", "quotes", "depth", "quotes", "depth"]
+    assert len(journal.read_text().splitlines()) == 2
+
+
+def test_minute_429_freezes_quotes_and_minutes_until_cooldown(tmp_path):
+    class Limited(Exception):
+        status_code = 429
+
+    calls, elapsed = [], [0.0]
+
+    def minutes(*args, **kwargs):
+        calls.append("minute")
+        if len(calls) == 1:
+            raise Limited("private text")
+        return pd.DataFrame()
+
+    p = AlphaFeedProvider(tmp_path, client=SimpleNamespace(klines=SimpleNamespace(get=minutes)),
+                          now=lambda: NOW, monotonic=lambda: elapsed[0])
+    args = (["600036.SH"], "2026-10-21 09:30", "2026-10-21 11:30")
+    with pytest.raises(Limited):
+        p.minute_history(*args)
+    with pytest.raises(RuntimeError, match="cooling down"):
+        p.minute_history(*args)
+    with pytest.raises(RuntimeError, match="cooling down"):
+        p.intraday_quotes(["600036.SH"])
+    assert len(calls) == 1
+    elapsed[0] = 60
+    assert p.minute_history(*args).empty
+    assert len(calls) == 2
+
+
+def test_duplicate_or_unrequested_rows_never_enter_execution(tmp_path):
+    q, d, i = sample()
+    wrong = {**q, "symbol": "000001.SZ"}
+    p = AlphaFeedProvider(tmp_path, now=lambda: NOW, client=SimpleNamespace(
+        instruments=SimpleNamespace(get=lambda symbols: [i]),
+        quotes=SimpleNamespace(get=lambda **kw: [q, q.copy(), wrong]),
+        depth=SimpleNamespace(batch=lambda *args, **kw: {q["symbol"]: d})))
+    assert p.intraday_quotes([q["symbol"]]).empty
+    import json
+    health = json.loads((tmp_path / "state/runtime/alphafeed-health.json").read_text())
+    assert health["status"] == "QUALITY_BLOCKED"
+    assert health["duplicate_symbols"] == [q["symbol"]]
+    assert health["missing_symbols"] == [q["symbol"]]

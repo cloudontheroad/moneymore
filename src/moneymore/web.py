@@ -2879,7 +2879,7 @@ def qlib_challenger() -> dict[str, object]:
         target_volatility=0.10,
     )
     candidate_rows = candidate_catalog(ROOT)
-    observed_candidate = candidate_rows[0] if candidate_rows else None
+    observed_candidate = next((row for row in candidate_rows if not row.get("archived")), None)
     candidate_history_all = pd.DataFrame()
     try:
         candidate_history_all = store.read(CANDIDATE_HISTORY_TABLE).sort_values("trade_date")
@@ -2926,7 +2926,11 @@ def qlib_challenger() -> dict[str, object]:
                 "common_observation_days": common_days,
                 "preliminary_review_days": preliminary_days,
                 "formal_review_days": formal_days,
-                "review_stage": stage,
+                "review_stage": (row.get("lifecycle") or {}).get("status", stage),
+                "review_reason": (row.get("lifecycle") or {}).get("reason", "等待每日流水线评审"),
+                "review_date": (row.get("lifecycle") or {}).get("review_date"),
+                "checkpoint": (row.get("lifecycle") or {}).get("checkpoint", 0),
+                "eligible_observation_days": (row.get("lifecycle") or {}).get("common_observation_days", 0),
             }
         )
         broker.initialize_account(1_000_000, account_id)
@@ -2986,6 +2990,7 @@ def qlib_challenger() -> dict[str, object]:
         "orders": [],
         "fills": [],
         "candidates": [],
+        "archived_candidates": [row for row in candidate_details if row.get("archived")],
         "comparison": {"status": "AWAITING_COMMON_DATES", "metrics": []},
     }
     if observed_candidate is not None:
@@ -3028,11 +3033,16 @@ def qlib_challenger() -> dict[str, object]:
             "fills": broker.fills(candidate_account),
             "reconciliation": asdict(broker.reconcile(candidate_account)),
             "comparison": candidate_comparison,
-            "candidates": candidate_details,
+            "candidates": [row for row in candidate_details if not row.get("archived")],
+            "archived_candidates": [row for row in candidate_details if row.get("archived")],
             "preliminary_review_days": preliminary_days,
             "formal_review_days": formal_days,
             "global_strategy_view": global_strategy_view,
         }
+    candidate_observation["leaderboard"] = [row for row in candidate_leaderboard if not row.get("archived")]
+    candidate_observation["archived_leaderboard"] = [row for row in candidate_leaderboard if row.get("archived")]
+    candidate_observation["lifecycle_policy"] = observation_policy
+    candidate_observation.setdefault("global_strategy_view", global_strategy_view)
     instrument_names = _instrument_names(store)
     cycle_marks: dict[str, float] = {}
     comparison_account_ids = [

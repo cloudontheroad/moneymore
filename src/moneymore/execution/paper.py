@@ -51,6 +51,8 @@ class PaperBroker:
         self._initialize()
 
     def submit(self, result: RiskResult, account_id: str = "default") -> str:
+        if self._candidate_frozen(account_id):
+            return "REJECTED_CANDIDATE_FROZEN"
         now = datetime.now(UTC).isoformat()
         with sqlite3.connect(self.database) as connection:
             if not result.accepted or result.intent is None:
@@ -203,6 +205,9 @@ class PaperBroker:
         config: BacktestConfig,
         account_id: str = "default",
     ) -> list[dict[str, object]]:
+        if self._candidate_frozen(account_id):
+            self.cancel_pending(account_id, "CANDIDATE_LIFECYCLE_FROZEN")
+            return []
         outcomes: list[dict[str, object]] = []
         with sqlite3.connect(self.database) as connection:
             connection.row_factory = sqlite3.Row
@@ -473,6 +478,8 @@ class PaperBroker:
         reason_code: str,
     ) -> int:
         """Restore a dated order batch after its blocking incident is resolved."""
+        if self._candidate_frozen(account_id):
+            return 0
         with sqlite3.connect(self.database) as connection:
             keys = [
                 row[0]
@@ -502,6 +509,15 @@ class PaperBroker:
                     (key, signal_date, reason_code),
                 )
         return len(keys)
+
+    def _candidate_frozen(self, account_id: str) -> bool:
+        if not account_id.startswith("qlib_candidate_"):
+            return False
+        from ..candidate_lifecycle import trading_allowed
+
+        return not trading_allowed(
+            self.database.parent.parent, account_id.removeprefix("qlib_candidate_"), ""
+        )
 
     def risk_state(self, account_id: str) -> dict[str, object]:
         with sqlite3.connect(self.database) as connection:
