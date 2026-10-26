@@ -64,3 +64,14 @@ nav{display:grid;gap:5px}nav button{border:0;background:none;color:#809d94;paddi
 .xq-security .trade-badge text{fill:#fff!important;stroke:#17212b;stroke-width:.8;paint-order:stroke fill;font:900 12px Arial,"Microsoft YaHei",sans-serif;letter-spacing:0;filter:drop-shadow(0 1px 0 #0008)}
 .xq-security .trade-badge .trade-connector{stroke-width:1.35;opacity:1}
 .xq-security .trade-badge .trade-price-dot{fill:#fff;stroke-width:2.5}
+.candidate-switcher .candidate-archive-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;min-height:34px;padding:7px 10px;border:1px solid #547067;border-radius:6px;background:#173a30;color:#b9ccc2;font-family:inherit;font-size:11px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.candidate-switcher .candidate-archive-toggle:hover{background:#23483b;border-color:#8aa698;color:#fff}
+.candidate-switcher .candidate-archive-toggle:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+.candidate-switcher .candidate-archive-toggle.is-active{background:#29492f;border-color:var(--lime);color:var(--lime)}
+.candidate-switcher .candidate-archive-label{font-size:11px;color:inherit;white-space:nowrap}
+.candidate-switcher .candidate-archive-count{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 4px;border-radius:4px;background:#ffffff0d;color:inherit;font:10px DM Mono,monospace}
+.candidate-switcher .candidate-archive-track{position:relative;width:24px;height:14px;border-radius:9px;background:#78908466;transition:background .15s}
+.candidate-switcher .candidate-archive-track i{position:absolute;top:3px;left:3px;width:8px;height:8px;border-radius:50%;background:#b5c7bd;transition:transform .15s,background .15s}
+.candidate-switcher .is-active .candidate-archive-track{background:#b9ed682e}
+.candidate-switcher .is-active .candidate-archive-track i{transform:translateX(10px);background:var(--lime)}
+@media(max-width:1000px){.candidate-switcher{flex-wrap:wrap}.candidate-switcher>span{flex-basis:100%;line-height:1.6}.candidate-switcher select{max-width:100%}}

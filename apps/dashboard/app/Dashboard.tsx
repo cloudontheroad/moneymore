@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import DesktopExecution from "./DesktopExecution";
+import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts } from "./candidate-view";
 
 type Row = Record<string, unknown>;
 type Page = "overview" | "sectors" | "research" | "risk" | "leveraged" | "challenger" | "data" | "operations" | "desktop";
@@ -169,7 +170,7 @@ const reviewStatusName = (value: unknown) => ({
   FORMAL_REVIEW_DUE:"等待正式评审",
   PROMOTED:"已晋级",
   REJECTED:"已淘汰",
-  GATE_REJECTED:"研究门禁淘汰",
+  GATE_REJECTED:"研究验收未通过",
   REVIEW_EXPIRED:"评审到期归档",
   REVIEW_HOLD:"证据不足·暂停",
   EXPERIMENTAL_PAPER:"模拟观察中",
@@ -193,6 +194,7 @@ async function json<T>(url: string, init?: RequestInit): Promise<T> {
 
 export default function Dashboard() {
   const [page, setPage] = useState<Page>("overview");
+  const [showArchivedCandidates,setShowArchivedCandidates]=useState(false);
   const [bank, setBank] = useState<Bank | null>(null);
   const [sectors, setSectors] = useState<Sectors | null>(null);
   const [execution, setExecution] = useState<Execution | null>(null);
@@ -293,7 +295,7 @@ export default function Dashboard() {
       {page === "research" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Research sectors={sectors} models={models}/></SecurityAccountContext.Provider>}
       {page === "risk" && <MarketRiskPage risk={marketRisk} live={live??undefined} names={sectors.symbol_names}/>}
       {page === "leveraged" && <LeveragedEtfPage account={leveragedEtf}/>}
-      {page === "challenger" && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live}/><ChallengerEvidence challenger={challenger}/><PointInTimeEvidence challenger={challenger}/><GovernanceEvidence challenger={challenger}/><LongTermReview challenger={challenger}/></SecurityAccountContext.Provider>}
+      {page === "challenger" && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/><ChallengerEvidence challenger={challenger} showArchived={showArchivedCandidates}/><PointInTimeEvidence challenger={challenger}/><GovernanceEvidence challenger={challenger}/><LongTermReview challenger={challenger}/></SecurityAccountContext.Provider>}
       {page === "data" && <DataHealth quality={quality}/>}
       {page === "desktop" && <DesktopExecution names={sectors.symbol_names}/>}
       {page === "operations" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Operations bank={bank} execution={displayedExecution} operations={operations} acceptance={acceptance} intraday={intraday} live={live} names={sectors.symbol_names} onRefresh={refresh}/></SecurityAccountContext.Provider>}
@@ -425,8 +427,8 @@ function Research({ sectors, models }: { sectors: Sectors; models: ModelRegistry
     <Panel title="迁移前分行业历史诊断（归档）" subtitle="旧人工候选池研究结果，仅保留审计，不代表当前Top1000策略"><Table rows={reports} columns={[["sector","旧分类"],["cagr","年化"],["volatility","波动率"],["sharpe","夏普"],["max_drawdown","最大回撤"],["fills","成交数"]]} format={{sector:(v)=>meta[text(v)]?.label??text(v),cagr:pct,volatility:pct,sharpe:num,max_drawdown:pct}}/></Panel><Evidence sectors={sectors}/></>;
 }
 
-function ChallengerPage({ challenger, names, live }: { challenger: Challenger; names: Record<string, string>; live:LiveAccounts|null }) {
-  const candidateVersions = [...(challenger.candidate_observation?.candidates??[]),...(challenger.candidate_observation?.archived_candidates??[])];
+function ChallengerPage({ challenger, names, live, showArchived, onShowArchived }: { challenger: Challenger; names: Record<string, string>; live:LiveAccounts|null; showArchived:boolean; onShowArchived:(value:boolean)=>void }) {
+  const candidateVersions = [...(challenger.candidate_observation?.candidates??[]),...(showArchived?(challenger.candidate_observation?.archived_candidates??[]):[])];
   const [selectedCandidateTag,setSelectedCandidateTag] = useState("");
   const selectedCandidate = candidateVersions.find((row)=>row.candidate_tag===selectedCandidateTag)??challenger.candidate_observation?.candidates?.find((row)=>Boolean(row.latest_trade_date))??challenger.candidate_observation?.candidates?.[0];
   const metrics = challenger.research.metrics??[];
@@ -451,14 +453,14 @@ function ChallengerPage({ challenger, names, live }: { challenger: Challenger; n
   const candidateEquity = Number(candidatePortfolio?.equity??1_000_000);
   const globalView = observation?.global_strategy_view??challenger.comparison;
   return <><Intro tag="QLIB CHALLENGER LAB" title="深度学习只能通过公平竞赛晋级">挑战者使用独立资金、模型、信号、订单和持仓。因子影子账户保持冻结；GPU只加速训练，不改变样本外和成本后晋级标准。</Intro>
-    <CandidateSwitcher observation={observation} selectedTag={text(selectedCandidate?.candidate_tag)} onSelect={setSelectedCandidateTag}/>
+    <CandidateSwitcher observation={observation} selectedTag={text(selectedCandidate?.candidate_tag)} onSelect={setSelectedCandidateTag} showArchived={showArchived} onShowArchived={onShowArchived}/>
     <div className="four-col account-columns">
       <AccountColumn title="基线" badge="FACTOR BASELINE" accountId={challenger.baseline.account_id} status={text(challenger.baseline.latest.status)} equity={baselineEquity} portfolio={baselinePortfolio} orders={baselineLive?.orders??challenger.baseline.orders??[]} fills={baselineLive?.fills??challenger.baseline.fills??[]} names={names}/>
       <AccountColumn title="基线·日内执行" badge="ADAPTIVE VWAP" accountId={text(challenger.intraday_baseline?.account_id)} status={text(challenger.intraday_baseline?.status)} equity={Number(intradayLive?.portfolio.equity??challenger.intraday_baseline?.portfolio?.equity??0)} portfolio={intradayLive?.portfolio??challenger.intraday_baseline?.portfolio} orders={intradayLive?.orders??challenger.intraday_baseline?.orders??[]} fills={intradayLive?.fills??challenger.intraday_baseline?.fills??[]} names={names}/>
       <AccountColumn title="挑战者" badge="ACTIVE GRU" accountId={challenger.account_id} status={text(challenger.latest.status)} equity={challengerEquity} portfolio={challengerPortfolio} targetExposure={Number(challenger.latest.target_gross_exposure)} exposurePolicy={challenger.latest.exposure_policy as Row|undefined} orders={challengerLive?.orders??challenger.orders} fills={challengerLive?.fills??challenger.fills} names={names}/>
       <AccountColumn title="候选者" badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={reviewStatusName(selectedCandidate?.review_stage??observation?.status)} equity={candidateEquity} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
     </div>
-    <PerformanceComparisonCharts comparison={globalView} observation={observation}/>
+    <PerformanceComparisonCharts comparison={globalView} observation={observation} showArchived={showArchived}/>
     <CandidateObservation challenger={challenger} selectedTag={text(selectedCandidate?.candidate_tag)}/>
     <TradeCycleComparison challenger={challenger} names={names} candidateAccountId={selectedCandidate?.account_id}/>
     <Panel title="统一样本外模型竞赛" subtitle="相同股票池、标签、训练切分和Top-K规则"><Table rows={metrics} columns={[["model_id","模型"],["segment","区间"],["samples","样本"],["rank_ic","Rank IC"],["rank_ic_ir","Rank ICIR"],["top_k_excess_return","Top-K超额"]]} format={{rank_ic:num,rank_ic_ir:num,top_k_excess_return:pct}}/></Panel>
@@ -474,12 +476,11 @@ function AccountColumn({ title, badge, accountId, status, equity, portfolio, tar
   return <SecurityAccountContext.Provider value={accountId}><article className={`account-column${accent?" account-column-accent":""}`}><header><span>{badge}</span><h3>{title}</h3><small>{accountId}</small></header><div className="account-equity"><b>{money(equity)}</b><span>累计 {pct(equity/1_000_000-1)} · 仓位 {pct(equity?marketValue/equity:0)}{Number.isFinite(targetExposure)?` / 目标 ${pct(targetExposure)}`:""}</span>{exposurePolicy?.realized_volatility!=null&&<small>组合波动 {pct(exposurePolicy.realized_volatility)} · 风险目标 {pct(exposurePolicy.annual_target)}</small>}<i>{status}</i></div><h4>当前持仓 · {positions.length}</h4><Table rows={positions.slice(0,12)} columns={[["symbol","证券"],["quantity","数量"],["avg_cost","成本"],["last","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{symbol:(v)=>security(v,names),avg_cost:num,last:num,market_value:money,unrealized_pnl:money}}/><h4>最近委托</h4><Table rows={orders.slice(0,8)} columns={[["signal_date","信号日"],["symbol","证券"],["side","方向"],["status","状态"]]} format={{symbol:(v)=>security(v,names)}}/><h4>最近成交</h4><Table rows={fills.slice(-8).reverse()} columns={[["trade_date","成交日"],["symbol","股票"],["side","方向"],["quantity","数量"],["price","成交价"]]} format={{symbol:(v)=>names[text(v)]??"未知证券",price:num}}/></article></SecurityAccountContext.Provider>;
 }
 
-function CandidateSwitcher({ observation, selectedTag, onSelect }: { observation:Challenger["candidate_observation"]; selectedTag:string; onSelect:(tag:string)=>void }) {
-  const [showArchived,setShowArchived]=useState(false);
+function CandidateSwitcher({ observation, selectedTag, onSelect, showArchived, onShowArchived }: { observation:Challenger["candidate_observation"]; selectedTag:string; onSelect:(tag:string)=>void; showArchived:boolean; onShowArchived:(value:boolean)=>void }) {
   if (!observation) return null;
   const active=observation.candidates??[];
   const rows=[...active,...(showArchived?(observation.archived_candidates??[]):[])];
-  return <div className="candidate-switcher"><b>第三列候选策略</b><select aria-label="候选策略版本" value={selectedTag} onChange={(event)=>onSelect(event.target.value)}>{rows.length===0&&<option value="">暂无活跃候选</option>}{rows.map((row)=><option key={row.candidate_tag} value={row.candidate_tag}>{row.archived?"[已归档] ":""}{row.candidate_tag} · {reviewStatusName(row.review_stage)} · {text(row.common_observation_days)}日</option>)}</select><label><input type="checkbox" checked={showArchived} onChange={(event)=>{setShowArchived(event.target.checked);if(!event.target.checked&&!active.some(row=>row.candidate_tag===selectedTag))onSelect(active[0]?.candidate_tag??"");}}/> 查看归档（{observation.archived_candidates?.length??0}）</label><span>默认仅展示有效候选；20 / 40 / 60共同日评审，退出版本保留收益、委托与成交</span></div>;
+  return <div className="candidate-switcher"><b>第三列候选策略</b><select aria-label="候选策略版本" value={selectedTag} onChange={(event)=>onSelect(event.target.value)}>{rows.length===0&&<option value="">暂无活跃候选</option>}{rows.map((row)=><option key={row.candidate_tag} value={row.candidate_tag}>{candidateOptionLabel(row,reviewStatusName(row.review_stage))}</option>)}</select><button type="button" role="switch" aria-label="查看归档策略" aria-checked={showArchived} className={`candidate-archive-toggle${showArchived?" is-active":""}`} onClick={()=>{const next=!showArchived;onShowArchived(next);if(!next&&!active.some(row=>row.candidate_tag===selectedTag))onSelect(active[0]?.candidate_tag??"");}}><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 8h16v12H4zM3 4h18v4H3zM9 12h6"/></svg><span className="candidate-archive-label">查看归档</span><span className="candidate-archive-count">{observation.archived_candidates?.length??0}</span><span className="candidate-archive-track" aria-hidden="true"><i/></span></button><span>默认仅展示有效候选；20 / 40 / 60共同日评审，退出版本保留收益、委托与成交</span></div>;
 }
 
 function CandidateObservation({ challenger, selectedTag }: { challenger: Challenger; selectedTag:string }) {
@@ -488,9 +489,9 @@ function CandidateObservation({ challenger, selectedTag }: { challenger: Challen
   const selected = [...(observation.candidates??[]),...(observation.archived_candidates??[])].find((row)=>row.candidate_tag===selectedTag);
   const commonDays = Number(selected?.common_observation_days??observation.comparison?.common_observation_days??0);
   return <>
-    <section className="kpis"><Kpi label="有效候选 / 归档" value={`${observation.candidates?.length??0} / ${observation.archived_candidates?.length??0}`} note="退出版本不再生成新委托"/><Kpi label="固定检查点" value="20 / 40 / 60日" note="对两个固定对照，校正多重检验"/><Kpi label="正式评审" value="60共同日" note="冻结新交易；10个市场交易日未评审则归档"/><Kpi label="当前选择" value={selectedTag} note={`${commonDays} 个共同日 · ${text(selected?.review_reason)}`}/></section>
+    <section className="kpis"><Kpi label="有效候选 / 归档" value={`${observation.candidates?.length??0} / ${observation.archived_candidates?.length??0}`} note="退出版本不再生成新委托"/><Kpi label="固定检查点" value="20 / 40 / 60日" note="对两个固定对照，校正多重检验"/><Kpi label="正式评审" value="60共同日" note="冻结新交易；10个市场交易日未评审则归档"/><Kpi label="当前选择" value={selectedTag} note={selected?`${candidateObservationLabel(selected)} · ${candidateReviewReason(selected)}`:`${commonDays} 个共同日`}/></section>
     <Panel title="有效候选模型排行榜" subtitle="固定检查点显著落后两个对照才提前淘汰；研究门禁失败直接退出。新版本加入不重置旧版本计数，也不自动晋级"><Table rows={observation.leaderboard} columns={[["candidate_tag","候选版本"],["data_cutoff","数据截止"],["rank_ic","Rank IC"],["rank_ic_ir","ICIR"],["cost_adjusted_top_k_excess_return","成本后Top-K超额"],["research_gate_passed","研究门禁"],["common_observation_days","运行共同日"],["eligible_observation_days","可信评审日"],["checkpoint","已评审检查点"],["review_stage","评审阶段"],["review_reason","评审结论"]]} format={{rank_ic:num,rank_ic_ir:num,cost_adjusted_top_k_excess_return:pct,research_gate_passed:(v)=>v?"通过":"未通过",review_stage:reviewStatusName}}/></Panel>
-    <details className="panel"><summary>归档候选与淘汰记录（{observation.archived_leaderboard?.length??0}）</summary><p>停止新交易，撤销未成交委托；账本及原有持仓保留，不虚构清仓。勾选顶部“查看归档”可查看持仓与成交详情。</p><Table rows={observation.archived_leaderboard??[]} columns={[["candidate_tag","版本"],["review_stage","退出类型"],["review_date","评审日"],["checkpoint","检查点"],["review_reason","退出原因"]]} format={{review_stage:reviewStatusName}}/></details>
+    <details className="panel"><summary>归档候选：验收未通过 / 观察期退出（{observation.archived_leaderboard?.length??0}）</summary><p>停止新交易，撤销未成交委托；账本及原有持仓保留，不虚构清仓。勾选顶部“查看归档”可查看持仓与成交详情。</p><Table rows={(observation.archived_leaderboard??[]).map(row=>({...row,review_reason:candidateReviewReason(row),observation_label:candidateObservationLabel(row)}))} columns={[["candidate_tag","版本"],["review_stage","归档类型"],["observation_label","观察情况"],["review_date","评审日"],["review_reason","具体原因"]]} format={{review_stage:reviewStatusName}}/></details>
   </>;
 }
 
@@ -506,16 +507,16 @@ function TradeCycleComparison({ challenger, names, candidateAccountId }: { chall
   return <><Panel title="完整持仓周期胜率与赔率" subtitle="从首次建仓到仓位归零算一个闭合周期；分批买卖合并，费用、滑点和分红计入；未清仓周期不进入胜率"><Table rows={summaryRows} columns={[["strategy","策略"],["closed_cycles","闭合周期"],["wins","盈利"],["losses","亏损"],["win_rate","胜率"],["payoff_ratio","赔率"],["profit_factor","盈亏因子"],["realized_pnl","累计已实现盈亏"],["average_return","平均周期收益"]]} format={{win_rate:pct,payoff_ratio:num,profit_factor:num,realized_pnl:money,average_return:pct}}/></Panel><div className="four-col">{accounts.map(({id,label})=><Panel key={id} title={`${label} · 个股持仓周期`} subtitle="每只股票所有已闭合周期聚合；当前开放周期单独标记"><Table strategyAccountId={id} rows={analysis[id]?.by_symbol??[]} columns={[["symbol","证券"],["closed_cycles","闭合"],["wins","赢"],["losses","亏"],["win_rate","胜率"],["payoff_ratio","赔率"],["profit_factor","盈亏因子"],["realized_pnl","已实现盈亏"],["open_cycle","持仓中"],["open_estimated_pnl","浮动盈亏"]]} format={{symbol:(v)=>security(v,names),win_rate:pct,payoff_ratio:num,profit_factor:num,realized_pnl:money,open_cycle:(v)=>v?"是":"否",open_estimated_pnl:money}}/></Panel>)}</div><div className="four-col">{accounts.map(({id,label})=><Panel key={id} title={`${label} · 已闭合周期明细`} subtitle="用于核验每次从建仓到清仓的真实结果"><Table strategyAccountId={id} rows={(analysis[id]?.closed_cycles??[]).slice(0,100)} columns={[["entry_date","建仓日"],["exit_date","清仓日"],["symbol","证券"],["pnl","净盈亏"],["return_rate","周期收益"],["dividend_income","分红"],["fees","费用"],["fill_count","成交笔数"],["result","结果"]]} format={{symbol:(v)=>security(v,names),pnl:money,return_rate:pct,dividend_income:money,fees:money}}/></Panel>)}</div></>;
 }
 
-function ChallengerEvidence({ challenger }: { challenger: Challenger }) {
+function ChallengerEvidence({ challenger, showArchived=false }: { challenger: Challenger; showArchived?:boolean }) {
   const commonDays = Number(challenger.comparison.common_observation_days??0);
   const commonStart = text(challenger.comparison.common_start_date);
   const commonEnd = text(challenger.comparison.common_end_date);
   const replayRows = (challenger.historical_execution.strategies??[]).map((row)=>({strategy_id:row.strategy_id,...(row.summary??{})}));
   const globalView=challenger.candidate_observation?.global_strategy_view??challenger.comparison;
-  const archivedAccounts=new Set((challenger.candidate_observation?.archived_candidates??[]).map(row=>row.account_id));
-  const globalMetrics=(globalView.metrics??[]).filter(row=>!archivedAccounts.has(text(row.account_id)));
+  const visibleAccounts=visibleStrategyAccounts(challenger.candidate_observation?.candidates??[],challenger.candidate_observation?.archived_candidates??[],Object.keys(chartPalette),showArchived);
+  const globalMetrics=(globalView.metrics??[]).filter(row=>visibleAccounts.has(text(row.account_id)));
   const strategyCount=globalMetrics.length;
-  return <><section className="kpis"><Kpi label="候选评审口径" value="版本独立" note="每个候选分别与两个固定对照计算"/><Kpi label="当前候选共同日" value={String(commonDays)} note="不受其他候选加入影响"/><Kpi label="当前共同区间" value={commonStart==="—"?"等待重叠数据":`${commonStart} → ${commonEnd}`} note="用于候选20/60日门禁"/><Kpi label="全局策略数量" value={String(strategyCount)} note="仅含有效策略；退出版本在归档中保留"/></section><Panel title="M5.3 完整历史执行重放" subtitle={`${text(challenger.historical_execution.start_date)} → ${text(challenger.historical_execution.end_date)} · ${text(challenger.historical_execution.evidence_status)} · 与模拟盘共用 PaperBroker`}><Table rows={replayRows} columns={[["strategy_id","策略"],["observation_days","交易日"],["total_return","累计收益"],["average_gross_exposure","平均仓位"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"],["order_count","订单"],["fill_count","成交"],["transaction_cost","交易成本"],["reconciled","对账"]]} format={{total_return:pct,average_gross_exposure:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct,transaction_cost:money}}/></Panel><div className="two-col"><Panel title="前瞻观察证据" subtitle="预测生成5个交易日后自动成熟标签"><Table rows={challenger.forward.daily??[]} columns={[["observation_date","观察日"],["maturity_date","成熟日"],["rank_ic","Rank IC"],["selected_excess_return","Top-K超额"],["sample_count","样本"]]} format={{rank_ic:num,selected_excess_return:pct}}/></Panel><Panel title={`${strategyCount}策略公平 PK`} subtitle="全局表展示每个策略自身完整运行区间；候选晋级仍使用各版本独立共同日"><Table rows={globalMetrics} columns={[["account_id","账户"],["start_date","开始日"],["end_date","结束日"],["observation_days","运行日"],["total_return","累计收益"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"]]} format={{total_return:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct}}/></Panel></div></>;
+  return <><section className="kpis"><Kpi label="候选评审口径" value="版本独立" note="每个候选分别与两个固定对照计算"/><Kpi label="当前候选共同日" value={String(commonDays)} note="不受其他候选加入影响"/><Kpi label="当前共同区间" value={commonStart==="—"?"等待重叠数据":`${commonStart} → ${commonEnd}`} note="用于候选20/60日门禁"/><Kpi label="全局策略数量" value={String(strategyCount)} note={showArchived?"已包含归档策略历史":"仅含有效策略；与顶部查看归档联动"}/></section><Panel title="M5.3 完整历史执行重放" subtitle={`${text(challenger.historical_execution.start_date)} → ${text(challenger.historical_execution.end_date)} · ${text(challenger.historical_execution.evidence_status)} · 与模拟盘共用 PaperBroker`}><Table rows={replayRows} columns={[["strategy_id","策略"],["observation_days","交易日"],["total_return","累计收益"],["average_gross_exposure","平均仓位"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"],["order_count","订单"],["fill_count","成交"],["transaction_cost","交易成本"],["reconciled","对账"]]} format={{total_return:pct,average_gross_exposure:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct,transaction_cost:money}}/></Panel><div className="two-col"><Panel title="前瞻观察证据" subtitle="预测生成5个交易日后自动成熟标签"><Table rows={challenger.forward.daily??[]} columns={[["observation_date","观察日"],["maturity_date","成熟日"],["rank_ic","Rank IC"],["selected_excess_return","Top-K超额"],["sample_count","样本"]]} format={{rank_ic:num,selected_excess_return:pct}}/></Panel><Panel title={`${strategyCount}策略公平 PK`} subtitle="全局表展示每个策略自身完整运行区间；候选晋级仍使用各版本独立共同日"><Table rows={globalMetrics} columns={[["account_id","账户"],["start_date","开始日"],["end_date","结束日"],["observation_days","运行日"],["total_return","累计收益"],["annualized_volatility","年化波动"],["sharpe","夏普"],["max_drawdown","最大回撤"]]} format={{total_return:pct,annualized_volatility:pct,sharpe:num,max_drawdown:pct}}/></Panel></div></>;
 }
 
 const chartPalette: Record<string, { label: string; color: string }> = {
@@ -525,19 +526,9 @@ const chartPalette: Record<string, { label: string; color: string }> = {
 };
 const candidateChartColors=["#8b6fd1","#19a36a","#ef7b45","#d950a0","#00a6a6","#6c7a89","#b98932"];
 
-function PerformanceComparisonCharts({ comparison, observation }: { comparison: Challenger["comparison"]; observation?:Challenger["candidate_observation"] }) {
+function PerformanceComparisonCharts({ comparison, observation, showArchived=false }: { comparison: Challenger["comparison"]; observation?:Challenger["candidate_observation"]; showArchived?:boolean }) {
   const histories = comparison.independent_histories??comparison.histories??{};
-  const permanentAccounts=new Set(Object.keys(chartPalette));
-  const excludedCandidateStates=new Set(["EARLY_REJECTED","REJECTED","ELIMINATED","RETIRED","OUTDATED"]);
-  const eligibleCandidateAccounts=(observation?.candidates??[]).filter((candidate)=>
-    Boolean(candidate.research_gate_passed)
-    && !excludedCandidateStates.has(text(candidate.review_stage).toUpperCase())
-    && !excludedCandidateStates.has(text(candidate.latest_status).toUpperCase())
-  ).map((candidate)=>candidate.account_id);
-  const visibleAccounts=new Set([
-    ...permanentAccounts,
-    ...eligibleCandidateAccounts,
-  ]);
+  const visibleAccounts=visibleStrategyAccounts(observation?.candidates??[],observation?.archived_candidates??[],Object.keys(chartPalette),showArchived);
   const series = Object.entries(histories).filter(([accountId])=>visibleAccounts.has(accountId)).map(([accountId, rows],index) => ({
     accountId,
     label: chartPalette[accountId]?.label??(accountId.startsWith("qlib_candidate_")?`Qlib 候选者 ${accountId.replace("qlib_candidate_","")}`:accountId),
@@ -551,8 +542,9 @@ function PerformanceComparisonCharts({ comparison, observation }: { comparison: 
     if (next.has(accountId)) next.delete(accountId); else next.add(accountId);
     return next;
   });
-  const showAll=!selectedAccountIds.size;
-  return <><div className="strategy-focus" role="group" aria-label="选择需要高亮的策略"><span>高亮策略（可多选）</span><button className={showAll?"active":""} onClick={()=>setSelectedAccountIds(new Set())}>全部</button>{series.map((item)=><button key={item.accountId} aria-pressed={!showAll&&selectedAccountIds.has(item.accountId)} className={!showAll&&selectedAccountIds.has(item.accountId)?"active":""} onClick={()=>toggleAccount(item.accountId)}><i style={{background:item.color}}/>{item.label}</button>)}</div><div className="two-col"><LineComparisonChart title="累计权益走势" subtitle="展示固定对照与全部门禁通过、仍在考核的候选；各策略从自身首个运行日归一为 100" series={series} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(1)}`} selectedAccountIds={selectedAccountIds} onToggle={toggleAccount}/><LineComparisonChart title="每日收益率波动" subtitle="已淘汰、已过时及门禁未通过策略不进入图表；未运行区间留空" series={series} valueKey="daily_return" formatValue={(value)=>pct(value)} zeroLine selectedAccountIds={selectedAccountIds} onToggle={toggleAccount}/></div></>;
+  const effectiveSelectedAccountIds=new Set([...selectedAccountIds].filter(id=>visibleAccounts.has(id)));
+  const showAll=!effectiveSelectedAccountIds.size;
+  return <><div className="strategy-focus" role="group" aria-label="选择需要高亮的策略"><span>高亮策略（可多选）</span><button className={showAll?"active":""} onClick={()=>setSelectedAccountIds(new Set())}>全部</button>{series.map((item)=><button key={item.accountId} aria-pressed={!showAll&&effectiveSelectedAccountIds.has(item.accountId)} className={!showAll&&effectiveSelectedAccountIds.has(item.accountId)?"active":""} onClick={()=>toggleAccount(item.accountId)}><i style={{background:item.color}}/>{item.label}</button>)}</div><div className="two-col"><LineComparisonChart title="累计权益走势" subtitle={showArchived?"含归档策略历史；各策略从自身首个运行日归一为100":"仅有效策略；与顶部查看归档联动，各策略从自身首个运行日归一为100"} series={series} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(1)}`} selectedAccountIds={effectiveSelectedAccountIds} onToggle={toggleAccount}/><LineComparisonChart title="每日收益率波动" subtitle={showArchived?"含归档策略历史，未运行区间留空":"已隐藏退出及验收未通过策略；勾选顶部查看归档可回看"} series={series} valueKey="daily_return" formatValue={(value)=>pct(value)} zeroLine selectedAccountIds={effectiveSelectedAccountIds} onToggle={toggleAccount}/></div></>;
 }
 
 function LineComparisonChart({ title, subtitle, series, valueKey, formatValue, zeroLine=false, yMin, yMax, selectedAccountIds, onToggle }: { title: string; subtitle: string; series: { accountId: string; label: string; color: string; rows: Row[] }[]; valueKey: string; formatValue: (value: number)=>string; zeroLine?: boolean; yMin?:number; yMax?:number; selectedAccountIds:Set<string>; onToggle:(accountId:string)=>void }) {
