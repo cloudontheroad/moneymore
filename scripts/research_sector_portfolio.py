@@ -12,6 +12,7 @@ from moneymore.research.sector_model import (
     build_global_factor_snapshot,
 )
 from moneymore.strategy_universe import active_strategy_universe
+from moneymore.research.score_evidence import archive_score_evidence
 
 ROOT = Path(__file__).resolve().parents[1]
 STORE = ParquetStore(ROOT / "data")
@@ -26,10 +27,12 @@ symbol_sectors = dict(
     )
 )
 global_config = CONFIG["global_selection"]
+audit_capture = {}
 global_scores = build_global_factor_snapshot(
     STORE,
     list(symbol_sectors),
     global_config["factors"],
+    audit_capture=audit_capture,
 )
 global_correlation = trailing_return_correlation(
     adjusted_close_panel(STORE, list(symbol_sectors)),
@@ -62,6 +65,9 @@ ranked["target_weight"] = ranked["symbol"].astype(str).map(portfolio_weights).fi
 ranked["rank"] = ranked["global_rank"]
 ranked["sector"] = ranked["symbol"].map(symbol_sectors).fillna("unmapped")
 ranked["model_id"] = "global_multifactor_v1"
+
+# Persist evidence before publishing recommendations; archive failure must not silently publish.
+archive_score_evidence(ROOT, audit_capture, ranked, global_config)
 
 STORE.merge_curated(
     "global_factor_recommendation",

@@ -127,6 +127,8 @@ def build_global_factor_snapshot(
     store: ParquetStore,
     symbols: list[str],
     factor_weights: dict[str, float],
+    *,
+    audit_capture: dict[str, pd.DataFrame] | None = None,
 ) -> pd.DataFrame:
     """Build the live cross-section with bulk parquet reads.
 
@@ -215,6 +217,8 @@ def build_global_factor_snapshot(
     names = list(factor_weights)
     computed = registry.compute(panel, names)
     factors = computed.loc[computed["date"] == computed["date"].max()].copy()
+    if audit_capture is not None:
+        audit_capture["raw_factors"] = factors.copy()
     for name in names:
         if registry.get(name).direction.value == "low_is_better":
             factors[name] = -factors[name]
@@ -230,6 +234,8 @@ def build_global_factor_snapshot(
         processed.loc[available, "score"] += processed.loc[available, name] * weight
         processed.loc[available, "active_weight"] += weight
     processed["score"] /= processed["active_weight"].replace(0, pd.NA)
+    if audit_capture is not None:
+        audit_capture["processed_factors"] = processed.copy()
     return processed
 
 

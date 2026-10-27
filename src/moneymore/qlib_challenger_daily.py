@@ -150,7 +150,11 @@ def run_qlib_challenger_daily(
     frame = frame.loc[
         frame.index.get_level_values("datetime") <= cutoff
     ]
+    if frame.empty:
+        raise ValueError("NO_CONTIGUOUS_QLIB_INPUT: missing or incomplete exchange-session features")
     latest_date = frame.index.get_level_values("datetime").max()
+    if latest_date != cutoff:
+        raise ValueError(f"STALE_QLIB_INPUT: requested {trade_date}, latest valid features {latest_date}")
     live_dataset = QlibPanelDataset(
         frame,
         {"live": (str(latest_date.date()), str(latest_date.date()))},
@@ -367,6 +371,9 @@ def run_qlib_challenger_daily(
         {
             **selection_metadata,
             "execution_strategy_id": strategy_id,
+            "input_calendar_enforced": True,
+            "scored_universe_size": len(score_frame),
+            "requested_universe_size": len(universe),
             "research_gate_passed": research_gate_passed,
             "research_gate_failures": research_gate_failures,
             "deployment_mode": deployment.get("execution_mode"),

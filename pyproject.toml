@@ -24,6 +24,9 @@ alphafeed = ["alphafeed==0.1.4"]
 desktop = ["pywinauto>=0.6.8,<0.7; sys_platform == 'win32'", "psutil>=6,<8"]
 dev = ["pytest>=8,<9", "ruff>=0.6,<1"]
 ai = [
+  "ecos>=2.0.14,<3",
+  "cvxpy>=1.6,<2",
+  "highspy>=1.10,<2",
   "pyqlib>=0.9.7,<1",
   "torch>=2.7",
   "lightgbm>=4.6,<5",

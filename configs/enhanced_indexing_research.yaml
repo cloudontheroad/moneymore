@@ -1,0 +1,21 @@
+version: qlib_enhanced_indexing_offline_v1
+mode: OFFLINE_TARGET_COUNTERFACTUAL
+automatic_promotion: false
+orders_enabled: false
+risk_lookback: 120
+num_statistical_factors: 10
+missing_return_policy: reject_incomplete_assets_and_block_missing_holdings
+confirmed_full_session_suspension_policy: carry_previous_known_price_in_risk_matrix_only_with_official_proof
+benchmark: equal_weight_same_recorded_scored_pool_after_risk_eligibility
+signal_scale: qlib_native_volatility_scaling_not_calibrated_expected_return
+gross_exposure: 1.0
+maximum_weight: 0.15
+turnover_l1_limit: 0.20
+risk_aversion_grid: [1.0, 10.0, 100.0]
+size_control_variants: [diagnostic_only, benchmark_neutral]
+selection_rule: no_winner_selection_from_current_snapshot
+needs_before_promotion:
+  - chronological_score_return_calibration
+  - purged_walk_forward_parameter_selection
+  - trading_rules_costs_and_lot_replay
+  - independent_forward_observation

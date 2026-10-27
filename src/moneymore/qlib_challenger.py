@@ -32,9 +32,7 @@ class ChallengerMetrics:
 class QlibPanelDataset:
     """Minimal DatasetH-compatible adapter backed by point-in-time local data."""
 
-    def __init__(
-        self, frame: pd.DataFrame, segments: dict[str, tuple[str, str]]
-    ) -> None:
+    def __init__(self, frame: pd.DataFrame, segments: dict[str, tuple[str, str]]) -> None:
         self.frame = frame.sort_index()
         self.segments = {
             name: slice(pd.Timestamp(start), pd.Timestamp(end))
@@ -50,9 +48,7 @@ class QlibPanelDataset:
         del data_key
         selected = self.segments[segment] if isinstance(segment, str) else segment
         dates = self.frame.index.get_level_values("datetime")
-        result = self.frame.loc[
-            (dates >= selected.start) & (dates <= selected.stop)
-        ]
+        result = self.frame.loc[(dates >= selected.start) & (dates <= selected.stop)]
         if col_set is None:
             return result
         return result.loc[:, col_set]
@@ -67,6 +63,9 @@ def build_challenger_dataset(
     feature_count: int = 6,
     live_as_of: str | None = None,
 ) -> pd.DataFrame:
+    from .challenger_diagnostics import align_trading_observations, trading_dates
+
+    sessions = trading_dates(store, live_as_of or "99991231")
     cache_key: tuple[object, ...] | None = None
     if live_as_of is not None:
         cache_key = (
@@ -88,8 +87,14 @@ def build_challenger_dataset(
         market = store.read(
             "daily",
             columns=[
-                "ts_code", "trade_date", "open", "high", "low", "close",
-                "vol", "amount",
+                "ts_code",
+                "trade_date",
+                "open",
+                "high",
+                "low",
+                "close",
+                "vol",
+                "amount",
             ],
             filters=[("ts_code", "in", requested)],
         )
@@ -109,8 +114,7 @@ def build_challenger_dataset(
             )
         )
         live_bars = {
-            str(symbol): frame.copy()
-            for symbol, frame in market.groupby("ts_code", sort=False)
+            str(symbol): frame.copy() for symbol, frame in market.groupby("ts_code", sort=False)
         }
     for symbol, sector in sorted(symbol_sectors.items()):
         if live_as_of is None:
@@ -119,6 +123,7 @@ def build_challenger_dataset(
             bars = live_bars.get(symbol, pd.DataFrame()).sort_values("date").copy()
             if bars.empty:
                 continue
+        bars = align_trading_observations(bars, sessions)
         close = bars["raw_close"].astype(float)
         previous = close.shift(1)
         feature_frame = pd.DataFrame(
@@ -129,11 +134,11 @@ def build_challenger_dataset(
                 "close_return": close / previous - 1,
                 "volume_change": np.log1p(bars["vol"].astype(float)).diff(),
                 "amount_change": np.log1p(bars["amount"].astype(float)).diff(),
-                "return_5": close.pct_change(5),
-                "return_20": close.pct_change(20),
+                "return_5": close.pct_change(5, fill_method=None),
+                "return_20": close.pct_change(20, fill_method=None),
                 "price_to_ma_20": close / close.rolling(20).mean() - 1,
                 "price_to_ma_60": close / close.rolling(60).mean() - 1,
-                "volatility_20": close.pct_change().rolling(20).std(),
+                "volatility_20": close.pct_change(fill_method=None).rolling(20).std(),
                 "drawdown_60": close / close.rolling(60).max() - 1,
             }
         ).replace([np.inf, -np.inf], np.nan)
@@ -143,9 +148,7 @@ def build_challenger_dataset(
         feature_columns: dict[str, pd.Series] = {}
         for feature in feature_frame:
             for lag in range(sequence_length - 1, -1, -1):
-                feature_columns[f"{feature}_lag{lag:02d}"] = feature_frame[
-                    feature
-                ].shift(lag)
+                feature_columns[f"{feature}_lag{lag:02d}"] = feature_frame[feature].shift(lag)
         future_return = close.shift(-label_horizon) / close - 1
         panel = pd.DataFrame(feature_columns)
         panel["raw_label"] = future_return
@@ -154,14 +157,10 @@ def build_challenger_dataset(
         panel["sector"] = sector
         panels.append(panel)
     combined = pd.concat(panels, ignore_index=True)
-    combined["label"] = combined["raw_label"] - combined.groupby(
-        ["datetime", "sector"]
-    )["raw_label"].transform("mean")
-    feature_names = [
-        column
-        for column in combined.columns
-        if "_lag" in column
-    ]
+    combined["label"] = combined["raw_label"] - combined.groupby(["datetime", "sector"])[
+        "raw_label"
+    ].transform("mean")
+    feature_names = [column for column in combined.columns if "_lag" in column]
     required = [*feature_names, *(["label"] if require_label else [])]
     combined = combined.dropna(subset=required)
     # Live inference only scores the latest available cross-section.  Keeping
@@ -205,13 +204,15 @@ def evaluate_predictions(
     confidence_temperature: float = 1.0,
     confidence_shrinkage: float = 0.35,
 ) -> ChallengerMetrics:
-    aligned = pd.concat(
-        [predictions.rename("score"), labels.rename("label")], axis=1
-    ).dropna()
-    daily_ic = aligned.groupby(level="datetime").apply(
-        lambda frame: frame["score"].corr(frame["label"], method="spearman"),
-        include_groups=False,
-    ).dropna()
+    aligned = pd.concat([predictions.rename("score"), labels.rename("label")], axis=1).dropna()
+    daily_ic = (
+        aligned.groupby(level="datetime")
+        .apply(
+            lambda frame: frame["score"].corr(frame["label"], method="spearman"),
+            include_groups=False,
+        )
+        .dropna()
+    )
     selections: list[set[str]] = []
     top_returns: list[float] = []
     held: set[str] = set()
@@ -235,7 +236,8 @@ def evaluate_predictions(
                     correlations.get(pd.Timestamp(date))
                     if correlations is not None
                     else trailing_return_correlation(price_panel, date, correlation_lookback)
-                    if price_panel is not None else None
+                    if price_panel is not None
+                    else None
                 ),
                 correlation_penalty=correlation_penalty,
                 cluster_correlation_threshold=cluster_correlation_threshold,
@@ -256,8 +258,7 @@ def evaluate_predictions(
             )
         )
     turnovers = [
-        len(current.symmetric_difference(previous))
-        / max(len(current) + len(previous), 1)
+        len(current.symmetric_difference(previous)) / max(len(current) + len(previous), 1)
         for previous, current in pairwise(selections)
     ]
     average_turnover = float(np.mean(turnovers)) if turnovers else 0.0
@@ -288,9 +289,7 @@ def challenger_universe(root: Path, store: ParquetStore) -> dict[str, str]:
         return dict(zip(active["symbol"].astype(str), active["industry"].astype(str)))
     except (FileNotFoundError, ValueError):
         pass
-    config = yaml.safe_load(
-        (root / "configs" / "sector_models.yaml").read_text(encoding="utf-8")
-    )
+    config = yaml.safe_load((root / "configs" / "sector_models.yaml").read_text(encoding="utf-8"))
     result: dict[str, str] = {}
     for sector, item in config["universes"].items():
         for symbol in item["holdings"]:
@@ -300,16 +299,13 @@ def challenger_universe(root: Path, store: ParquetStore) -> dict[str, str]:
         filters=[("universe", "==", "bank_cn")],
     )
     latest = membership.loc[
-        pd.to_datetime(membership["date"])
-        == pd.to_datetime(membership["date"]).max()
+        pd.to_datetime(membership["date"]) == pd.to_datetime(membership["date"]).max()
     ]
     result.update({str(symbol): "bank" for symbol in latest["ts_code"]})
     return result
 
 
-def save_challenger_artifact(
-    payload: dict[str, Any], target: Path
-) -> Path:
+def save_challenger_artifact(payload: dict[str, Any], target: Path) -> Path:
     target.parent.mkdir(parents=True, exist_ok=True)
     content = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
     if target.exists():
@@ -359,16 +355,27 @@ def research_gate_diagnostics(
         (int(metric.get("samples", 0)) >= int(gate["minimum_samples"]), "MINIMUM_SAMPLES"),
         (float(metric.get("rank_ic", -1)) >= float(gate["minimum_rank_ic"]), "RANK_IC"),
         (float(metric.get("rank_ic_ir", -1)) >= float(gate["minimum_rank_ic_ir"]), "RANK_IC_IR"),
-        (float(metric.get("cost_adjusted_top_k_excess_return", -1)) > float(gate["minimum_cost_adjusted_excess_return"]), "COST_ADJUSTED_EXCESS_RETURN"),
+        (
+            float(metric.get("cost_adjusted_top_k_excess_return", -1))
+            > float(gate["minimum_cost_adjusted_excess_return"]),
+            "COST_ADJUSTED_EXCESS_RETURN",
+        ),
         (int(stability.get("seed_count", 0)) >= int(gate["minimum_seed_count"]), "SEED_COUNT"),
-        (float(stability.get("positive_seed_ratio", 0)) >= float(gate["minimum_positive_seed_ratio"]), "SEED_STABILITY"),
+        (
+            float(stability.get("positive_seed_ratio", 0))
+            >= float(gate["minimum_positive_seed_ratio"]),
+            "SEED_STABILITY",
+        ),
     )
     failures.extend(reason for passed, reason in checks if not passed)
     if str(protocol.get("protocol_version", "legacy")) == "challenger_v2":
         if int(research.get("universe_size", 0)) < int(gate.get("minimum_universe_size", 0)):
             failures.append("UNIVERSE_SIZE")
         lightgbm = metrics.get("qlib_lightgbm_alpha360_v1", {})
-        if gate.get("require_positive_lightgbm_rank_ic", False) and float(lightgbm.get("rank_ic", -1)) <= 0:
+        if (
+            gate.get("require_positive_lightgbm_rank_ic", False)
+            and float(lightgbm.get("rank_ic", -1)) <= 0
+        ):
             failures.append("CROSS_MODEL_LIGHTGBM_RANK_IC")
     return not failures, failures
 
@@ -378,92 +385,30 @@ def evaluate_forward_observations(
     store: ParquetStore,
     label_horizon: int,
 ) -> dict[str, object]:
-    """Mature immutable daily predictions once their future label is observable."""
-    report_dir = root / "state" / "qlib-challenger-shadow"
-    daily_results: list[dict[str, object]] = []
-    latest_reports: dict[str, dict[str, object]] = {}
-    for report_path in sorted(report_dir.glob("*.json")):
-        report = json.loads(report_path.read_text(encoding="utf-8"))
-        trade_date = str(report.get("trade_date", ""))
-        current = latest_reports.get(trade_date)
-        if current is None or str(report.get("created_at", "")) > str(
-            current.get("created_at", "")
-        ):
-            latest_reports[trade_date] = report
-    for report in latest_reports.values():
-        scores = report.get("scores", [])
-        if not scores:
-            continue
-        observation_date = pd.Timestamp(str(report["trade_date"]))
-        rows: list[dict[str, object]] = []
-        mature = True
-        for score in scores:
-            symbol = str(score["instrument"])
-            bars = load_total_return_stock_bars(store, symbol).sort_values("date")
-            dates = pd.to_datetime(bars["date"])
-            locations = np.flatnonzero(dates.to_numpy() == observation_date.to_datetime64())
-            if not len(locations) or int(locations[-1]) + label_horizon >= len(bars):
-                mature = False
-                break
-            start = int(locations[-1])
-            future_return = (
-                float(bars.iloc[start + label_horizon]["raw_close"])
-                / float(bars.iloc[start]["raw_close"])
-                - 1
-            )
-            rows.append(
-                {
-                    "instrument": symbol,
-                    "sector": str(score["sector"]),
-                    "score": float(score["score"]),
-                    "raw_return": future_return,
-                    "maturity_date": pd.Timestamp(
-                        bars.iloc[start + label_horizon]["date"]
-                    ),
-                }
-            )
-        if not mature or not rows:
-            continue
-        frame = pd.DataFrame(rows)
-        frame["label"] = frame["raw_return"] - frame.groupby("sector")[
-            "raw_return"
-        ].transform("mean")
-        rank_ic = frame["score"].corr(frame["label"], method="spearman")
-        selected = set(report.get("selected", []))
-        selected_excess = frame.loc[
-            frame["instrument"].isin(selected), "label"
-        ].mean()
-        daily_results.append(
-            {
-                "observation_date": str(report["trade_date"]),
-                "maturity_date": str(
-                    max(row["maturity_date"] for row in rows).date()
-                ),
-                "rank_ic": 0.0 if pd.isna(rank_ic) else float(rank_ic),
-                "selected_excess_return": (
-                    0.0 if pd.isna(selected_excess) else float(selected_excess)
-                ),
-                "sample_count": len(frame),
-            }
-        )
-    rank_ics = pd.Series([row["rank_ic"] for row in daily_results], dtype=float)
-    payload = {
-        "updated_at": pd.Timestamp.now(tz="UTC").isoformat(),
-        "matured_days": len(daily_results),
-        "rank_ic": float(rank_ics.mean()) if len(rank_ics) else None,
-        "rank_ic_ir": (
-            float(rank_ics.mean() / rank_ics.std(ddof=1))
-            if len(rank_ics) > 1 and rank_ics.std(ddof=1)
-            else None
-        ),
-        "daily": daily_results,
-    }
-    target = root / "state" / "qlib-challenger" / "forward-evaluation.json"
-    target.parent.mkdir(parents=True, exist_ok=True)
-    temporary = target.with_suffix(".json.tmp")
-    temporary.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+    """Compatibility entry point for the active model's bounded evaluator."""
+    from .challenger_diagnostics import (
+        evaluate_forward_reports,
+        prediction_reports,
+        trading_dates,
+        write_diagnostic,
     )
-    temporary.replace(target)
+
+    as_of = pd.Timestamp.now(tz="Asia/Shanghai").strftime("%Y%m%d")
+    calendar = trading_dates(store, as_of)
+    reports = prediction_reports(root / "state/qlib-challenger-shadow", as_of)
+    symbols = sorted({str(score["instrument"]) for report in reports for score in report["scores"]})
+    first = min((report["trade_date"] for report in reports), default=as_of)
+    market = store.read(
+        "daily",
+        columns=["ts_code", "trade_date", "close"],
+        filters=[
+            ("trade_date", ">=", first),
+            ("trade_date", "<=", as_of),
+            ("ts_code", "in", symbols),
+        ],
+    )
+    payload = evaluate_forward_reports(
+        reports, market, calendar, as_of=as_of, horizon=label_horizon
+    )
+    write_diagnostic(root / "state/qlib-challenger/forward-evaluation.json", payload)
     return payload

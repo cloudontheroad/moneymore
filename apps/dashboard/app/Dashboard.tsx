@@ -25,6 +25,7 @@ type Sectors = {
   symbol_names: Record<string, string>;
   strategy_universe?: Row; industry_catalog?: Row[]; board_catalog?: Row[];
   strategy_constituents?: Row[];
+  factor_data_quality?: {live?:Row;repair?:Row;comparison?:Row;score_archive?:Row};
 };
 type Execution = {
   account_id: string; status: string; trade_date?: string;
@@ -94,6 +95,7 @@ type MonthlyAcceptance = {
   evidence: Row; report_path?: string | null;
 };
 type Challenger = {
+  diagnostics?: { as_of_date?:string; forward?:{ accounts?:Row[] }; style_attribution?:Row & { accounts?:(Row & { contributions?:Row; skipped_days?:Row[] })[] }; recommendations?:Row[] };
   account_id: string; research: Row & { metrics?: Row[] };
   next_trade_date?: string | null;
   forward: Row & { daily?: Row[] };
@@ -417,9 +419,15 @@ function Research({ sectors, models }: { sectors: Sectors; models: ModelRegistry
   const constituents=sectors.strategy_constituents??[];
   const factorRanking=[...constituents].sort((a,b)=>Number(a.global_rank??99999)-Number(b.global_rank??99999));
   const selectedCount=constituents.filter((row)=>Boolean(row.selected)).length;
-  return <><Intro tag="RESEARCH GOVERNANCE" title="Top1000统一横截面研究体系">因子基线和Qlib模型在同一候选池全局评分，行业不参与排名和预算。组合构建只处理Top-K、换手缓冲、整手约束与相关风险簇。</Intro>
+  const quality=sectors.factor_data_quality;
+  return <><Intro tag="RESEARCH GOVERNANCE" title="Top1000统一横截面研究体系">因子基线和Qlib模型在统一候选池全局评分，不设行业配额。没有配额不代表风格中性：因子、训练目标及数据缺失仍会影响最终暴露。</Intro>
     <section className="kpis"><Kpi label="统一研究池" value={String(constituents.length)} note="沪深主板 + 创业板 + 科创板"/><Kpi label="模型路线" value="2" note="因子基线 + Qlib GRU"/><Kpi label="当前基线目标" value={String(selectedCount)} note="全局Top-K与风险簇约束" accent/><Kpi label="新口径前瞻起点" value={text(sectors.strategy_universe?.effective_date)} note="此前历史冻结，不回刷"/></section>
-    <Panel title="当前因子基线全局排名" subtitle="所有股票使用同一截面口径；行业列仅用于解释暴露"><Table rows={factorRanking.slice(0,30)} columns={[["global_rank","全局排名"],["symbol","证券"],["industry","行业"],["board","板块"],["factor_score","因子分"],["selected","当前目标"],["target_weight","目标权重"]]} format={{symbol:(v)=>security(v,sectors.symbol_names),factor_score:num,selected:(v)=>v?"入选":"—",target_weight:pct}}/></Panel>
+    {quality&&<Panel title="因子数据质量与修复进度" subtitle="旧基线保留原口径；全池财务补齐进入隔离研究版本，不自动晋级、不回刷历史"><Table rows={[
+      {scope:"现有基线财务",complete:`${text(quality.live?.complete)} / ${text(quality.live?.requested)}`,fresh:text(quality.live?.fresh_complete),state:quality.live?.gate==="PASS"?"完整":"数据不完整（旧版本审计告警）"},
+      {scope:"隔离修复版财务",complete:`${text(quality.repair?.complete)} / ${text(quality.repair?.requested)}`,fresh:text(quality.repair?.fresh_complete),state:quality.repair?.status==="PAUSED_ERROR"?"同步暂停，需检查数据源":quality.repair?.gate==="PASS"?"财务覆盖通过，尚未晋级":"限速补齐 / 门禁未通过"},
+      {scope:"修复版评分",complete:text(quality.comparison?.complete_factor_rows),fresh:"不生成订单",state:quality.comparison?.status==="RESEARCH_ONLY"?"仅研究，等待前瞻验收":"等待完整数据及一致行情日"}
+    ]} columns={[["scope","范围"],["complete","完整数据股票数"],["fresh","新鲜数据数 / 说明"],["state","状态"]]}/><p className="evidence-note">缺失财务不等于基本面差。旧基线仍有按可用因子重新分配权重的历史行为；本轮先补数据并留证，不用行业配额掩盖问题。评分留档：{text(quality.score_archive?.as_of_date)}；市值控制变量：{quality.score_archive?.size_control_present===true?"存在":quality.score_archive?.size_control_present===false?"未实际传入":"等待首次新留档"}。</p></Panel>}
+    <Panel title="当前因子基线全局排名" subtitle="全局横截面排名；财务缺失及有效权重差异见数据质量检查，行业列仅用于解释暴露"><Table rows={factorRanking.slice(0,30)} columns={[["global_rank","全局排名"],["symbol","证券"],["industry","行业"],["board","板块"],["factor_score","因子分"],["selected","当前目标"],["target_weight","目标权重"]]} format={{symbol:(v)=>security(v,sectors.symbol_names),factor_score:num,selected:(v)=>v?"入选":"—",target_weight:pct}}/></Panel>
     <Panel title="当前策略架构" subtitle="展示正在运行的研究与组合链路"><div className="architecture">{[["01","版本化候选池","市值Top1000，按月刷新，历史成分不回写"],["02","统一特征层","行情、估值、财务、分红和可交易性按时点对齐"],["03","并行模型层","因子模型与Qlib GRU独立评分、独立账户公平PK"],["04","全局组合层","全局Top-K、退出缓冲、单期替换限制和排名递减权重"],["05","相关风险层","120日收益相关聚类，限制同类风险重复下注"],["06","模拟执行层","T+1撮合、整手、成本、公司行为、对账与收益归因"]].map(([n,t,d])=><div key={n}><b>{n}</b><span><strong>{t}</strong><small>{d}</small></span></div>)}</div></Panel>
     <div className="two-col"><Panel title="候选池行业分布" subtitle="反向分类只用于研究诊断，不形成行业袖套"><Table rows={(sectors.industry_catalog??[]).slice(0,30)} columns={[["industry","行业"],["stock_count","候选数"],["selected_count","当前目标"],["market_value","总市值（万元）"]]} format={{market_value:money}}/></Panel><Panel title="当前组合规则" subtitle="规则来自正在运行的全局组合构建器"><Table rows={Object.entries(sectors.portfolio_policy??{}).map(([rule,value])=>({rule,value:Array.isArray(value)?value.join(", "):value}))} columns={[["rule","规则"],["value","当前值"]]}/></Panel></div>
     <Panel title="模型版本注册表" subtitle="模型版本绑定代码、配置、股票池和数据截止日；任一内容改变都会产生新版本"><Table rows={models.versions} columns={[["version_id","版本"],["lifecycle","生命周期"],["evidence_stage","证据阶段"],["data_cutoff","数据截止"],["universe_hash","股票池指纹"],["code_hash","代码指纹"]]}/></Panel>
@@ -461,6 +469,7 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
       <AccountColumn title="候选者" badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={reviewStatusName(selectedCandidate?.review_stage??observation?.status)} equity={candidateEquity} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
     </div>
     <PerformanceComparisonCharts comparison={globalView} observation={observation} showArchived={showArchived}/>
+    <ChallengerDiagnostics challenger={challenger} showArchived={showArchived}/>
     <CandidateObservation challenger={challenger} selectedTag={text(selectedCandidate?.candidate_tag)}/>
     <TradeCycleComparison challenger={challenger} names={names} candidateAccountId={selectedCandidate?.account_id}/>
     <Panel title="统一样本外模型竞赛" subtitle="相同股票池、标签、训练切分和Top-K规则"><Table rows={metrics} columns={[["model_id","模型"],["segment","区间"],["samples","样本"],["rank_ic","Rank IC"],["rank_ic_ir","Rank ICIR"],["top_k_excess_return","Top-K超额"]]} format={{rank_ic:num,rank_ic_ir:num,top_k_excess_return:pct}}/></Panel>
@@ -481,6 +490,21 @@ function CandidateSwitcher({ observation, selectedTag, onSelect, showArchived, o
   const active=observation.candidates??[];
   const rows=[...active,...(showArchived?(observation.archived_candidates??[]):[])];
   return <div className="candidate-switcher"><b>第三列候选策略</b><select aria-label="候选策略版本" value={selectedTag} onChange={(event)=>onSelect(event.target.value)}>{rows.length===0&&<option value="">暂无活跃候选</option>}{rows.map((row)=><option key={row.candidate_tag} value={row.candidate_tag}>{candidateOptionLabel(row,reviewStatusName(row.review_stage))}</option>)}</select><button type="button" role="switch" aria-label="查看归档策略" aria-checked={showArchived} className={`candidate-archive-toggle${showArchived?" is-active":""}`} onClick={()=>{const next=!showArchived;onShowArchived(next);if(!next&&!active.some(row=>row.candidate_tag===selectedTag))onSelect(active[0]?.candidate_tag??"");}}><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 8h16v12H4zM3 4h18v4H3zM9 12h6"/></svg><span className="candidate-archive-label">查看归档</span><span className="candidate-archive-count">{observation.archived_candidates?.length??0}</span><span className="candidate-archive-track" aria-hidden="true"><i/></span></button><span>默认仅展示有效候选；20 / 40 / 60共同日评审，退出版本保留收益、委托与成交</span></div>;
+}
+
+function ChallengerDiagnostics({challenger,showArchived}:{challenger:Challenger;showArchived:boolean}) {
+  const data=challenger.diagnostics;
+  if(!data?.forward)return null;
+  const observation=challenger.candidate_observation;
+  const visible=visibleStrategyAccounts(observation?.candidates??[],observation?.archived_candidates??[],Object.keys(chartPalette),showArchived);
+  const recommendations=new Map((data.recommendations??[]).map(row=>[text(row.account_id),row]));
+  const forward=(data.forward.accounts??[]).filter(row=>visible.has(text(row.account_id))).map(row=>({...row,recommendation:recommendations.get(text(row.account_id))?.recommendation,review_reason:recommendations.get(text(row.account_id))?.reason}));
+  const attribution=(data.style_attribution?.accounts??[]).filter(row=>visible.has(text(row.account_id))).map(row=>({...row,...(row.matched_days?row.contributions:{}),coverage:`${row.matched_days} / ${row.expected_return_days}`}));
+  const accountLabel=(value:unknown)=>chartPalette[text(value)]?.label??`候选 ${text(value).replace("qlib_candidate_","")}`;
+  const recommendationLabel=(value:unknown)=>({ALREADY_ARCHIVED:"已归档",REPAIR_EVIDENCE_FIRST:"先修复证据",OBSERVE_NO_PROMOTION:"继续观察·不晋级",RESEARCH_REDESIGN:"建议重构研究方案",REVIEW_RISK_EXPOSURE:"优先审查风险暴露",CONTINUE_ISOLATED_REVIEW:"继续隔离评审"}[text(value)]??text(value));
+  const nullableNumber=(v:unknown)=>v==null?"—":Number(v).toFixed(4);
+  const nullablePercent=(v:unknown)=>v==null?"—":pct(v);
+  return <><Panel title="前瞻预测验收与处置建议" subtitle={`${text(data.as_of_date)} · 原预测到5个交易日后才形成标签；事后重建只作诊断，不计入成熟前瞻日。建议不自动修改模型或账户`}><Table rows={forward} columns={[["account_id","策略"],["matured_days","成熟前瞻日"],["pending_days","待标签日"],["incomplete_days","异常日"],["rank_ic","前瞻Rank IC"],["rolling_rank_ic","近20成熟日IC"],["selected_excess_return","平均5日Top-K超额"],["recommendation","处置建议"],["review_reason","理由"]]} format={{account_id:accountLabel,rank_ic:nullableNumber,rolling_rank_ic:nullableNumber,selected_excess_return:nullablePercent,recommendation:recommendationLabel}}/></Panel><Panel title="风格匹配后的收益归因" subtitle={`${text(data.style_attribution?.start_date)} → ${text(data.style_attribution?.end_date)} · 前一日持仓，匹配同板块、市值、20日动量与波动的5只近邻；3/10近邻敏感性另行留档。各项为财富链接贡献，并非因果证明`}><Table rows={attribution} columns={[["account_id","策略"],["coverage","匹配日 / 应有日"],["actual_period_return","同期实际收益"],["market","市场贡献"],["style","风格贡献"],["selection","匹配后选股贡献"],["trading_and_other","交易及其他残差"],["costs","费用贡献"],["reconciliation_error","归因校验差"]]} format={{account_id:accountLabel,actual_period_return:nullablePercent,market:nullablePercent,style:nullablePercent,selection:nullablePercent,trading_and_other:nullablePercent,costs:nullablePercent,reconciliation_error:nullableNumber}}/><p className="empty">使用当时记录的候选池，不用当前行业分类分配预算。交易及其他残差含持仓调整、执行与公司行为差异，不能当作纯择时能力；缺数据日不填零，部分匹配不能冒充完整区间归因。</p></Panel></>;
 }
 
 function CandidateObservation({ challenger, selectedTag }: { challenger: Challenger; selectedTag:string }) {

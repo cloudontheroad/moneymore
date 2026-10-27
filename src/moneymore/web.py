@@ -36,11 +36,13 @@ from .baseline_exposure_daily import (
     TREND_CAP_EXPOSURE_HISTORY,
     run_baseline_exposure_daily,
 )
+from .challenger_diagnostics import run_challenger_review
 from .config import BacktestConfig
 from .data.fundamental_sync import (
     sync_daily_basic_universe,
     sync_missing_target_fundamentals,
 )
+from .data.fundamental_research import financial_quality, research_financial_frame
 from .data.qmt_provider import create_market_data_provider
 from .data.realtime import create_realtime_provider
 from .data.research import load_total_return_stock_bars
@@ -102,6 +104,9 @@ from .trade_cycles import analyze_trade_cycles
 from .weekly_training import WeeklyTrainingService
 
 ROOT = Path(__file__).resolve().parents[2]
+# Resolve configured providers before health checks and startup schedulers run;
+# otherwise a fresh process temporarily advertises the legacy QMT defaults.
+load_dotenv(ROOT / ".env", override=False)
 STATE = ROOT / "state"
 DATA = ROOT / "data"
 PAPER_DATABASE = STATE / "paper_orders.sqlite3"
@@ -537,6 +542,44 @@ def _composite_universe_symbols(store: ParquetStore) -> list[str]:
     return sorted(symbols)
 
 
+def _refresh_research_financial_pool(store: ParquetStore, trade_date: str) -> dict:
+    # Long bounded backfills must not occupy the trading/API process. The worker
+    # owns its dedicated crash-safe lock and checkpoints, not the broker DB.
+    if trade_date != datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y%m%d"):
+        return {"status": "SKIPPED_HISTORICAL_REPLAY", "orders_enabled": False}
+    logs = ROOT / "logs"
+    logs.mkdir(exist_ok=True)
+    with (logs / "financial-research-backfill.out.log").open("ab") as output, (logs / "financial-research-backfill.err.log").open("ab") as error:
+        process = subprocess.Popen(
+            [sys.executable, str(ROOT / "scripts/sync_research_financials.py"),
+             "--as-of", trade_date, "--max-requests", "1000"],
+            cwd=ROOT, stdout=output, stderr=error, stdin=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+    return {"status": "DISPATCHED_NOT_COMPLETED", "pid": process.pid,
+            "orders_enabled": False, "quality_report": "state/fundamental-research-v2/quality.json"}
+
+
+def _factor_research_quality(store: ParquetStore, symbols: list[str]) -> dict:
+    as_of = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y%m%d")
+    try:
+        live = financial_quality(store.read("fina_indicator"), symbols, as_of)
+    except FileNotFoundError:
+        live = {"complete": 0, "requested": len(symbols), "gate": "BLOCK"}
+    result = {"live": live}
+    for label, relative in (("repair", "fundamental-research-v2/quality.json"),
+                            ("comparison", "fundamental-research-v2/comparison.json"),
+                            ("score_archive", "score-evidence/global_multifactor_v1/latest.json")):
+        path = STATE / relative
+        result[label] = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    try:
+        staged = research_financial_frame(store)
+        result["repair"].update(financial_quality(staged, symbols, as_of, per_field=True))
+    except FileNotFoundError:
+        pass
+    return result
+
+
 def _selected_factor_symbols(store: ParquetStore) -> list[str]:
     recommendation = store.read("global_factor_recommendation")
     return sorted(recommendation.loc[recommendation["selected"].astype(bool), "symbol"].astype(str))
@@ -831,6 +874,8 @@ class TaskService:
             "multi_sector_execution",
             "qlib_challenger_execution",
             "qlib_candidate_observation",
+            "research_financial_pool_refresh",
+            "qlib_forward_and_style_review",
         ]
         with sqlite3.connect(self.database) as connection:
             completed = {
@@ -1671,6 +1716,14 @@ class TaskService:
                     ),
                 ),
                 (
+                    "qlib_forward_and_style_review",
+                    lambda: run_challenger_review(ROOT, store, trade_date),
+                ),
+                (
+                    "research_financial_pool_refresh",
+                    lambda: _refresh_research_financial_pool(store, trade_date),
+                ),
+                (
                     "qlib_drift_monitoring",
                     lambda: evaluate_qlib_drift(ROOT, store, broker, trade_date),
                 ),
@@ -1872,6 +1925,12 @@ async def lifespan(_: FastAPI):
     weekly_training_service.start()
     finrl_training_service.start()
     leveraged_etf_scheduler.start()
+    if task_service.config().get("enabled"):
+        try:
+            _refresh_research_financial_pool(ParquetStore(DATA), datetime.now(SHANGHAI).strftime("%Y%m%d"))
+        except OSError:
+            # Research repair is optional; failure must not take the trading API down.
+            pass
     yield
     leveraged_etf_scheduler.stop()
     finrl_training_service.stop()
@@ -2562,6 +2621,7 @@ def sector_portfolio() -> dict[str, object]:
         "board_catalog": board_catalog,
         "strategy_constituents": _records(strategy_constituents),
         "portfolio_policy": config["global_selection"],
+        "factor_data_quality": _factor_research_quality(store, strategy_constituents.symbol.astype(str).tolist() if not strategy_constituents.empty else []),
         "risk_metrics": {
             "average_pair_correlation": average_correlation,
             "effective_independent_bets": effective_bets,
@@ -3112,6 +3172,10 @@ def qlib_challenger() -> dict[str, object]:
         "account_id": QLIB_CHALLENGER_ACCOUNT,
         "research": research,
         "forward": forward_evaluation,
+        "diagnostics": (
+            json.loads((STATE / "challenger-diagnostics/latest.json").read_text(encoding="utf-8"))
+            if (STATE / "challenger-diagnostics/latest.json").exists() else {}
+        ),
         "latest": latest,
         "next_trade_date": _next_open_trade_date(store, str(latest.get("trade_date", ""))),
         "orders": orders,

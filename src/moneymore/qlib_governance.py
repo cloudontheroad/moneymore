@@ -200,6 +200,8 @@ def evaluate_qlib_drift(
     store: ParquetStore,
     broker: PaperBroker,
     trade_date: str,
+    *,
+    apply_protection: bool = True,
 ) -> dict[str, Any]:
     deployment = bootstrap_qlib_release(root)
     config = yaml.safe_load(
@@ -227,13 +229,17 @@ def evaluate_qlib_drift(
     )
     turnover = _average_turnover(recent_reports)
     forward_path = root / "state" / "qlib-challenger" / "forward-evaluation.json"
+    dated_forward = forward_path.parent / "forward-evaluation-history" / f"{trade_date}.json"
+    if dated_forward.exists():
+        forward_path = dated_forward
     forward = (
         json.loads(forward_path.read_text(encoding="utf-8"))
         if forward_path.exists()
         else {"daily": []}
     )
     daily_ic = pd.Series(
-        [row["rank_ic"] for row in forward.get("daily", [])], dtype=float
+        [row["rank_ic"] for row in forward.get("daily", [])
+         if str(row.get("maturity_date", "")).replace("-", "") <= trade_date], dtype=float
     )
     rolling_ic = (
         float(daily_ic.tail(int(drift["recent_window"])).mean())
@@ -274,7 +280,7 @@ def evaluate_qlib_drift(
     status = "WARMING_UP" if matured < int(drift["minimum_observations"]) else (
         "BREACH" if breaches else "PASS"
     )
-    if breaches and deployment["execution_mode"] == "PAPER_TRADING":
+    if apply_protection and breaches and deployment["execution_mode"] == "PAPER_TRADING":
         deployment = transition_release(
             root,
             release_id=str(deployment["release_id"]),
@@ -289,6 +295,7 @@ def evaluate_qlib_drift(
         "status": status,
         "observed_prediction_days": observed,
         "matured_forward_days": matured,
+        "protection_mode": "EXISTING_AUTOMATIC_POLICY" if apply_protection else "DIAGNOSTIC_ONLY",
         "rolling_rank_ic": rolling_ic,
         "score_psi": score_psi,
         "maximum_feature_psi": feature_psi,
