@@ -1,0 +1,45 @@
+version: factor_baseline_v2_20261028
+activation_date: '20261028'
+display_name: 因子基线 V2｜可比评分
+candidate_tag: '20261028'
+real_orders_enabled: false
+automatic_promotion: false
+# Predeclared forward experiment. No optimization against October returns.
+minimum_industry_assets: 5
+history_sessions: 253
+financial_age_days: 200
+financial_period_rule: COMMON_DISCLOSED_QUARTER
+industry_control_source: SW_L1_EFFECTIVE_INTERVALS
+market_metadata_age_days: 10
+minimum_cross_section_assets: 100
+missing_policy: QLIB_FILLNA_NEUTRAL_NORMALIZED_SCORE
+required_factors:
+  - roe
+  - quarterly_revenue_growth
+  - momentum_252_21
+  - return_120
+  - volatility_60
+  - drawdown_120
+factors:
+  earnings_yield: 0.16
+  book_to_price: 0.10
+  dividend_yield_ttm: 0.10
+  roe: 0.16
+  quarterly_revenue_growth: 0.12
+  momentum_252_21: 0.14
+  return_120: 0.08
+  volatility_60: 0.08
+  drawdown_120: 0.06
+portfolio:
+  top_k: 10
+  exit_rank: 15
+  max_replacements: 3
+  gross_exposure: 1.0
+  minimum_weight: 0.05
+  maximum_weight: 0.15
+  correlation_lookback: 120
+  cluster_correlation_threshold: 0.65
+  maximum_cluster_members: 3
+  weighting_method: rank_linear
+  confidence_temperature: 1.0
+  confidence_shrinkage: 0.35

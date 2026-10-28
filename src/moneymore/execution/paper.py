@@ -199,6 +199,11 @@ class PaperBroker:
             "positions": positions,
         }
 
+    def settle_available_positions(self, account_id: str, trade_date: str) -> None:
+        """Release only prior-session purchases before a paper planning snapshot."""
+        with sqlite3.connect(self.database) as connection:
+            self._settle_positions(connection, account_id, trade_date)
+
     def execute_pending(
         self,
         bar: ExecutionBar,

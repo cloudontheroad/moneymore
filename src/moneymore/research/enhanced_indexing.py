@@ -21,6 +21,7 @@ class EnhancedPolicy:
     maximum_weight: float = 0.15
     num_factors: int = 10
     size_neutral: bool = False
+    objective_preconditioning: bool = False
 
 
 def check_weights(w, w0, wb, exposures, factor_limits, policy, tolerance=1e-5):
@@ -49,7 +50,8 @@ def optimize_snapshot(
     *,
     audit_capture: dict | None = None,
     style_controls: pd.DataFrame | None = None,
-    style_retention: float = 0.0,
+    style_retention: float | None = None,
+    style_limits: dict[str, float] | None = None,
     solver_max_iters: int = 200,
 ) -> dict:
     """Fully-invested STOCK sleeve; current_weights and benchmark both sum to one.
@@ -60,6 +62,9 @@ def optimize_snapshot(
     import cvxpy as cp
     from qlib.contrib.strategy.optimizer import enhanced_indexing as native
     from qlib.model.riskmodel import StructuredCovEstimator
+
+    if style_limits is not None and style_controls is None:
+        raise ValueError("FIXED_STYLE_BUDGET_REQUIRES_CONTROLS")
 
     symbols = list(returns.columns)
     if "ECOS" not in cp.installed_solvers():
@@ -110,7 +115,11 @@ def optimize_snapshot(
         # Only the log-size active exposure is required to be zero.
         limits = np.r_[np.ptp(F, axis=0), 0.0]
     if style_controls is not None:
-        if not 0 <= style_retention <= 1:
+        if style_limits is not None and style_retention is not None:
+            raise ValueError("FIXED_AND_LEGACY_STYLE_POLICY_CANNOT_MIX")
+        if style_limits is None and style_retention is None:
+            raise ValueError("EXPLICIT_STYLE_BUDGET_REQUIRED")
+        if style_retention is not None and not 0 <= style_retention <= 1:
             raise ValueError("INVALID_STYLE_RETENTION")
         controls = style_controls.reindex(symbols)
         if controls.empty or not np.isfinite(controls.to_numpy()).all():
@@ -118,10 +127,19 @@ def optimize_snapshot(
         controls = (controls - controls.mean()) / controls.std(ddof=0).replace(0, 1)
         factors = np.column_stack([factors, controls.to_numpy()])
         extended = np.zeros((factors.shape[1], factors.shape[1]))
-        extended[:cov.shape[0], :cov.shape[1]] = cov
+        extended[: cov.shape[0], : cov.shape[1]] = cov
         cov = extended
-        control_limits = np.abs((w0 - wb) @ controls.to_numpy()) * style_retention
-        limits = np.r_[np.ptp(F, axis=0), ([0.] if policy.size_neutral else []), control_limits]
+        if style_limits is not None:
+            if set(style_limits) != set(controls.columns):
+                raise ValueError("FIXED_STYLE_BUDGET_SCHEMA_MISMATCH")
+            control_limits = pd.Series(style_limits).reindex(controls.columns).to_numpy(float)
+            if not np.isfinite(control_limits).all() or (control_limits < 0).any():
+                raise ValueError("INVALID_FIXED_STYLE_BUDGET")
+        else:
+            # Explicit legacy-only research reproduction. New policies must
+            # supply a fixed budget, not silently shrink yesterday's holdings.
+            control_limits = np.abs((w0 - wb) @ controls.to_numpy()) * style_retention
+        limits = np.r_[np.ptp(F, axis=0), ([0.0] if policy.size_neutral else []), control_limits]
     if audit_capture is not None:
         audit_capture.update(
             factor_exposure=factors,
@@ -141,9 +159,20 @@ def optimize_snapshot(
 
     handler = Capture()
     native.logger.addHandler(handler)
+    objective_unit = 1.0
+    if policy.objective_preconditioning:
+        objective_unit = float(
+            np.sqrt(np.mean(np.sum((factors @ cov) * factors, axis=1) + specific))
+        )
+        if not np.isfinite(objective_unit) or objective_unit <= 0:
+            native.logger.removeHandler(handler)
+            raise ValueError("INVALID_OBJECTIVE_PRECONDITIONER")
     try:
         optimizer = native.EnhancedIndexingOptimizer(
-            lamb=policy.lamb,
+            # Native scales the score to portfolio volatility. Dividing both
+            # return and risk objective by this unit preserves the maximizer:
+            # r'=r/u, Cov'=Cov/u^2, lambda'=lambda*u.
+            lamb=policy.lamb * objective_unit,
             delta=policy.delta,
             b_dev=policy.maximum_weight - 1 / len(symbols),
             f_dev=limits,
@@ -151,7 +180,9 @@ def optimize_snapshot(
             epsilon=0.0,
             solver_kwargs={"max_iters": solver_max_iters},
         )
-        weights = optimizer(signal.copy(), factors, cov, specific, w0, wb)
+        weights = optimizer(
+            signal.copy(), factors, cov / objective_unit**2, specific / objective_unit**2, w0, wb
+        )
     finally:
         native.logger.removeHandler(handler)
     failures = check_weights(weights, w0, wb, factors, limits, policy)
@@ -187,15 +218,26 @@ def optimize_snapshot(
         "solver_events": events,
         "actual_size_control_column": "standardized_log_total_mv" if policy.size_neutral else None,
         "named_style_active_exposures": {
-            name: {"before": float((w0 - wb) @ controls[name].to_numpy()),
-                   "after": float((weights - wb) @ controls[name].to_numpy())}
+            name: {
+                "before": float((w0 - wb) @ controls[name].to_numpy()),
+                "after": float((weights - wb) @ controls[name].to_numpy()),
+            }
             for name in (style_controls.columns if style_controls is not None else [])
         },
         "named_style_retention": style_retention if style_controls is not None else None,
+        "named_style_limits": dict(zip(controls.columns, map(float, control_limits)))
+        if style_controls is not None
+        else {},
+        "style_policy": "FIXED_EXPLICIT_BUDGET"
+        if style_limits is not None
+        else "LEGACY_RECURSIVE_RESEARCH_ONLY"
+        if style_controls is not None
+        else "NO_NAMED_STYLE_BUDGET",
         "benchmark_weights": dict(zip(symbols, map(float, wb))),
         "native_optimizer_sha256": hashlib.sha256(Path(path).read_bytes()).hexdigest(),
         "risk_estimator": "qlib.StructuredCovEstimator.PCA",
         "risk_return_units": "daily_decimal",
+        "native_objective_divisor": objective_unit,
         "signal_units": "QLIB_NATIVE_VOLATILITY_SCALING_NOT_EXPECTED_RETURN_CALIBRATION",
         "automatic_promotion": False,
         "orders_enabled": False,

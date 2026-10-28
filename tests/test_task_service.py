@@ -98,6 +98,8 @@ def test_daily_run_preview_is_read_only_and_marks_resume_steps(tmp_path: Path):
         {"step_name": "multi_sector_execution", "action": "RUN"},
         {"step_name": "qlib_challenger_execution", "action": "RUN"},
         {"step_name": "qlib_candidate_observation", "action": "RUN"},
+        {"step_name": "research_financial_pool_refresh", "action": "RUN"},
+        {"step_name": "qlib_forward_and_style_review", "action": "RUN"},
     ]
 
 

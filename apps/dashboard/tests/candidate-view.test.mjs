@@ -2,6 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {candidateOptionLabel,candidateObservationLabel,candidateReviewReason,visibleStrategyAccounts} from "../app/candidate-view.ts";
 
+test("weight-validation experiment is excluded from active performance curves",()=>{
+  const active=[{account_id:"v2",research_gate_passed:true,validation_hold:true}];
+  assert.deepEqual([...visibleStrategyAccounts(active,[],["baseline"],false)],["baseline"]);
+});
+
+test("portfolio experiment is named explicitly rather than posing as a new trained model",()=>{
+  const row={candidate_tag:"20261027",display_name:"1010模型＋固定风险预算",common_observation_days:0};
+  assert.match(candidateOptionLabel(row,"观察积累中"),/20261027 1010模型＋固定风险预算/);
+});
+
 test("failed entry validation is not a zero-day performance elimination",()=>{
   const row={candidate_tag:"20261024",archived:true,review_stage:"GATE_REJECTED",observation_days:0,common_observation_days:0,research_gate_failures:["COST_ADJUSTED_EXCESS_RETURN"],cost_adjusted_top_k_excess_return:-0.0007748461325810382};
   assert.equal(candidateOptionLabel(row,"研究验收未通过"),"[已归档] 20261024 · 入场验收未通过 · 尚未开始观察");

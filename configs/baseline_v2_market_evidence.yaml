@@ -1,0 +1,20 @@
+version: reviewed_issuer_announcements_20261028
+usage: RESEARCH_GAP_EXPLANATION_ONLY_NOT_PRICE_FILL_OR_ORDER_AUTHORITY
+suspensions:
+  - symbol: 300114.SZ
+    start: '20230112'
+    resume: '20230202'
+    source: https://static.cninfo.com.cn/finalpage/2023-02-02/1215749571.PDF
+    evidence: Issuer acquisition-plan summary specifies suspension from Jan 12 and resumption on Feb 2.
+  - symbol: 688766.SH
+    start: '20251126'
+    resume: '20251209'
+    source: https://static.cninfo.com.cn/finalpage/2025-11-26/1224826077.PDF
+    resume_source: https://epaper.stcn.com/pic/202512/09/7be947bc1e2c8d2a34fd5b17754b8178.pdf
+    evidence: Issuer suspension announcement 2025-082 and resumption announcement 2025-088.
+symbol_changes:
+  - old: 300114.SZ
+    new: 302132.SZ
+    effective: '20250217'
+    source: https://disc.static.szse.cn/disc/disk03/finalpage/2025-02-15/cedb693a-f5ee-4463-9682-ea33d406b569.PDF
+    evidence: Issuer implementation notice 2025-028; quantity and security class unchanged.

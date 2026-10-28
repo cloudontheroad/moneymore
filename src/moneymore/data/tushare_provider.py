@@ -53,6 +53,10 @@ class TushareProvider:
     def adjustment_factors(self, trade_date: str) -> pd.DataFrame:
         return self._client.adj_factor(trade_date=trade_date)
 
+    def historical_adjustments(self, ts_code: str, start_date: str, end_date: str) -> pd.DataFrame:
+        """Bounded per-symbol official history for isolated research consistency checks."""
+        return self._client.adj_factor(ts_code=ts_code, start_date=start_date, end_date=end_date)
+
     def etf_instruments(self) -> pd.DataFrame:
         frames = [self._client.etf_basic(list_status=status) for status in ("L", "D", "P")]
         nonempty = [frame for frame in frames if frame is not None and not frame.empty]

@@ -48,10 +48,85 @@ def test_constant_scores_and_missing_returns_are_not_imputed():
 def test_named_style_constraint_uses_native_factor_limits():
     scores, returns, size, w0 = inputs()
     styles = pd.DataFrame({"momentum": returns.tail(20).sum(), "volatility": returns.std()})
-    result = optimize_snapshot(scores, returns, size, w0,
-                               EnhancedPolicy(delta=2, num_factors=3), style_controls=styles)
+    result = optimize_snapshot(
+        scores,
+        returns,
+        size,
+        w0,
+        EnhancedPolicy(delta=2, num_factors=3),
+        style_controls=styles,
+        style_limits={"momentum": 0.0, "volatility": 0.0},
+    )
     assert result["status"] == "PASS_OFFLINE_ONLY"
     assert all(abs(v["after"]) < 1e-5 for v in result["named_style_active_exposures"].values())
+
+
+def test_fixed_style_budget_does_not_shrink_with_current_holdings():
+    scores, returns, size, w0 = inputs()
+    styles = pd.DataFrame({"momentum": returns.tail(20).sum(), "volatility": returns.std()})
+    budget = {"momentum": 0.8, "volatility": 0.8}
+    for current in (w0, pd.Series(np.linspace(1, 2, 12), index=w0.index) / 18):
+        result = optimize_snapshot(
+            scores,
+            returns,
+            size,
+            current,
+            EnhancedPolicy(delta=2, num_factors=3),
+            style_controls=styles,
+            style_limits=budget,
+        )
+        assert result["status"] == "PASS_OFFLINE_ONLY"
+        assert result["named_style_limits"] == budget
+        assert result["named_style_retention"] is None
+        assert result["style_policy"] == "FIXED_EXPLICIT_BUDGET"
+
+
+def test_objective_preconditioning_preserves_native_economic_problem():
+    scores, returns, size, w0 = inputs()
+    original = optimize_snapshot(scores, returns, size, w0, EnhancedPolicy(delta=2, num_factors=3))
+    scaled = optimize_snapshot(
+        scores,
+        returns,
+        size,
+        w0,
+        EnhancedPolicy(delta=2, num_factors=3, objective_preconditioning=True),
+    )
+    assert original["status"] == scaled["status"] == "PASS_OFFLINE_ONLY"
+    assert 0 < scaled["native_objective_divisor"] < 1
+    assert np.max(np.abs(pd.Series(original["weights"]) - pd.Series(scaled["weights"]))) < 2e-4
+
+
+@pytest.mark.parametrize(
+    "kwargs,reason",
+    [
+        ({}, "EXPLICIT_STYLE_BUDGET_REQUIRED"),
+        ({"style_limits": {"momentum": 0.8}, "style_retention": 0.75}, "CANNOT_MIX"),
+        ({"style_limits": {"wrong": 0.8}}, "SCHEMA_MISMATCH"),
+        ({"style_limits": {"momentum": float("nan")}}, "INVALID_FIXED"),
+        ({"style_limits": {"momentum": -0.1}}, "INVALID_FIXED"),
+    ],
+)
+def test_fixed_style_budget_rejects_missing_mixed_or_invalid_policy(kwargs, reason):
+    scores, returns, size, w0 = inputs()
+    styles = pd.DataFrame({"momentum": returns.tail(20).sum()})
+    with pytest.raises(ValueError, match=reason):
+        optimize_snapshot(
+            scores,
+            returns,
+            size,
+            w0,
+            EnhancedPolicy(num_factors=3),
+            style_controls=styles,
+            **kwargs,
+        )
+
+
+def test_budget_without_factor_controls_is_rejected():
+    scores, returns, size, w0 = inputs()
+    with pytest.raises(ValueError, match="REQUIRES_CONTROLS"):
+        optimize_snapshot(
+            scores, returns, size, w0, EnhancedPolicy(num_factors=3), style_limits={"momentum": 0.8}
+        )
 
 
 def test_missing_holdings_and_size_cannot_be_dropped():

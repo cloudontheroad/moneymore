@@ -28,8 +28,6 @@ def candidate_catalog(root: Path) -> list[dict[str, Any]]:
     model_id = str(config["model_id"])
     rows: list[dict[str, Any]] = []
     lifecycle = lifecycle_rows(root)
-    if not base.exists():
-        return rows
     for path in sorted(base.glob("*/research.json"), reverse=True):
         if not (path.parent / "_TRAINING_COMPLETE").exists():
             continue
@@ -90,7 +88,56 @@ def candidate_catalog(root: Path) -> list[dict[str, Any]]:
                 },
             }
         )
-    return rows
+    # Portfolio variants reuse an immutable model bundle, not a fabricated
+    # training-complete marker. They retain their own reports and paper account.
+    by_tag = {r["candidate_tag"]: r for r in rows}
+    for registry in sorted((root / "state/qlib-portfolio-candidates").glob("*.json")):
+        variant = json.loads(registry.read_text(encoding="utf-8"))
+        tag = str(variant["candidate_tag"])
+        if len(tag) != 8 or not tag.isdigit() or tag in by_tag:
+            raise ValueError("INVALID_OR_DUPLICATE_PORTFOLIO_CANDIDATE_TAG")
+        source = by_tag[str(variant["source_candidate_tag"])]
+        reports = sorted((root / "state/qlib-candidate-shadow" / tag).glob("*.json"))
+        payloads = [json.loads(p.read_text(encoding="utf-8")) for p in reports]
+        latest = max(payloads, key=lambda p: str(p.get("trade_date", ""))) if payloads else {}
+        receipts = sorted((root / "state/qlib-portfolio-execution" / tag).glob("*.json"))
+        latest_execution = json.loads(receipts[-1].read_text(encoding="utf-8")) if receipts else {}
+        rows.append({**source, **variant, "account_id": candidate_account_id(tag),
+                     "observation_days": len({p["trade_date"] for p in payloads}),
+                     "latest_trade_date": latest.get("trade_date"),
+                     "latest_status": latest.get("status", "AWAITING_OBSERVATION"),
+                     "latest_report": latest, "latest_portfolio": latest.get("portfolio"),
+                     "latest_execution": latest_execution,
+                     "protocol_version": "portfolio_fixed_budget_forward_v1",
+                     "lifecycle": lifecycle.get(tag, {}),
+                     "archived": lifecycle.get(tag, {}).get("status") in {
+                         "EARLY_REJECTED", "REJECTED", "GATE_REJECTED", "REVIEW_EXPIRED"}})
+    used_tags = {row["candidate_tag"] for row in rows}
+    for registry in sorted((root / "state/factor-baseline-candidates").glob("*.json")):
+        variant = json.loads(registry.read_text(encoding="utf-8"))
+        tag = str(variant["candidate_tag"])
+        if len(tag) != 8 or not tag.isdigit() or tag in used_tags:
+            raise ValueError("INVALID_OR_DUPLICATE_FACTOR_CANDIDATE_TAG")
+        payloads = [json.loads(p.read_text(encoding="utf-8"))
+                    for p in (root / "state/qlib-candidate-shadow" / tag).glob("*.json")]
+        latest = max(payloads, key=lambda p: str(p.get("trade_date", ""))) if payloads else {}
+        receipts = sorted((root / "state/qlib-portfolio-execution" / tag).glob("*.json"))
+        rows.append({**variant, "research_path": str(registry),
+                     "research_gate_passed": True, "research_gate_failures": [],
+                     "data_cutoff": latest.get("signal_date", latest.get("trade_date")),
+                     "protocol_version": "factor_baseline_v2_forward_contract",
+                     "observation_days": len({p["trade_date"] for p in payloads}),
+                     "latest_trade_date": latest.get("trade_date"),
+                     "latest_status": latest.get("status", "AWAITING_OBSERVATION"),
+                     "latest_report": latest, "latest_portfolio": latest.get("portfolio"),
+                     "latest_execution": json.loads(receipts[-1].read_text(encoding="utf-8")) if receipts else {},
+                     "rank_ic": None, "rank_ic_ir": None,
+                     "cost_adjusted_top_k_excess_return": None,
+                     "lifecycle": lifecycle.get(tag, {}),
+                     "archived": lifecycle.get(tag, {}).get("status") in {
+                         "EARLY_REJECTED", "REJECTED", "GATE_REJECTED", "REVIEW_EXPIRED"}})
+        used_tags.add(tag)
+    return sorted(rows, key=lambda r: r["candidate_tag"], reverse=True)
 
 
 def latest_candidate(root: Path) -> dict[str, Any] | None:
@@ -108,14 +155,26 @@ def run_candidate_daily(
     trade_date: str,
 ) -> ChallengerDailyResult:
     tag = str(candidate["candidate_tag"])
+    if candidate.get("validation_hold"):
+        raise ValueError("WEIGHT_VALIDATION_HOLD")
     if not trading_allowed(root, tag, trade_date):
         broker.cancel_pending(candidate_account_id(tag), "CANDIDATE_LIFECYCLE_FROZEN")
         raise ValueError(f"candidate {tag} is frozen by lifecycle review")
+    if candidate.get("portfolio_variant") == "factor_baseline_v2":
+        from .baseline_v2_candidate import prepare_factor_v2
+        return prepare_factor_v2(root=root, store=store, broker=broker, config=config,
+                                 candidate=candidate, trade_date=trade_date)
     model_id = str(
         yaml.safe_load(
             (root / "configs" / "qlib_challenger.yaml").read_text(encoding="utf-8")
         )["model_id"]
     )
+    handler = None
+    if candidate.get("portfolio_variant") == "fixed_budget_v1":
+        from .portfolio_candidate import prepare_portfolio_candidate
+        handler = lambda **kwargs: prepare_portfolio_candidate(
+            root=root, store=store, broker=broker, config=config, candidate=candidate,
+            trade_date=trade_date, **kwargs)
     return run_qlib_challenger_daily(
         root=root,
         store=store,
@@ -129,6 +188,7 @@ def run_candidate_daily(
         model_dir=Path(str(candidate["model_dir"])),
         research_path=Path(str(candidate["research_path"])),
         account_history_table=CANDIDATE_HISTORY_TABLE,
+        portfolio_handler=handler,
     )
 
 
@@ -152,6 +212,8 @@ def run_candidate_queue_daily(
         tag = str(candidate["candidate_tag"])
         if tag > trade_date:
             continue
+        if candidate.get("validation_hold"):
+            continue
         if lifecycle.get(tag, {}).get("status") in FROZEN:
             broker.cancel_pending(candidate_account_id(tag), "CANDIDATE_LIFECYCLE_FROZEN")
             continue
@@ -166,6 +228,10 @@ def run_candidate_queue_daily(
         )
         if existing_report.exists():
             payload = json.loads(existing_report.read_text(encoding="utf-8"))
+            if candidate.get("portfolio_variant") == "factor_baseline_v2" and str(payload.get("signal_date", trade_date)) < trade_date:
+                results.append(run_candidate_daily(candidate=candidate, root=root, store=store,
+                                                   broker=broker, config=config, trade_date=trade_date))
+                continue
             results.append(
                 ChallengerDailyResult(
                     trade_date=str(payload["trade_date"]),
@@ -209,7 +275,7 @@ def run_latest_candidate_daily(
 ) -> ChallengerDailyResult | None:
     """Backward-compatible single-candidate entry point."""
     candidate = latest_candidate(root)
-    if (candidate is None or str(candidate["candidate_tag"]) > trade_date
+    if (candidate is None or candidate.get("validation_hold") or str(candidate["candidate_tag"]) > trade_date
             or not trading_allowed(root, str(candidate["candidate_tag"]), trade_date)):
         return None
     return run_candidate_daily(

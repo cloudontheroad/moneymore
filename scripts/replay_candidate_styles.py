@@ -34,7 +34,9 @@ def prospective(report, calendar):
             < pd.Timestamp(calendar[i + 1] + " 09:30", tz="Asia/Shanghai").tz_convert("UTC"))
 
 
-def run(root, account_filter=None, integer=False):
+def run(root, account_filter=None, integer=False, fixed_budget=False):
+    if fixed_budget and not integer:
+        raise ValueError("FIXED_BUDGET_REQUIRES_INTEGER_EXECUTION_PROTOCOL")
     store = ParquetStore(root / "data")
     folder = root / "state/enhanced-indexing-research"
     preflight = json.loads((folder / "replay-preflight.json").read_text(encoding="utf-8"))
@@ -99,10 +101,11 @@ def run(root, account_filter=None, integer=False):
         bars = market.loc[market.ts_code.isin(pool)].rename(columns={"trade_date": "date", "ts_code": "symbol"})
         bars = bars[["date", "symbol", "open", "close", "can_buy", "can_sell"]].copy()
         bars["date"] = pd.to_datetime(bars.date)
-        variants = ("native_pca", "style_feasible") if integer else ("saved_targets", "native_pca", "style_retain_75pct", "style_feasible")
+        variants = ("native_pca", "style_fixed_budget") if fixed_budget else ("native_pca", "style_feasible") if integer else ("saved_targets", "native_pca", "style_retain_75pct", "style_feasible")
         for variant in variants:
             audit = []
             context = {}
+            frozen_budget = {}
 
             def opening(date, snapshot, quotes):
                 if not context:
@@ -123,6 +126,13 @@ def run(root, account_filter=None, integer=False):
                     plan["execution_style_proof"] = dict(
                         standardized=standardized.reindex(plan["target_quantities"]).to_dict("index"),
                         limits=context["limits"])
+                    if variant == "style_fixed_budget" and not frozen_budget:
+                        # Freeze before any subsequent returns/rebalancing are
+                        # observed. This is a mechanism control, not trained risk.
+                        frozen_budget.update({k: abs(v) for k, v in plan["active_style_exposures"].items()})
+                        audit.append(dict(date=date, stage="FREEZE_BOOTSTRAP_STYLE_ENVELOPE",
+                                          limits=dict(frozen_budget),
+                                          calibration="INITIAL_KNOWN_EXPOSURE_NOT_TRAINED_OR_OPTIMAL"))
                 return {**plan, "signal_date": context["date"],
                         "source_sha256": context["source_sha256"],
                         "signal_target_weights": context["targets"],
@@ -175,11 +185,13 @@ def run(root, account_filter=None, integer=False):
                         phase_one = attainable_style_retention(styles, w0)
                         retention = phase_one["chosen_retention"]
                         audit.append(dict(date=date, stage="STYLE_FEASIBILITY", **phase_one))
-                    limits = {c: 1e6 for c in styles.columns}
+                    limits = dict(frozen_budget) if variant == "style_fixed_budget" and frozen_budget else {c: 1e6 for c in styles.columns}
                     if held:
-                        solved = optimize_snapshot(scores, risk, size, w0, EnhancedPolicy(lamb=10.),
-                            style_controls=styles if variant in ("style_retain_75pct", "style_feasible") else None,
-                            style_retention=retention, solver_max_iters=1000 if variant == "style_feasible" else 200)
+                        solved = optimize_snapshot(scores, risk, size, w0, EnhancedPolicy(lamb=10., objective_preconditioning=fixed_budget),
+                            style_controls=styles if variant in ("style_retain_75pct", "style_feasible", "style_fixed_budget") else None,
+                            style_retention=None if variant == "style_fixed_budget" else retention,
+                            style_limits=limits if variant == "style_fixed_budget" else None,
+                            solver_max_iters=1000 if variant in ("style_feasible", "style_fixed_budget") else 200)
                         audit.append(dict(date=date, risk_end=window.index[-1], source_sha256=report["source_sha256"],
                                           **{k: v for k, v in solved.items() if k not in ("weights", "benchmark_weights")}))
                         if solved["status"] != "PASS_OFFLINE_ONLY":
@@ -222,8 +234,9 @@ def run(root, account_filter=None, integer=False):
             write_diagnostic(output_dir / "progress.json", result)
             print(name, row["status"], row.get("reason", ""), flush=True)
     result["protected_equity_tables_unchanged"] = hashes == {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in protected}
-    prefix = "integer-continuous-replay" if integer else "continuous-replay"
+    prefix = "fixed-budget-continuous-replay" if fixed_budget else "integer-continuous-replay" if integer else "continuous-replay"
     result["integer_opening_planning"] = integer
+    result["fixed_budget_mechanism_control"] = fixed_budget
     report_name = f"{prefix}-{account_filter}.json" if account_filter else prefix + ".json"
     write_diagnostic(folder / report_name, result)
     return result
@@ -233,5 +246,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--account")
     parser.add_argument("--integer", action="store_true")
+    parser.add_argument("--fixed-budget", action="store_true")
     args = parser.parse_args()
-    run(Path(__file__).resolve().parents[1], args.account, args.integer)
+    run(Path(__file__).resolve().parents[1], args.account, args.integer, args.fixed_budget)

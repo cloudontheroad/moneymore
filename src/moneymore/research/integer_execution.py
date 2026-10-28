@@ -49,6 +49,7 @@ def plan_integer_execution(
     can_buy=None,
     can_sell=None,
     time_limit=10.0,
+    solver_threads=None,
 ):
     """Use supplied (known) quotes. Never promises execution at a future open.
 
@@ -197,6 +198,10 @@ def plan_integer_execution(
         active_value >= -cp.multiply(bounds, invested),
     ]
     options = {"time_limit": time_limit, "mip_rel_gap": 0.0}
+    if solver_threads is not None:
+        options["threads"] = max(1, min(4, int(solver_threads)))
+    primary_optimal_fallback = False
+    secondary_status = None
     try:
         target = targets.reindex(symbols, fill_value=0).to_numpy()
         tracking = cp.norm1(values / equity - target) + cp.abs(
@@ -207,11 +212,21 @@ def plan_integer_execution(
         if first.status != "optimal":
             return blocked("INTEGER_FEASIBILITY_" + first.status.upper())
         best_tracking = float(tracking.value)
+        primary_values = [(v, np.array(v.value, copy=True)) for v in first.variables()]
         constraints.append(tracking <= best_tracking + 1e-8)
         second = cp.Problem(cp.Maximize(invested), constraints)
-        second.solve(solver=cp.HIGHS, **options)
-        if second.status != "optimal":
-            return blocked("INTEGER_TRACKING_" + second.status.upper())
+        try:
+            second.solve(solver=cp.HIGHS, **options)
+            secondary_status = second.status
+        except cp.error.SolverError:
+            secondary_status = "solver_error"
+        if secondary_status != "optimal":
+            # A secondary tie-break must not erase an already optimal primary
+            # plan. Restore it, then run the SAME exact lot/cash/style checks.
+            # This is not permission to use an infeasible or timed-out primary.
+            for variable, value in primary_values:
+                variable.save_value(value)
+            primary_optimal_fallback = True
     except cp.error.SolverError:
         return blocked("INTEGER_SOLVER_ERROR")
     if q.value is None or not np.isfinite(q.value).all():
@@ -224,6 +239,12 @@ def plan_integer_execution(
             continue
         side = Side.BUY if difference > 0 else Side.SELL
         count = abs(difference)
+        if (
+            count > order_caps[symbols.index(symbol)]
+            or (side == Side.BUY and can_buy is not None and not can_buy.get(symbol, False))
+            or (side == Side.SELL and can_sell is not None and not can_sell.get(symbol, False))
+        ):
+            return blocked("INTEGER_POSTCHECK_MARKET_OR_ORDER_CAP")
         star = symbol.startswith(("688", "689"))
         if (side == Side.BUY and (count % lot != 0 or (star and count < 200))) or (
             side == Side.SELL
@@ -270,6 +291,7 @@ def plan_integer_execution(
         expected_cash < -0.01
         or abs(expected_cash - float(cash_end.value)) > 0.01
         or (actual_values > config.max_position_weight * equity + 0.01).any()
+        or actual_invested > min(float(targets.sum()), config.max_gross_exposure) * equity + 0.01
         or actual_turnover > turnover + 1e-5
         or (np.abs(active) > bounds + 1e-5).any()
     ):
@@ -302,6 +324,8 @@ def plan_integer_execution(
         }
     return {
         "status": "PASS_REFERENCE_QUOTES_ONLY",
+        "primary_optimal_fallback": primary_optimal_fallback,
+        "secondary_optimizer_status": secondary_status,
         "orders": sorted(
             orders,
             key=lambda o: (

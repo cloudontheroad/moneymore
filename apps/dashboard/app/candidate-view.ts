@@ -6,7 +6,7 @@ export function visibleStrategyAccounts(
   const excluded = new Set(["EARLY_REJECTED", "REJECTED", "GATE_REJECTED", "REVIEW_EXPIRED", "ELIMINATED", "RETIRED", "OUTDATED"]);
   const rows = [...active, ...archived];
   return new Set([...permanent, ...rows.filter(row => showArchived || (
-    !row.archived && Boolean(row.research_gate_passed)
+    !row.archived && !row.validation_hold && Boolean(row.research_gate_passed)
     && !excluded.has(String(row.review_stage ?? "").toUpperCase())
     && !excluded.has(String(row.latest_status ?? "").toUpperCase())
   )).map(row => String(row.account_id))]);
@@ -33,7 +33,7 @@ export function candidateOptionLabel(row: Candidate, statusName: string): string
   const neverStarted = row.review_stage === "GATE_REJECTED"
     && Number(row.observation_days ?? row.common_observation_days ?? 0) === 0;
   const status = neverStarted ? "入场验收未通过" : statusName;
-  return `${row.archived ? "[已归档] " : ""}${row.candidate_tag} · ${status} · ${candidateObservationLabel(row)}`;
+  return `${row.archived ? "[已归档] " : ""}${row.candidate_tag}${row.display_name ? ` ${row.display_name}` : ""} · ${status} · ${candidateObservationLabel(row)}`;
 }
 
 export function candidateReviewReason(row: Candidate): string {

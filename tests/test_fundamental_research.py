@@ -141,6 +141,17 @@ def test_future_provider_rows_rejected(tmp_path):
     assert not (store.curated / (TABLE + ".parquet")).exists()
 
 
+def test_future_announcement_is_quarantined_without_losing_visible_history(tmp_path):
+    class Mixed:
+        def financial_indicators(self, *args):
+            return pd.concat([frame(), frame(ann="20261028", period="20260930")])
+    store = ParquetStore(tmp_path / "data")
+    report = sync_research_financials(tmp_path, store, Mixed(), ["000001.SZ"], "20261027")
+    assert report["complete"] == 1
+    assert set(store.read(TABLE).ann_date) == {"20260820"}
+    assert set(store.read("fina_indicator_future_quarantine_v2").ann_date) == {"20261028"}
+
+
 def test_candidate_data_gate_does_not_publish(tmp_path):
     report = build_financial_research_comparison(
         tmp_path, ParquetStore(tmp_path / "data"), ["000001.SZ"], "20261027"

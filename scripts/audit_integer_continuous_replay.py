@@ -1,5 +1,6 @@
 """Read-only, ledger-derived verification of isolated integer opening replays."""
 
+import argparse
 import hashlib
 import json
 import sqlite3
@@ -13,9 +14,11 @@ from moneymore.data.store import ParquetStore
 from moneymore.research.replay_attribution import reconstruct_cash, reconstruct_positions
 
 
-def run(root):
+def run(root, fixed_budget=False, account=None):
     folder = root / "state/enhanced-indexing-research"
-    source = folder / "integer-continuous-replay.json"
+    prefix = "fixed-budget-continuous" if fixed_budget else "integer-continuous"
+    suffix = "-" + account if account else ""
+    source = folder / (prefix + "-replay" + suffix + ".json")
     replay = json.loads(source.read_text(encoding="utf-8"))
     directory = Path(replay["output_directory"])
     daily = ParquetStore(root / "data").read(
@@ -41,6 +44,22 @@ def run(root):
             result["runs"].append(item)
             continue
         name = row["account"] + "-" + row["variant"]
+        if fixed_budget and row["variant"] == "style_fixed_budget":
+            freezes = [
+                e
+                for e in row["daily_optimizer_audit"]
+                if e.get("stage") == "FREEZE_BOOTSTRAP_STYLE_ENVELOPE"
+            ]
+            if len(freezes) != 1:
+                raise ValueError("FIXED_BUDGET_FREEZE_NOT_UNIQUE:" + name)
+            fixed_limits = freezes[0]["limits"]
+            for event in row["daily_optimizer_audit"]:
+                if event.get("status") == "PASS_OFFLINE_ONLY" and (
+                    event.get("named_style_limits") != fixed_limits
+                    or event.get("named_style_retention") is not None
+                ):
+                    raise ValueError("FIXED_BUDGET_CHANGED_OR_RECURSIVE:" + name)
+            item["fixed_budget_unchanged"] = True
         with sqlite3.connect(
             (directory / (name + ".sqlite3")).as_uri() + "?mode=ro", uri=True
         ) as conn:
@@ -98,16 +117,17 @@ def run(root):
             summary={k: v for k, v in row["summary"].items() if k != "opening_plan_audits"},
         )
         result["runs"].append(item)
-    for account in sorted({r["account"] for r in result["runs"]}):
+    for account_id in sorted({r["account"] for r in result["runs"]}):
         pair = {
-            r["variant"]: r for r in result["runs"] if r["account"] == account and "summary" in r
+            r["variant"]: r for r in result["runs"] if r["account"] == account_id and "summary" in r
         }
-        if set(pair) != {"native_pca", "style_feasible"}:
+        style_variant = "style_fixed_budget" if fixed_budget else "style_feasible"
+        if set(pair) != {"native_pca", style_variant}:
             continue
-        native, style = pair["native_pca"], pair["style_feasible"]
+        native, style = pair["native_pca"], pair[style_variant]
         result["pairs"].append(
             {
-                "account": account,
+                "account": account_id,
                 "native_return": native["summary"]["total_return"],
                 "style_return": style["summary"]["total_return"],
                 "difference_pp": 100
@@ -118,10 +138,14 @@ def run(root):
             }
         )
     result["protected_equity_tables_unchanged"] = replay["protected_equity_tables_unchanged"]
-    write_diagnostic(folder / "integer-continuous-audit.json", result)
+    write_diagnostic(folder / (prefix + "-audit" + suffix + ".json"), result)
     print(json.dumps({"runs": len(result["runs"]), "pairs": result["pairs"]}, ensure_ascii=True))
     return result
 
 
 if __name__ == "__main__":
-    run(Path(__file__).resolve().parents[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--fixed-budget", action="store_true")
+    parser.add_argument("--account")
+    args = parser.parse_args()
+    run(Path(__file__).resolve().parents[1], args.fixed_budget, args.account)

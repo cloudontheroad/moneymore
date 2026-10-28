@@ -118,7 +118,10 @@ def linked_attribution(daily: list[dict[str, Any]]) -> dict[str, Any]:
 def run_style_attribution(root: Path, store: Any, as_of: str) -> dict[str, Any]:
     from .qlib_candidate_observer import candidate_catalog
 
-    candidates = [row for row in candidate_catalog(root) if not row["archived"]]
+    # Factor V2 has its own score/style ablations. Do not shorten the existing
+    # GRU cohort's diagnostic window merely by adding a brand-new factor account.
+    candidates = [row for row in candidate_catalog(root)
+                  if not row["archived"] and row.get("strategy_family") != "factor_baseline"]
     sources = [
         ("multi_sector_shadow", root / "state/multi-sector-shadow"),
         ("qlib_gru_shadow", root / "state/qlib-challenger-shadow"),

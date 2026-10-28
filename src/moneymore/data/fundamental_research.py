@@ -190,6 +190,8 @@ def sync_research_financials(
     *,
     max_requests: int = 30,
     interval_seconds: float = 1.1,
+    checkpoint_name: str = "checkpoint.json",
+    flush_every: int = 10,
 ) -> dict:
     """One request per symbol, no blind retries; checkpoint every response, batch writes."""
     directory = root / "state/fundamental-research-v2"
@@ -200,7 +202,9 @@ def sync_research_financials(
             lock.execute("BEGIN IMMEDIATE")
         except sqlite3.OperationalError:
             return {"status": "ALREADY_RUNNING", "requests": 0}
-        checkpoint = directory / "checkpoint.json"
+        if Path(checkpoint_name).name != checkpoint_name or not checkpoint_name.endswith(".json"):
+            raise ValueError("INVALID_CHECKPOINT_NAME")
+        checkpoint = directory / checkpoint_name
         state = (
             json.loads(checkpoint.read_text(encoding="utf-8"))
             if checkpoint.exists()
@@ -265,12 +269,20 @@ def sync_research_financials(
                 "remaining_due": max(0, len(pending) - requests),
                 "captured_at": datetime.now(UTC).isoformat(),
             }
-            write_diagnostic(directory / "quality.json", result)
+            quality_name = "quality.json" if checkpoint_name == "checkpoint.json" else Path(checkpoint_name).stem + "-quality.json"
+            write_diagnostic(directory / quality_name, result)
             return result
 
+        last_request_started = None
+        flush_every = max(1, min(int(flush_every), 50))
         for symbol in pending[: max(0, min(max_requests, 1000))]:
             if requests:
-                time.sleep(max(1.1, interval_seconds))
+                remaining_interval = max(1.1, interval_seconds) - (
+                    time.monotonic() - last_request_started
+                )
+                if remaining_interval > 0:
+                    time.sleep(remaining_interval)
+            last_request_started = time.monotonic()
             requests += 1
             try:
                 fetch = getattr(
@@ -283,12 +295,27 @@ def sync_research_financials(
                 if not frame.empty:
                     if not frame.ts_code.eq(symbol).all():
                         raise ValueError("Unexpected symbol")
+                    future_rows = pd.Series(False, index=frame.index)
                     for column in ("ann_date", "end_date"):
                         parsed = pd.to_datetime(frame[column], format="%Y%m%d", errors="coerce")
-                        if parsed.isna().any() or (parsed > pd.Timestamp(as_of)).any():
-                            raise ValueError("Invalid or future financial dates")
+                        if parsed.isna().any():
+                            raise ValueError("Invalid financial dates")
+                        future_rows |= parsed > pd.Timestamp(as_of)
+                    if future_rows.any():
+                        # A valid later announcement must not abort the issuer's
+                        # entire earlier history. Keep it outside the active table.
+                        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
+                        store.save_snapshot(
+                            "fina_indicator_future_quarantine_v2",
+                            frame.loc[future_rows],
+                            "tushare",
+                            ["ts_code", "ann_date", "end_date"],
+                            symbol.replace(".", "_") + "_" + stamp,
+                        )
+                        frame = frame.loc[~future_rows].copy()
                     captured = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
-                    frames.append((f"{symbol.replace('.', '_')}_{captured}", frame))
+                    if not frame.empty:
+                        frames.append((f"{symbol.replace('.', '_')}_{captured}", frame))
                 records[symbol] = {
                     "checked_date": as_of,
                     "rows": len(frame),
@@ -296,7 +323,7 @@ def sync_research_financials(
                 }
                 state.pop("last_error", None)
                 status = "PROGRESS"
-                if requests % 10 == 0:
+                if requests % flush_every == 0:
                     flush()
             except Exception as error:  # noqa: BLE001 - circuit breaker; never log provider secrets
                 message = str(error).lower()

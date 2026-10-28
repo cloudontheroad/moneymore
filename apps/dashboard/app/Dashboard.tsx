@@ -175,6 +175,7 @@ const reviewStatusName = (value: unknown) => ({
   GATE_REJECTED:"研究验收未通过",
   REVIEW_EXPIRED:"评审到期归档",
   REVIEW_HOLD:"证据不足·暂停",
+  WEIGHT_VALIDATION_HOLD:"权重验证中·暂停交易",
   EXPERIMENTAL_PAPER:"模拟观察中",
   AWAITING_OBSERVATION:"等待首次观察",
 }[text(value)]??text(value));
@@ -435,6 +436,30 @@ function Research({ sectors, models }: { sectors: Sectors; models: ModelRegistry
     <Panel title="迁移前分行业历史诊断（归档）" subtitle="旧人工候选池研究结果，仅保留审计，不代表当前Top1000策略"><Table rows={reports} columns={[["sector","旧分类"],["cagr","年化"],["volatility","波动率"],["sharpe","夏普"],["max_drawdown","最大回撤"],["fills","成交数"]]} format={{sector:(v)=>meta[text(v)]?.label??text(v),cagr:pct,volatility:pct,sharpe:num,max_drawdown:pct}}/></Panel><Evidence sectors={sectors}/></>;
 }
 
+function FactorBaselineV2Info({candidate,names}:{candidate:Row;names:Record<string,string>}) {
+  const latest=(candidate.latest??{}) as Row;
+  const evidence=(latest.score_evidence??{}) as Row;
+  const variants=(evidence.variants??{}) as Record<string,Row>;
+  const labels:Record<string,string>={fixed_weight_neutral_missing:"统一权重与缺失处理",size_comparable:"再加市值可比化",industry_size_comparable:"再加行业可比化（V2）"};
+  const rows=Object.entries(variants).map(([id,v])=>({variant:labels[id]??id,eligible:evidence.eligible,tech:v.top_star_chinext_count,best:v.best_star_chinext_rank,size:v.score_size_correlation}));
+  const current=variants.industry_size_comparable??{};
+  const validation=(candidate.weight_validation??{}) as Row;
+  const scienceRows=(Array.isArray(current.star_chinext_top10)?current.star_chinext_top10 as Row[]:[]).map(row=>({...row,value:Number(row.contribution__earnings_yield??0)+Number(row.contribution__book_to_price??0)+Number(row.contribution__dividend_yield_ttm??0),quality:Number(row.contribution__roe??0),growth:Number(row.contribution__quarterly_revenue_growth??0),trend:Number(row.contribution__momentum_252_21??0)+Number(row.contribution__return_120??0),defense:Number(row.contribution__volatility_60??0)+Number(row.contribution__drawdown_120??0)}));
+  return <Panel title={text(candidate.display_name)} subtitle="独立因子基线 V2 · 评分契约验收通过，不代表收益研究通过 · 不自动替换旧基线">
+    {Boolean(candidate.validation_hold)&&<><h4>尚非最终 V2：权重验证中，新委托已冻结</h4><p>训练、选参与测试分离，历史样本覆盖和权重增益均需通过；不把未通过验证的系数替换进模拟盘。当前状态：{text(validation.status)}</p><p>固定权重测试 Rank IC：{validation.test_mean_rank_ic_fixed==null?"尚未完成":modelScore(validation.test_mean_rank_ic_fixed)} · 学习权重：{validation.test_mean_rank_ic_learned==null?"尚未完成":modelScore(validation.test_mean_rank_ic_learned)} · 增益置信下界：{validation.rank_ic_improvement_ci_low==null?"尚未完成":modelScore(validation.rank_ic_improvement_ci_low)}。下界未大于零，不认定改善可靠。</p></>}
+    <p>估值缺失仅在标准化信号层作中性处理，保留缺失标记，不把原始股息率当零，也不放大其他因子权重。行业与市值用于因子可比性，不规定任何行业或科创/创业板仓位。</p>
+    <p>信号数据日：{text(latest.signal_date)} · 计划交易日：{text(latest.planned_trade_date)} · 独立100万元模拟账户 · 不补造上线前成交；模拟成交仅使用启用后的有效实时价格。</p>
+    <Table rows={rows} columns={[["variant","处理对照"],["eligible","有效候选"],["tech","前十科创/创业数量"],["best","科创/创业最佳排名"],["size","评分与市值相关"]]} format={{size:num}}/>
+    <p>以下是参考评分排名，不是已成交持仓；仍为零含科也不会强制加入。当前固定因子权重尚未证明最优，后续须用独立前瞻结果和滚动验证判断。</p>
+    <Table rows={Array.isArray(current.top)?current.top as Row[]:[]} columns={[["symbol","股票"],["industry","行业"],["score","评分"],["observed_weight","已观察因子权重"]]} format={{symbol:v=>security(v,names),score:num,observed_weight:pct}}/>
+    <h4>科创 / 创业板候选的评分来源</h4>
+    <p>各项为评分贡献，不是收益贡献；没有入选不等于被股票池排除。</p>
+    <Table rows={scienceRows} columns={[["symbol","股票"],["rank","全池排名"],["score","总评分"],["value","估值/分红"],["quality","质量"],["growth","增长"],["trend","动量"],["defense","防御"]]} format={{symbol:v=>security(v,names),score:num,value:num,quality:num,growth:num,trend:num,defense:num}}/>
+    <h4>待实时重算的参考委托（非已成交）</h4>
+    <Table rows={Array.isArray(latest.orders)?latest.orders as Row[]:[]} columns={[["symbol","股票"],["side","方向"],["quantity","参考股数"],["reference_price","收盘参考价"]]} format={{symbol:v=>security(v,names),side:v=>text(v)==="BUY"?"买入":"卖出",reference_price:num}}/>
+  </Panel>;
+}
+
 function ChallengerPage({ challenger, names, live, showArchived, onShowArchived }: { challenger: Challenger; names: Record<string, string>; live:LiveAccounts|null; showArchived:boolean; onShowArchived:(value:boolean)=>void }) {
   const candidateVersions = [...(challenger.candidate_observation?.candidates??[]),...(showArchived?(challenger.candidate_observation?.archived_candidates??[]):[])];
   const [selectedCandidateTag,setSelectedCandidateTag] = useState("");
@@ -459,9 +484,12 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
   const candidateLive=live?.accounts[text(selectedCandidate?.account_id??observation?.account_id)];
   const candidatePortfolio = candidateLive?.portfolio??selectedCandidate?.latest?.portfolio??observation?.latest?.portfolio;
   const candidateEquity = Number(candidatePortfolio?.equity??1_000_000);
+  const candidateExecution=(selectedCandidate?.latest_execution??{}) as Row;
   const globalView = observation?.global_strategy_view??challenger.comparison;
-  return <><Intro tag="QLIB CHALLENGER LAB" title="深度学习只能通过公平竞赛晋级">挑战者使用独立资金、模型、信号、订单和持仓。因子影子账户保持冻结；GPU只加速训练，不改变样本外和成本后晋级标准。</Intro>
+  return <><Intro tag="QLIB CHALLENGER LAB" title="独立策略，通过公平竞赛验证">原基线保持算法不变，因子V2与深度学习候选使用独立账户、信号、订单和持仓；不自动替换，不重写历史。</Intro>
     <CandidateSwitcher observation={observation} selectedTag={text(selectedCandidate?.candidate_tag)} onSelect={setSelectedCandidateTag} showArchived={showArchived} onShowArchived={onShowArchived}/>
+    {selectedCandidate?.portfolio_variant==="fixed_budget_v1"&&<Panel title={text(selectedCandidate.display_name)} subtitle="独立模拟组合实验 · 复用既有模型，未重新训练 · 不自动晋级"><p>信号来源：{text(selectedCandidate.source_candidate_tag)}。固定预算在首次实际模拟建仓时冻结；之后不递归收紧。开盘使用有效实时价格重算整数股数，原账户与历史收益不变。</p><p>计划成交日：{text(selectedCandidate.latest?.planned_trade_date)} · {text(selectedCandidate.latest?.planning_status)==="AWAITING_OPEN_REPLAN"?"已生成，等待开盘重算与模拟执行":text(selectedCandidate.latest?.planning_status)} · 最近执行：{candidateExecution.status==="COMPLETED"?`${text(candidateExecution.trade_date)} 已完成并对账`:text(candidateExecution.status??"未到执行时间")} · 收盘参考方案：{text(selectedCandidate.latest?.reference_plan_status)}</p><Table rows={(Array.isArray(selectedCandidate.latest?.orders)?selectedCandidate.latest.orders:[]) as Row[]} columns={[["symbol","股票"],["side","方向"],["quantity","参考股数"],["reference_price","参考价格"],["submit_status","执行状态"]]} format={{symbol:(v)=>security(v,names),side:(v)=>text(v)==="BUY"?"买入":"卖出",reference_price:num,submit_status:(v)=>text(v)==="AWAITING_OPEN_REPLAN"?"待开盘重算":text(v)}}/></Panel>}
+    {selectedCandidate?.portfolio_variant==="factor_baseline_v2"&&<FactorBaselineV2Info candidate={selectedCandidate} names={names}/>}
     <div className="four-col account-columns">
       <AccountColumn title="基线" badge="FACTOR BASELINE" accountId={challenger.baseline.account_id} status={text(challenger.baseline.latest.status)} equity={baselineEquity} portfolio={baselinePortfolio} orders={baselineLive?.orders??challenger.baseline.orders??[]} fills={baselineLive?.fills??challenger.baseline.fills??[]} names={names}/>
       <AccountColumn title="基线·日内执行" badge="ADAPTIVE VWAP" accountId={text(challenger.intraday_baseline?.account_id)} status={text(challenger.intraday_baseline?.status)} equity={Number(intradayLive?.portfolio.equity??challenger.intraday_baseline?.portfolio?.equity??0)} portfolio={intradayLive?.portfolio??challenger.intraday_baseline?.portfolio} orders={intradayLive?.orders??challenger.intraday_baseline?.orders??[]} fills={intradayLive?.fills??challenger.intraday_baseline?.fills??[]} names={names}/>
@@ -551,11 +579,12 @@ const chartPalette: Record<string, { label: string; color: string }> = {
 const candidateChartColors=["#8b6fd1","#19a36a","#ef7b45","#d950a0","#00a6a6","#6c7a89","#b98932"];
 
 function PerformanceComparisonCharts({ comparison, observation, showArchived=false }: { comparison: Challenger["comparison"]; observation?:Challenger["candidate_observation"]; showArchived?:boolean }) {
+  const candidateNames=Object.fromEntries([...(observation?.candidates??[]),...(observation?.archived_candidates??[])].filter(row=>row.display_name).map(row=>[row.account_id,text(row.display_name)]));
   const histories = comparison.independent_histories??comparison.histories??{};
   const visibleAccounts=visibleStrategyAccounts(observation?.candidates??[],observation?.archived_candidates??[],Object.keys(chartPalette),showArchived);
   const series = Object.entries(histories).filter(([accountId])=>visibleAccounts.has(accountId)).map(([accountId, rows],index) => ({
     accountId,
-    label: chartPalette[accountId]?.label??(accountId.startsWith("qlib_candidate_")?`Qlib 候选者 ${accountId.replace("qlib_candidate_","")}`:accountId),
+    label: chartPalette[accountId]?.label??candidateNames[accountId]??(accountId.startsWith("qlib_candidate_")?`Qlib 候选者 ${accountId.replace("qlib_candidate_","")}`:accountId),
     color: chartPalette[accountId]?.color??candidateChartColors[index%candidateChartColors.length],
     rows: rows as Row[],
   })).filter((series)=>series.rows.length > 0);
@@ -638,7 +667,7 @@ function Operations({ bank, execution, operations, acceptance, intraday, live, n
   const firstTickEquity=Number(intraday.account_ticks[0]?.equity??0);
   const intradaySeries=intraday.account_ticks.map((row)=>({...row,trade_date:row.observed_at,normalized_nav:firstTickEquity?Number(row.equity)/firstTickEquity:1}));
   const liveAccountRows=Object.values(live?.accounts??{});
-  const openExecution={
+  const openExecution:Row & {fills?:Row[];pending_orders?:Row[];accounts?:Row[];account_ids?:string[]}={
     ...(operations.open_execution??{}),
     ...(live?{
       fills:liveAccountRows.flatMap((row)=>row.today_fills),

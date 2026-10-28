@@ -724,7 +724,9 @@ class TaskService:
         if open_audit.exists():
             try:
                 if json.loads(open_audit.read_text(encoding="utf-8")).get("status") == "COMPLETED":
-                    self._last_open_execution_date = today
+                    from .portfolio_candidate import derived_execution_complete
+                    if derived_execution_complete(ROOT, candidate_catalog(ROOT), today):
+                        self._last_open_execution_date = today
             except (json.JSONDecodeError, OSError):
                 pass
         self._stop.clear()
@@ -1145,6 +1147,11 @@ class TaskService:
                     load_dotenv(ROOT / ".env")
                     _require_trading_gate()
                     broker = PaperBroker(PAPER_DATABASE)
+                    # Portfolio experiments must replan against current valid
+                    # quotes, not flow into the legacy immutable-open executor.
+                    from .portfolio_candidate import execute_portfolio_candidate_open
+                    portfolio_candidates = [row for row in candidate_catalog(ROOT)
+                                            if row.get("portfolio_variant") in {"fixed_budget_v1", "factor_baseline_v2"} and not row.get("archived") and not row.get("validation_hold")]
                     prepare_intraday_branch_orders(broker, trade_date)
                     prepare_exposure_intraday_branch_orders(broker, trade_date)
                     result = execute_accounts_at_qmt_open(
@@ -1162,11 +1169,29 @@ class TaskService:
                             *[
                                 candidate_account_id(str(row["candidate_tag"]))
                                 for row in candidate_catalog(ROOT)
+                                if not row.get("portfolio_variant")
                             ],
                         ],
                         audit_dir=STATE / "open-execution",
                     )
-                    if result["status"] == "COMPLETED":
+                    # Finish existing accounts first; experimental optimization
+                    # latency and errors cannot delay their order intake.
+                    portfolio_results = []
+                    for row in portfolio_candidates:
+                        try:
+                            portfolio_results.append(execute_portfolio_candidate_open(
+                                root=ROOT, store=ParquetStore(DATA), broker=broker,
+                                config=BacktestConfig.from_yaml(ROOT / "configs/default.yaml"),
+                                candidate=row, provider=create_realtime_provider(root=ROOT), trade_date=trade_date))
+                        except Exception as candidate_error:  # noqa: BLE001
+                            portfolio_results.append({"status": "EXECUTION_ERROR", "account_id": row["account_id"],
+                                                      "error": f"{type(candidate_error).__name__}: {candidate_error}"})
+                    for outcome in portfolio_results:
+                        if outcome["status"] not in {"COMPLETED", "OUTSIDE_EXECUTION_SESSION"}:
+                            self._notify("WARN", "PORTFOLIO_CANDIDATE_EXECUTION", "固定预算候选执行待处理",
+                                         f"{outcome['account_id']}: {outcome['status']}", trade_date=trade_date,
+                                         dedupe_key=f"{trade_date}:{outcome['account_id']}:{outcome['status']}")
+                    if result["status"] == "COMPLETED" and all(r["status"] == "COMPLETED" for r in portfolio_results):
                         self._last_open_execution_date = trade_date
                 except Exception as open_error:  # noqa: BLE001
                     self._notify(
@@ -1503,6 +1528,7 @@ class TaskService:
                             *[
                                 candidate_account_id(str(row["candidate_tag"]))
                                 for row in candidate_catalog(ROOT)
+                                if not row.get("portfolio_variant")
                             ],
                         ],
                         audit_dir=STATE / "open-execution-recovery",
@@ -2993,6 +3019,14 @@ def qlib_challenger() -> dict[str, object]:
                 "eligible_observation_days": (row.get("lifecycle") or {}).get("common_observation_days", 0),
             }
         )
+        if row.get("validation_hold"):
+            public_row.update(review_stage="WEIGHT_VALIDATION_HOLD",
+                              review_reason="因子权重与历史覆盖未验收，暂停新委托；尚非最终V2",
+                              eligible_observation_days=0)
+            validation_path = STATE / "baseline-v2-validation/weight-validation.json"
+            public_row["weight_validation"] = (
+                json.loads(validation_path.read_text(encoding="utf-8")) if validation_path.exists() else {}
+            )
         broker.initialize_account(1_000_000, account_id)
         candidate_details.append(
             {

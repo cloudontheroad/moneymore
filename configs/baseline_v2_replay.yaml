@@ -1,0 +1,21 @@
+version: monthly_weight_execution_ablation_event_retry_v2_20261028
+start_date: '20240131'
+end_date: '20251231'
+initial_cash: 1000000
+commission_rate: 0.00015
+minimum_commission: 5
+stamp_duty_rate: 0.0005
+transfer_fee_rate: 0.00001
+slippage_bps: 2
+lot_size: 100
+max_position_weight: 0.15
+max_gross_exposure: 1.0
+max_drawdown: 0.15
+solver_time_limit: 10
+solver_threads: 2
+turnover_l1: 2.0
+dividend_scenarios:
+  gross_dividend: 1.0
+  conservative_20pct_dividend_withholding: 0.8
+real_orders_enabled: false
+automatic_promotion: false

@@ -22,13 +22,18 @@ from moneymore.research.replay_attribution import (
 )
 
 
-def run(root, integer=False):
+def run(root, integer=False, fixed_budget=False):
     folder = root / "state/enhanced-indexing-research"
-    replay = json.loads(
-        (
-            folder / ("integer-continuous-replay.json" if integer else "continuous-replay.json")
-        ).read_text(encoding="utf-8")
+    integer = integer or fixed_budget
+    source_name = (
+        "fixed-budget-continuous-replay.json"
+        if fixed_budget
+        else "integer-continuous-replay.json"
+        if integer
+        else "continuous-replay.json"
     )
+    style_variant = "style_fixed_budget" if fixed_budget else "style_feasible"
+    replay = json.loads((folder / source_name).read_text(encoding="utf-8"))
     preflight = json.loads((folder / "replay-preflight.json").read_text(encoding="utf-8"))
     action_audit = json.loads((folder / "corporate-action-audit.json").read_text(encoding="utf-8"))
     directory = Path(replay["output_directory"])
@@ -319,10 +324,8 @@ def run(root, integer=False):
         )
     for account in sorted({r["account"] for r in output["runs"]}):
         rows = {r["variant"]: r for r in output["runs"] if r["account"] == account}
-        if all(
-            rows.get(v, {}).get("status") == "AUDITED" for v in ("native_pca", "style_feasible")
-        ):
-            a, b = rows["native_pca"], rows["style_feasible"]
+        if all(rows.get(v, {}).get("status") == "AUDITED" for v in ("native_pca", style_variant)):
+            a, b = rows["native_pca"], rows[style_variant]
             primary_a = a["attribution_sensitivity"]["5"]["linked"]
             primary_b = b["attribution_sensitivity"]["5"]["linked"]
             if primary_a and primary_b:
@@ -343,7 +346,7 @@ def run(root, integer=False):
                             .abs()
                             .mean()
                             .to_dict()
-                            for v in ("native_pca", "style_feasible")
+                            for v in ("native_pca", style_variant)
                         },
                         "interpretation": "Style minus native PCA; matching model is descriptive, not causal.",
                     }
@@ -353,7 +356,13 @@ def run(root, integer=False):
     }
     write_diagnostic(
         folder
-        / ("integer-actual-fill-attribution.json" if integer else "actual-fill-attribution.json"),
+        / (
+            "fixed-budget-actual-fill-attribution.json"
+            if fixed_budget
+            else "integer-actual-fill-attribution.json"
+            if integer
+            else "actual-fill-attribution.json"
+        ),
         output,
     )
     print([(r["account"], r["linked_contribution_difference"]) for r in output["comparisons"]])
@@ -363,5 +372,6 @@ def run(root, integer=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--integer", action="store_true")
+    parser.add_argument("--fixed-budget", action="store_true")
     args = parser.parse_args()
-    run(Path(__file__).resolve().parents[1], args.integer)
+    run(Path(__file__).resolve().parents[1], args.integer, args.fixed_budget)

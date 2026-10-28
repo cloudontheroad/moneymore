@@ -25,6 +25,50 @@ def config():
     )
 
 
+@pytest.mark.parametrize("secondary_exception", [False, True])
+def test_secondary_failure_preserves_certified_primary_plan(monkeypatch, secondary_exception):
+    import cvxpy as cp
+
+    original = cp.Problem.solve
+    calls = []
+
+    def force_secondary_failure(problem, *args, **kwargs):
+        calls.append(problem)
+        if len(calls) == 2:
+            problem._status = "infeasible"
+            for variable in problem.variables():
+                variable.save_value(None)
+            if secondary_exception:
+                raise cp.error.SolverError("test-secondary-error")
+            return float("inf")
+        return original(problem, *args, **kwargs)
+
+    monkeypatch.setattr(cp.Problem, "solve", force_secondary_failure)
+    result = plan({"A": 0.5, "B": 0.5}, {"A": 10.0, "B": 10.0}, limits=2)
+    assert result["status"] == "PASS_REFERENCE_QUOTES_ONLY"
+    assert result["primary_optimal_fallback"]
+    assert result["secondary_optimizer_status"] == (
+        "solver_error" if secondary_exception else "infeasible"
+    )
+    assert result["estimated_cash"] >= 0
+    assert result["estimated_gross"] <= 1
+
+
+@pytest.mark.parametrize("failure_status", ["infeasible", "user_limit"])
+def test_primary_infeasible_never_uses_fallback(monkeypatch, failure_status):
+    import cvxpy as cp
+
+    def fail(problem, *args, **kwargs):
+        problem._status = failure_status
+        return float("inf")
+
+    monkeypatch.setattr(cp.Problem, "solve", fail)
+    result = plan({"A": 0.5, "B": 0.5}, {"A": 10.0, "B": 10.0}, limits=2)
+    assert result["status"] == "BLOCKED"
+    assert result["reason"] == "INTEGER_FEASIBILITY_" + failure_status.upper()
+    assert result["orders"] == []
+
+
 def plan(
     target, price, quantity=None, available=None, cash=10000, equity=10000, limits=2.0, **kwargs
 ):

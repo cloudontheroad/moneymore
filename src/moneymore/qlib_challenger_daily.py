@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import pickle
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -94,6 +95,7 @@ def run_qlib_challenger_daily(
     model_dir: Path | None = None,
     research_path: Path | None = None,
     account_history_table: str = "qlib_challenger_account_daily",
+    portfolio_handler: Callable | None = None,
 ) -> ChallengerDailyResult:
     default_challenger_config = yaml.safe_load(
         (root / "configs" / "qlib_challenger.yaml").read_text(encoding="utf-8")
@@ -270,6 +272,10 @@ def run_qlib_challenger_daily(
             },
             account_id=account_id,
         )
+
+    if portfolio_handler is not None:
+        return portfolio_handler(score_frame=score_frame, bootstrap_weights=portfolio_weights,
+                                 marks=marks, strategy_id=strategy_id, model_id=model_id)
 
     executions = []
     for symbol, bar in sorted(bars.items()):

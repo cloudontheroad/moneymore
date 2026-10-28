@@ -19,7 +19,10 @@ spec.loader.exec_module(module)
 
 
 @pytest.mark.parametrize("corruption", [None, "quantity", "style"])
-def test_independent_audit_reconstructs_ledger_and_rejects_corruption(tmp_path, corruption):
+@pytest.mark.parametrize("fixed_budget", [False, True])
+def test_independent_audit_reconstructs_ledger_and_rejects_corruption(
+    tmp_path, corruption, fixed_budget
+):
     config = BacktestConfig(
         initial_cash=10000,
         commission_rate=0.00015,
@@ -35,6 +38,8 @@ def test_independent_audit_reconstructs_ledger_and_rejects_corruption(tmp_path, 
     folder = tmp_path / "state/enhanced-indexing-research"
     output = folder / "isolated"
     output.mkdir(parents=True)
+    variant = "style_fixed_budget" if fixed_budget else "native_pca"
+    name = "fake-" + variant
     bars = pd.DataFrame(
         [
             {"date": d, "symbol": "AAA", "open": 10.0, "close": 11.0}
@@ -79,20 +84,25 @@ def test_independent_audit_reconstructs_ledger_and_rejects_corruption(tmp_path, 
         bars=bars,
         targets=pd.DataFrame(columns=["date", "symbol", "target_weight"]),
         config=config,
-        database=output / "fake-native_pca.sqlite3",
+        database=output / (name + ".sqlite3"),
         strategy_id="fake",
         account_id="fake",
         closing_target_provider=close,
         opening_plan_provider=opening,
     )
-    replay.equity.to_parquet(output / "fake-native_pca-equity.parquet", index=False)
+    replay.equity.to_parquet(output / (name + "-equity.parquet"), index=False)
     plan = replay.summary["opening_plan_audits"][1]["plan"]
     if corruption == "quantity":
         plan["target_quantities"]["AAA"] += 100
     elif corruption == "style":
         plan["execution_style_proof"]["limits"]["style"] = 0.1
     write_diagnostic(
-        folder / "integer-continuous-replay.json",
+        folder
+        / (
+            "fixed-budget-continuous-replay.json"
+            if fixed_budget
+            else "integer-continuous-replay.json"
+        ),
         {
             "start_date": "20260105",
             "as_of_date": "20260106",
@@ -103,7 +113,15 @@ def test_independent_audit_reconstructs_ledger_and_rejects_corruption(tmp_path, 
             "runs": [
                 {
                     "account": "fake",
-                    "variant": "native_pca",
+                    "variant": variant,
+                    "daily_optimizer_audit": [
+                        {"stage": "FREEZE_BOOTSTRAP_STYLE_ENVELOPE", "limits": {"style": 2.0}},
+                        {
+                            "status": "PASS_OFFLINE_ONLY",
+                            "named_style_limits": {"style": 2.0},
+                            "named_style_retention": None,
+                        },
+                    ],
                     "status": "COMPLETED_DIAGNOSTIC_ONLY",
                     "summary": replay.summary,
                 }
@@ -112,8 +130,10 @@ def test_independent_audit_reconstructs_ledger_and_rejects_corruption(tmp_path, 
     )
     if corruption:
         with pytest.raises(ValueError, match="LEDGER_"):
-            module.run(tmp_path)
+            module.run(tmp_path, fixed_budget=fixed_budget)
     else:
-        audit = module.run(tmp_path)
+        audit = module.run(tmp_path, fixed_budget=fixed_budget)
         assert audit["runs"][0]["verified_opens"] == 1
         assert audit["runs"][0]["ledger_cash_max_error"] < 0.01
+        if fixed_budget:
+            assert audit["runs"][0]["fixed_budget_unchanged"]
