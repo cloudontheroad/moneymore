@@ -48,7 +48,7 @@ def coverage_rows(top, signal, source, counts, missing_close, missing_adj, finan
     return out
 
 
-def audit_daily_inputs(root, store):
+def audit_daily_inputs(root, store, *, identity=None):
     folder = root / "state/baseline-v2-validation/daily-inputs"
     pointer = folder / "readiness.json"
     readiness = json.loads(pointer.read_text(encoding="utf-8"))
@@ -82,17 +82,29 @@ def audit_daily_inputs(root, store):
                 pd.util.hash_pandas_object(frame, index=False).values.tobytes()
             ).hexdigest()
         evidence.append({"source_date": source, "sha256": digest})
+        if identity is not None:
+            frame = identity.market_rows(
+                frame, "trade_date", ["close", "pb", "pe_ttm", "dv_ttm", "total_mv"]
+            )
         snapshots[row["signal_date"]] = validate_snapshot(frame, source)
     symbols = sorted(set().union(*(set(f.ts_code) for f in snapshots.values())))
+    source_symbols = set(symbols)
+    if identity is not None:
+        for row in identity.changes:
+            if row["old"] in source_symbols:
+                source_symbols.add(row["new"])
     start = calendar[max(0, calendar.index(min(snapshots)) - 252)]
     dates = [d for d in calendar if start <= d <= max(snapshots)]
     filters = [
-        ("ts_code", "in", symbols),
+        ("ts_code", "in", sorted(source_symbols)),
         ("trade_date", ">=", start),
         ("trade_date", "<=", max(snapshots)),
     ]
     daily = store.read("daily", columns=["ts_code", "trade_date", "close"], filters=filters)
     adj = store.read("adj_factor", columns=["ts_code", "trade_date", "adj_factor"], filters=filters)
+    if identity is not None:
+        daily = identity.market_rows(daily, "trade_date", ["close"])
+        adj = identity.market_rows(adj, "trade_date", ["adj_factor"])
     close = daily.pivot(index="trade_date", columns="ts_code", values="close").reindex(
         index=dates, columns=symbols
     )
@@ -106,6 +118,19 @@ def audit_daily_inputs(root, store):
     adj_gaps = (good_close & ~good_adj).rolling(253, min_periods=253).sum()
     financials = research_financial_frame(store)
     membership = store.read("baseline_v2_industry_membership")
+    instruments = store.read("instruments")
+    if identity is not None:
+        financials = identity.market_rows(
+            financials,
+            "ann_date",
+            ["roe", "q_sales_yoy"],
+            record_keys=["ann_date", "end_date", "growth_source"],
+        )
+        membership = identity.industry_rows(membership)
+        instruments = instruments.copy()
+        instruments["ts_code"] = instruments.ts_code.map(identity.stable)
+        if instruments.ts_code.duplicated().any():
+            raise ValueError("DUPLICATE_IDENTITY_LISTING_METADATA")
     frames = []
     for row in readiness["schedule"]:
         signal, source = row["signal_date"], row["source_date"]
@@ -128,7 +153,7 @@ def audit_daily_inputs(root, store):
             )
         )
     detail = pd.concat(frames, ignore_index=True)
-    detail = classify_price_history(detail, store.read("instruments"), calendar)
+    detail = classify_price_history(detail, instruments, calendar)
     run = (
         folder
         / "coverage-audits"
@@ -145,6 +170,8 @@ def audit_daily_inputs(root, store):
         "signals": len(summary),
         "rows": len(detail),
         "historical_symbols": len(symbols),
+        "identity_policy": identity.changes if identity is not None else None,
+        "identity_scope_start": start,
         "source_logical_hashes": {
             name: hashlib.sha256(
                 pd.util.hash_pandas_object(frame, index=True).values.tobytes()
@@ -173,5 +200,9 @@ def audit_daily_inputs(root, store):
         ],
     }
     write_diagnostic(run / "report.json", report)
-    write_diagnostic(folder / "coverage-audit.json", report)
+    write_diagnostic(
+        folder
+        / ("identity-coverage-audit.json" if identity is not None else "coverage-audit.json"),
+        report,
+    )
     return report

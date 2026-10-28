@@ -54,7 +54,21 @@
 
 27项日度证据、财务和缓存相关测试通过，包括复牌边界不算停牌、代码变更不视为停牌、公告T+1可见及财务冲突/源空值区分。
 
-## 运行入口
+## 证券身份连续性验收（覆盖上节“待建”状态）
+
+新增研究模块`security_identity.py`，通过公告指定old/new及生效日映射稳定内部身份与当日可交易代码。内部稳定标识不是委托代码；执行意图必须调用`execution_targets`按执行日映射。`holdings`保留数量、不改变成本或现金，重复别名仓位必须另行对账，禁止简单相加制造双倍持股。模块不接券商、不写账本。
+
+行情和估值截面使用当时有效源代码，不以未来新代码回填缺失的旧行情；新旧代码同日数值冲突默认阻断。原始源行与被去掉的镜像行不删除。财务以公告日期区分当时源代码，报告期和增长补充来源共同组成记录键，不能把指标原始行和算术补充行互相覆盖。行业只映射证券身份，不改历史行业生效区间；上市时间仅补充身份元数据，不将今天的行业标签带入过去。
+
+审计结果：原463个日度截面中248天含重复身份名额。身份修正后每一天都是1000个不同证券身份，联合池仍为1565（去重后补足排名后继成员，不能简单把总数减1）。对应预览保留在`identity-audits/20261028T084455535378Z`。
+
+新旧代码全历史复权有8处数值差异，均在2018-08-16至2018-08-27；明细保留，不随意取一方。它们不落入本实验所需2023-01-18至2025-12-30窗口，窗口内行情/复权/财务重叠源值冲突0。首轮按全历史阻断的审计仍保留；后续明确范围的审计不代表2018年的差异已解决。
+
+已把身份适配接入独立日度覆盖审计（`--identity`），有效结果目录`coverage-audits/20261028T084656Z-1aa24228`。463000条股票日：合格440532、价格窗口不足21617、主要财务剔除834、历史行业缺失17；最低日928；上市元数据未知0。相比未映射审计，合格增加228，行业缺失减少241；补足新的第1000名股票也带入少量真实价格窗口不足，不隐藏这些变化。
+
+最新指针使用`identity-coverage-audit.json`，不覆盖原`coverage-audit.json`。尚未生成身份修正版日度收益，也未验证真实账本迁移；旧训练面板、模型系数、原收益及生产账户不动。27项相关测试通过，包括代码生效边界、重复持仓/目标阻断、未来代码镜像去重、历史行业区间不变和财务补充来源保留。
+
+## 命令
 
 补数：`.venv/Scripts/python.exe scripts/prepare_baseline_v2_daily.py --download --max-requests 100`
 
@@ -69,6 +83,10 @@
 停牌证据补齐及缺口诊断：`.venv/Scripts/python.exe scripts/investigate_baseline_v2_daily_gaps.py --download --max-requests 130`；不加`--download`为只读缓存核对。
 
 公告解释归档：`.venv/Scripts/python.exe scripts/reconcile_baseline_v2_gap_announcements.py`。
+
+身份源值与全截面审计：`.venv/Scripts/python.exe scripts/audit_baseline_v2_security_identity.py`。
+
+身份修正版完整覆盖审计：`.venv/Scripts/python.exe scripts/audit_baseline_v2_daily.py --identity`。
 
 进度：`state/baseline-v2-validation/daily-inputs/readiness.json`。
 
