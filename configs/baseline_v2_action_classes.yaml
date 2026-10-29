@@ -1,0 +1,16 @@
+version: retail_account_issuer_evidence_20261028
+usage: ISOLATED_REPLAY_ONLY_NOT_FACTOR_OR_RAW_SOURCE_REWRITE
+classes:
+  - symbol: 600989.SH
+    end_date: '20231231'
+    record_date: '20240723'
+    ex_date: '20240724'
+    pay_date: '20240724'
+    imp_ann_date: '20240718'
+    observed_cash_classes: [0.265, 0.3158]
+    retail_cash_per_share: 0.3158
+    source: https://static.sse.com.cn/disclosure/listedinfo/announcement/c/new/2024-07-18/600989_20240718_2K7K.pdf
+    downloaded_mirror: https://file.finance.sina.com.cn/211.154.219.97:9494/MRGG/CNSESH_STOCK/2024/2024-7/2024-07-18/10334213.PDF
+    local_document: state/baseline-v2-validation/daily-inputs/execution-extensions/b13786a74ba218a9d719/600989-20240718.pdf
+    sha256: d47db5c0b7d2c9bfc37dbc71cfdd2e34ed299948baaad08e7fadedb6fa2dde86
+    evidence: Issuer notice 2024-040 explicitly differentiates ordinary public investors 0.3158 and major shareholders 0.2650. Exchange ex-price deduction is 0.28, not the retail cash amount.

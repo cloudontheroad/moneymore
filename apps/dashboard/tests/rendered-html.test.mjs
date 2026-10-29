@@ -34,3 +34,12 @@ test("metadata describes the multi-sector console", async () => {
   assert.match(layout, /MoneyMore · 多行业量化组合/);
   assert.match(layout, /银行、红利、工业有色、芯片与创业板成长/);
 });
+
+test("V2 release panel is read-only and does not present partial evidence as approval", async () => {
+  const source = await readFile(new URL("BaselineV2Release.tsx", app), "utf8");
+  for (const label of ["基线 V2 · 发布验收", "最终版未启用", "可信新前瞻日", "不是因果归因", "/api/baseline-v2-release"]) {
+    assert.ok(source.includes(label));
+  }
+  assert.ok(source.includes('status === "PASS"'));
+  assert.ok(!source.includes('method: "POST"'));
+});

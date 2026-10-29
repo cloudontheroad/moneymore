@@ -1,5 +1,10 @@
 version: reviewed_issuer_announcements_20261028
 usage: RESEARCH_GAP_EXPLANATION_ONLY_NOT_PRICE_FILL_OR_ORDER_AUTHORITY
+delistings:
+  - symbol: 601989.SH
+    effective: '20250905'
+    source: https://www.sse.com.cn/disclosure/announcement/listing/stock/c/c_20250829_10790128.shtml
+    evidence: SSE termination decision dated 2025-08-29, effective 2025-09-05 due to absorption. No synthetic liquidation or share conversion authorized.
 suspensions:
   - symbol: 300114.SZ
     start: '20230112'

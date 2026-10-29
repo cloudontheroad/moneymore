@@ -2828,6 +2828,13 @@ def model_registry() -> dict[str, list[dict[str, Any]]]:
     return registry.snapshot()
 
 
+@app.get("/api/baseline-v2-release")
+def baseline_v2_release() -> dict[str, object]:
+    from .baseline_v2_release_view import release_view
+
+    return release_view(ROOT)
+
+
 @app.get("/api/qlib-challenger")
 def qlib_challenger() -> dict[str, object]:
     broker = PaperBroker(PAPER_DATABASE)

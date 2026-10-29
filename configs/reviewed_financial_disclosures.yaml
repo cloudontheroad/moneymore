@@ -1,0 +1,52 @@
+version: reviewed_disclosure_fact_schema_v1_20261029
+usage: ISOLATED_RECONSTRUCTION_NOT_RAW_VENDOR_REWRITE_OR_FULL_PIT_RELEASE
+records:
+  - symbol: 600036.SH
+    report_period: '20230930'
+    published_date: '20231028'
+    announcement_title: 招商银行股份有限公司2023年第三季度报告
+    source_url: https://static.cninfo.com.cn/finalpage/2023-10-28/1218188128.PDF
+    publication_evidence_url: https://www.cninfo.com.cn/new/hisAnnouncement/query
+    publication_index:
+      path: state/baseline-v2-release/financial-documents/cninfo-index/600036-20231027-20231029/v2-official-js/response.json
+      sha256: b59e6d61337508af932cd17c4316b74f7b7fc9cd16928c0351e0dc8a4a256acb
+      announcement_id: '1218188128'
+    document_path: state/baseline-v2-release/financial-documents/600036-20230930-cninfo.pdf
+    document_sha256: 6cf141a1e862377a41baba1c061772adca018abc5d1a6b7969b7a5f1a8c4f1b1
+    statement_scope: CONSOLIDATED
+    currency: CNY
+    roe_definition: PARENT_YTD_PROFIT_OVER_MEAN_PARENT_EQUITY
+    revenue_definition: SINGLE_QUARTER_SAME_DISCLOSURE_COMPARABLE
+    rounding_assumption: NEAREST_REPORTED_UNIT
+    review: CNINFO archived PDF pages 2 and 18 visually checked separately from issuer PDF; file hashes differ, not asserted identical. ROE is an explicit simple cumulative formula, NOT the disclosed annualized weighted common-shareholder ROE. Publication date and PDF path are checked against hashed official index. Half-unit intervals are an explicit rounding assumption, not hidden tolerance widening.
+    facts:
+      profit_parent_ytd: {value: 113890, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20230101/20230930', page: 2}
+      equity_parent_begin: {value: 945503, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20221231', page: 2}
+      equity_parent_end: {value: 1012235, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20230930', page: 2}
+      revenue_quarter: {value: 81819, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20230701/20230930', page: 18}
+      revenue_quarter_comparable: {value: 85742, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20220701/20220930', page: 18}
+  - symbol: 600000.SH
+    report_period: '20230930'
+    published_date: '20231028'
+    announcement_title: 上海浦东发展银行股份有限公司2023年第三季度报告
+    source_url: https://static.cninfo.com.cn/finalpage/2023-10-28/1218192057.PDF
+    publication_evidence_url: https://www.cninfo.com.cn/new/hisAnnouncement/query
+    publication_index:
+      format: public_index_cache_v1
+      path: state/baseline-v2-release/financial-documents/public-index/600000.SH-20231027-20231031/page-1.json
+      sha256: 782bbca851e8db1bb41c1f88a069c16b1799eea77ef5ea2e7682302f964f95e9
+      announcement_id: '1218192057'
+    document_path: state/baseline-v2-release/financial-documents/600000-20230930-cninfo.pdf
+    document_sha256: 2c73b102f3aecab85207c2a4244d10788eb942cd9227815784fcb9358a987051
+    statement_scope: CONSOLIDATED
+    currency: CNY
+    roe_definition: PARENT_YTD_PROFIT_OVER_MEAN_PARENT_EQUITY
+    revenue_definition: SINGLE_QUARTER_SAME_DISCLOSURE_COMPARABLE
+    rounding_assumption: NEAREST_REPORTED_UNIT
+    review: Archived PDF pages 1, 2 and 15 visually checked, including group versus parent columns and units. Derived simple cumulative ROE is not the disclosed weighted ordinary-shareholder ROE 4.32%; source notes preferred/perpetual deductions. No universal vendor formula certification.
+    facts:
+      profit_parent_ytd: {value: 27986, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20230101/20230930', page: 1}
+      equity_parent_begin: {value: 697872, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20221231', page: 2}
+      equity_parent_end: {value: 715695, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20230930', page: 2}
+      revenue_quarter: {value: 41585, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20230701/20230930', page: 15}
+      revenue_quarter_comparable: {value: 45036, unit: 1000000, half_unit: 0.5, currency: CNY, period: '20220701/20220930', page: 15}

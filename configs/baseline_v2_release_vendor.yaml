@@ -1,0 +1,30 @@
+version: baseline_v2_release_vendor_controls_v3_20261029
+scope: INDEPENDENT_PAPER_RELEASE_NOT_REAL_TRADING
+decision_basis: USER_AUTHORIZED_PRAGMATIC_VENDOR_DATA_POLICY_20261029
+real_orders_enabled: false
+automatic_replacement_of_baseline: false
+required_stages: [attribution, full_union_economics, financial_controls, robustness, execution_stress, parity, forward_observation]
+observation_required_stages: [attribution, full_union_economics, financial_controls, robustness, execution_stress, parity]
+financial_data_policy:
+  provider: TUSHARE
+  original_statement_exhaustive_attestation_required: false
+  historical_point_in_time_attestation_claimed: false
+  announcement_rule: NEXT_CALENDAR_DAY_OR_LATER
+  snapshot_required: true
+  common_fiscal_period_required: true
+  missing_policy: NEUTRAL_WITHOUT_FACTOR_WEIGHT_REALLOCATION
+  original_document_review: SAMPLE_AND_ANOMALY_ONLY
+  sensitivity_analysis: DIAGNOSTIC_NOT_EXHAUSTIVE_DOCUMENT_BLOCKER
+research_after_inspecting_holdout: true
+observation_activation_is_not_promotion: true
+bootstrap_samples: 2000
+bootstrap_month_block: 3
+comparisons: 3
+minimum_test_months: 23
+seed: 1729
+slippage_scenarios_bps: [2, 5, 10]
+commission_multiplier: 2
+dividend_pressure_multiplier: 0.8
+forward_observation_days: 20
+forward_review_days: 60
+accounting_tolerance_yuan: 0.01

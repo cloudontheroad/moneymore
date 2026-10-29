@@ -32,7 +32,24 @@ def validate_snapshot(frame, date):
     return top
 
 
-def construct_daily_targets(scores, actual_holdings, prices, signal_date, execution_date, policy):
+def classify_held_inputs(actual_holdings, scored_symbols, *, universe_members=None):
+    """An explicit complete pool is needed to distinguish exclusion from missing data."""
+    held = {str(s) for s, quantity in actual_holdings.items() if quantity > 0}
+    scored = set(scored_symbols)
+    if universe_members is None:
+        return {"universe_exits": [], "input_faults": sorted(held - scored)}
+    universe = set(universe_members)
+    if not universe or not scored.issubset(universe):
+        raise ValueError("INVALID_COMPLETE_CANDIDATE_UNIVERSE")
+    return {
+        "universe_exits": sorted(held - universe),
+        "input_faults": sorted((held & universe) - scored),
+    }
+
+
+def construct_daily_targets(
+    scores, actual_holdings, prices, signal_date, execution_date, policy, *, universe_members=None
+):
     """Replay adapter: actual incumbents, exact dated scores, no future correlation."""
     from ..portfolio_constructor import global_topk_portfolio, trailing_return_correlation
 
@@ -44,7 +61,10 @@ def construct_daily_targets(scores, actual_holdings, prices, signal_date, execut
     if scores.symbol.duplicated().any() or scores.score.isna().any():
         raise ValueError("INVALID_DAILY_SCORES")
     held = {str(s) for s, quantity in actual_holdings.items() if quantity > 0}
-    if held - set(scores.symbol):
+    classification = classify_held_inputs(
+        actual_holdings, scores.symbol, universe_members=universe_members
+    )
+    if classification["input_faults"]:
         raise ValueError("HELD_V2_INPUT_INCOMPLETE_HOLD_AND_ALERT")
     p = policy["portfolio"]
     correlation = trailing_return_correlation(

@@ -32,19 +32,32 @@ def global_topk_portfolio(
         raise ValueError("minimum weights exceed gross exposure")
     if top_k * maximum_weight < gross_exposure - 1e-12:
         raise ValueError("maximum weights cannot deploy gross exposure")
-    ranking = scores.reset_index(drop=True).dropna(subset=["score"]).sort_values(
-        ["score", symbol_column], ascending=[False, True]
-    ).drop_duplicates(symbol_column, keep="first").copy()
+    ranking = (
+        scores.reset_index(drop=True)
+        .dropna(subset=["score"])
+        .sort_values(["score", symbol_column], ascending=[False, True])
+        .drop_duplicates(symbol_column, keep="first")
+        .copy()
+    )
     ranking = _diversification_adjusted_order(
-        ranking, symbol_column, correlation, correlation_penalty, exit_rank,
-        cluster_correlation_threshold, maximum_cluster_members,
+        ranking,
+        symbol_column,
+        correlation,
+        correlation_penalty,
+        exit_rank,
+        cluster_correlation_threshold,
+        maximum_cluster_members,
     )
     ranking["global_rank"] = range(1, len(ranking) + 1)
     ranks = dict(zip(ranking[symbol_column].astype(str), ranking["global_rank"], strict=True))
     eligible = set(ranks)
     held = set(incumbents) & eligible
     forced_cluster_exits: set[str] = set()
-    if correlation is not None and cluster_correlation_threshold is not None and maximum_cluster_members is not None:
+    if (
+        correlation is not None
+        and cluster_correlation_threshold is not None
+        and maximum_cluster_members is not None
+    ):
         clusters = _correlation_clusters(list(held), correlation, cluster_correlation_threshold)
         grouped: dict[str, list[str]] = {}
         for symbol in held:
@@ -59,9 +72,9 @@ def global_topk_portfolio(
         reverse=True,
     )[:max_replacements]
     held -= set(exits)
-    additions = [
-        symbol for symbol in ranking[symbol_column].astype(str) if symbol not in held
-    ][: max(0, top_k - len(held))]
+    additions = [symbol for symbol in ranking[symbol_column].astype(str) if symbol not in held][
+        : max(0, top_k - len(held))
+    ]
     held.update(additions)
     selected = sorted(held, key=ranks.__getitem__)[:top_k]
     if weighting_method == "rank_linear":
@@ -71,7 +84,8 @@ def global_topk_portfolio(
         scale = float(selected_scores.std(ddof=0))
         standardized = (
             (selected_scores - float(selected_scores.mean())) / scale
-            if scale > 1e-12 else selected_scores * 0.0
+            if scale > 1e-12
+            else selected_scores * 0.0
         )
         temperature = max(float(confidence_temperature), 1e-6)
         softmax = np.exp(np.clip(standardized.to_numpy() / temperature, -20, 20))
@@ -139,9 +153,7 @@ def _diversification_adjusted_order(
     cluster_threshold: float | None,
     maximum_cluster_members: int | None,
 ) -> pd.DataFrame:
-    if correlation is None or correlation.empty or (
-        penalty <= 0 and not cluster_threshold
-    ):
+    if correlation is None or correlation.empty or (penalty <= 0 and not cluster_threshold):
         return ranking
     working = ranking.copy()
     symbols = working[symbol_column].astype(str).tolist()
@@ -157,15 +169,22 @@ def _diversification_adjusted_order(
         for symbol in remaining:
             if maximum_cluster_members is not None:
                 cluster = clusters.get(symbol, symbol)
-                if sum(clusters.get(item, item) == cluster for item in ordered) >= maximum_cluster_members:
+                if (
+                    sum(clusters.get(item, item) == cluster for item in ordered)
+                    >= maximum_cluster_members
+                ):
                     continue
-            correlations = [
-                float(correlation.loc[symbol, existing])
-                for existing in ordered
-                if symbol in correlation.index
-                and existing in correlation.columns
-                and pd.notna(correlation.loc[symbol, existing])
-            ]
+            correlations = (
+                [
+                    float(correlation.loc[symbol, existing])
+                    for existing in ordered
+                    if symbol in correlation.index
+                    and existing in correlation.columns
+                    and pd.notna(correlation.loc[symbol, existing])
+                ]
+                if penalty != 0
+                else []
+            )
             redundancy = float(np.mean(np.clip(correlations, 0.0, 1.0))) if correlations else 0.0
             utility = alpha[symbol] - penalty * redundancy
             candidates.append((utility, alpha[symbol], symbol))
@@ -200,6 +219,15 @@ def _correlation_clusters(
             parent[right_root] = left_root
 
     available = [symbol for symbol in symbols if symbol in correlation.index]
+    if all(s in correlation.columns for s in available) and all(
+        pd.api.types.is_numeric_dtype(correlation[s]) for s in available
+    ):
+        # Preserve upper-triangle traversal and union order exactly; avoid O(n²) pandas lookups.
+        values = correlation.loc[available, available].to_numpy(dtype=float, na_value=np.nan)
+        lefts, rights = np.nonzero(np.triu(values >= threshold, k=1))
+        for left, right in zip(lefts, rights, strict=True):
+            union(available[left], available[right])
+        return {symbol: find(symbol) for symbol in symbols}
     for index, left in enumerate(available):
         for right in available[index + 1 :]:
             value = correlation.loc[left, right]
@@ -216,9 +244,7 @@ def _bounded_pro_rata(
     active = set(raw)
     while active and remaining > 1e-12:
         denominator = sum(raw[symbol] for symbol in active)
-        proposed = {
-            symbol: remaining * raw[symbol] / denominator for symbol in active
-        }
+        proposed = {symbol: remaining * raw[symbol] / denominator for symbol in active}
         capped = {
             symbol
             for symbol, increment in proposed.items()

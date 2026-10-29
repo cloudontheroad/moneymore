@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import DesktopExecution from "./DesktopExecution";
+import BaselineV2Release from "./BaselineV2Release";
 import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts } from "./candidate-view";
 
 type Row = Record<string, unknown>;
@@ -488,6 +489,7 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
   const globalView = observation?.global_strategy_view??challenger.comparison;
   return <><Intro tag="QLIB CHALLENGER LAB" title="独立策略，通过公平竞赛验证">原基线保持算法不变，因子V2与深度学习候选使用独立账户、信号、订单和持仓；不自动替换，不重写历史。</Intro>
     <CandidateSwitcher observation={observation} selectedTag={text(selectedCandidate?.candidate_tag)} onSelect={setSelectedCandidateTag} showArchived={showArchived} onShowArchived={onShowArchived}/>
+    <BaselineV2Release/>
     {selectedCandidate?.portfolio_variant==="fixed_budget_v1"&&<Panel title={text(selectedCandidate.display_name)} subtitle="独立模拟组合实验 · 复用既有模型，未重新训练 · 不自动晋级"><p>信号来源：{text(selectedCandidate.source_candidate_tag)}。固定预算在首次实际模拟建仓时冻结；之后不递归收紧。开盘使用有效实时价格重算整数股数，原账户与历史收益不变。</p><p>计划成交日：{text(selectedCandidate.latest?.planned_trade_date)} · {text(selectedCandidate.latest?.planning_status)==="AWAITING_OPEN_REPLAN"?"已生成，等待开盘重算与模拟执行":text(selectedCandidate.latest?.planning_status)} · 最近执行：{candidateExecution.status==="COMPLETED"?`${text(candidateExecution.trade_date)} 已完成并对账`:text(candidateExecution.status??"未到执行时间")} · 收盘参考方案：{text(selectedCandidate.latest?.reference_plan_status)}</p><Table rows={(Array.isArray(selectedCandidate.latest?.orders)?selectedCandidate.latest.orders:[]) as Row[]} columns={[["symbol","股票"],["side","方向"],["quantity","参考股数"],["reference_price","参考价格"],["submit_status","执行状态"]]} format={{symbol:(v)=>security(v,names),side:(v)=>text(v)==="BUY"?"买入":"卖出",reference_price:num,submit_status:(v)=>text(v)==="AWAITING_OPEN_REPLAN"?"待开盘重算":text(v)}}/></Panel>}
     {selectedCandidate?.portfolio_variant==="factor_baseline_v2"&&<FactorBaselineV2Info candidate={selectedCandidate} names={names}/>}
     <div className="four-col account-columns">
