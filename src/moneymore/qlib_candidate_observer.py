@@ -115,6 +115,8 @@ def candidate_catalog(root: Path) -> list[dict[str, Any]]:
     used_tags = {row["candidate_tag"] for row in rows}
     for registry in sorted((root / "state/factor-baseline-candidates").glob("*.json")):
         variant = json.loads(registry.read_text(encoding="utf-8"))
+        from .research.style_v2_experiment import public_style_details
+        variant.update(public_style_details(root, variant))
         tag = str(variant["candidate_tag"])
         if len(tag) != 8 or not tag.isdigit() or tag in used_tags:
             raise ValueError("INVALID_OR_DUPLICATE_FACTOR_CANDIDATE_TAG")

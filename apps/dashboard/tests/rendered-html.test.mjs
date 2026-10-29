@@ -43,3 +43,16 @@ test("V2 release panel is read-only and does not present partial evidence as app
   assert.ok(source.includes('status === "PASS"'));
   assert.ok(!source.includes('method: "POST"'));
 });
+
+test("Qlib operating page does not render research and training process panels", async () => {
+  const source = await readFile(new URL("Dashboard.tsx", app), "utf8");
+  const page = source.slice(source.indexOf("function ChallengerPage("), source.indexOf("function AccountColumn("));
+  for (const panel of ["<BaselineV2Release", "<FactorBaselineV2Info", "<ChallengerDiagnostics", "<CandidateObservation", "统一样本外模型竞赛", "固定预算在首次实际模拟建仓时冻结"]) {
+    assert.ok(!page.includes(panel), panel);
+  }
+  for (const panel of ["<CandidateSwitcher", "<AccountColumn", "<PerformanceComparisonCharts", "<TradeCycleComparison", "candidateRunStatus"]) {
+    assert.ok(page.includes(panel), panel);
+  }
+  const route = source.split("\n").find(line => line.includes('page === "challenger"'));
+  for (const panel of ["<ChallengerEvidence", "<PointInTimeEvidence", "<GovernanceEvidence", "<LongTermReview"]) assert.ok(!route.includes(panel), panel);
+});

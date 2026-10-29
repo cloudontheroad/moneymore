@@ -95,13 +95,20 @@ def comparable_scores(raw, policy, *, size_control=True, industry_control=True):
         processed[f"effective_weight__{name}"] = weight / total
         processed[f"contribution__{name}"] = processed[name] * weight / total
         processed["score"] += processed[f"contribution__{name}"]
-    learned = policy.get("validated_linear_model")
+    if policy.get("validated_linear_model") and policy.get("experimental_linear_model"):
+        raise ValueError("AMBIGUOUS_LINEAR_MODEL_RELEASE_SCOPE")
+    learned = policy.get("validated_linear_model") or policy.get("experimental_linear_model")
     if learned:
         coefficients = learned.get("coefficients", {})
         if (
             learned.get("native_model") != "qlib.contrib.model.linear.LinearModel"
             or set(coefficients) != set(names)
-            or not learned.get("validation_evidence_sha256")
+            or not (learned.get("validation_evidence_sha256") or (
+                learned.get("scope") == "FORWARD_STYLE_REPAIR_EXPERIMENT_NOT_PROMOTION"
+                and learned.get("evidence_sha256")
+                and policy.get("real_orders_enabled") is False
+                and policy.get("automatic_promotion") is False
+            ))
             or not np.isfinite(list(coefficients.values())).all()
             or sum(abs(float(c)) for c in coefficients.values()) <= 1e-12
         ):
@@ -139,6 +146,13 @@ def build_v2_snapshot(root: Path, store, as_of: str, policy=None):
     policy = policy or yaml.safe_load(
         (root / "configs/baseline_v2.yaml").read_text(encoding="utf-8")
     )
+    if policy.get("experimental_linear_model"):
+        from .security_identity import SecurityIdentity
+        from .style_v2_experiment import OverlayStore, validate_experiment
+
+        validate_experiment(root, policy)
+        overlay = policy["input_overlay"]
+        store = OverlayStore(store, overlay["path"], overlay["sha256"], SecurityIdentity(overlay["identity_policy"]))
     if policy.get("validated_linear_model"):
         learned = policy["validated_linear_model"]
         evidence_path = Path(learned.get("validation_evidence_path", "")).resolve()
@@ -327,7 +341,7 @@ def archive_v2(root, as_of, policy, variants, capture, exclusions):
         "path": str(directory),
         "variants": {},
         "limitations": [
-            "NOT_TRAINED_OR_RETURN_OPTIMAL",
+            "FROZEN_LEARNED_RESEARCH_NOT_PROMOTION_VALIDATED" if policy.get("experimental_linear_model") else "NOT_TRAINED_OR_RETURN_OPTIMAL",
             "CURRENT_UNIVERSE_NOT_HISTORICAL_BACKTEST",
             "NEUTRAL_IMPUTATION_IS_MODEL_ASSUMPTION_NOT_RAW_ZERO",
             "NO_BOARD_ALLOCATION_TARGET",

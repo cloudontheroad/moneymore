@@ -19,6 +19,9 @@ from .research.integer_execution import plan_integer_execution
 
 def prepare_factor_v2(*, root, store, broker, config, candidate, trade_date, signal_date=None):
     """Close planning only; bootstrap may use yesterday's known close, marked honestly."""
+    from .research.style_v2_experiment import candidate_execution_config, execution_policy_hash
+
+    config = candidate_execution_config(config, candidate)
     signal_date = signal_date or trade_date
     tag, account = candidate["candidate_tag"], candidate["account_id"]
     if trade_date < candidate["activation_date"] or signal_date > trade_date:
@@ -44,7 +47,9 @@ def prepare_factor_v2(*, root, store, broker, config, candidate, trade_date, sig
         p["symbol"]: int(p["quantity"]) for p in held_snapshot["positions"] if p["quantity"] > 0
     }
     # Data-loss is not an instruction to sell a held security.
-    if set(held) - set(scores.symbol):
+    from .strategy_universe import active_strategy_universe
+    universe_members = set(active_strategy_universe(store).symbol)
+    if (set(held) & universe_members) - set(scores.symbol):
         raise ValueError("HELD_V2_INPUT_INCOMPLETE_HOLD_AND_ALERT")
     price_panel = capture["prices"]
     price_panel.index = pd.to_datetime(price_panel.index, format="%Y%m%d")
@@ -100,9 +105,13 @@ def prepare_factor_v2(*, root, store, broker, config, candidate, trade_date, sig
         "freeze_budget": False,
         "real_orders_enabled": False,
         "promotion_eligible": False,
+        "experiment_scope": policy.get("experimental_linear_model", {}).get("scope"),
         "reason_code": "FACTOR_BASELINE_V2_FORWARD_PAPER",
         "score_evidence": evidence["path"],
         "policy_sha256": evidence["policy_sha256"],
+        "execution_policy_sha256": execution_policy_hash(candidate),
+        "execution_slippage_bps": config.slippage_bps,
+        "execution_policy": candidate.get("execution_policy", {}),
         "style_policy": "FACTOR_COMPARABILITY_NOT_PORTFOLIO_STYLE_OR_BOARD_QUOTA",
     }
     plan_path = root / "state/qlib-portfolio-plans" / tag / (signal_date + ".json")
@@ -119,12 +128,15 @@ def prepare_factor_v2(*, root, store, broker, config, candidate, trade_date, sig
         "display_name": policy["display_name"],
         "execution_strategy_id": strategy_id,
         "promotion_eligible": False,
+        "style_release_evidence": candidate.get("style_release_evidence"),
         "target_weights": targets,
         "target_gross_exposure": sum(targets.values()),
         "planned_trade_date": following,
         "signal_date": signal_date,
         "planning_status": "AWAITING_OPEN_REPLAN",
         "reference_plan_status": preview["status"],
+        "execution_slippage_bps": config.slippage_bps,
+        "execution_policy": candidate.get("execution_policy", {}),
         "score_evidence": evidence,
         "corporate_actions": actions,
         "exposure_policy": {
@@ -155,6 +167,8 @@ def register_factor_v2(root, store, broker, config, *, now=None):
     if date < policy["activation_date"] or policy["real_orders_enabled"]:
         raise ValueError("INVALID_V2_ACTIVATION")
     tag = policy["candidate_tag"]
+    if (root / "state/removed-factor-candidates" / (tag + ".json")).exists():
+        raise ValueError("FACTOR_CANDIDATE_EXPLICITLY_REMOVED")
     path = root / "state/factor-baseline-candidates" / (tag + ".json")
     if (root / "state/qlib-challenger/candidates" / tag / "_TRAINING_COMPLETE").exists() or (
         root / "state/qlib-portfolio-candidates" / (tag + ".json")

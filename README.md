@@ -356,3 +356,13 @@ pnpm test
 - 回滚：powershell -ExecutionPolicy Bypass -File scripts/configure_quant_host.ps1 -Action Rollback
 
 安装动作禁止有用户登录时被Windows Update自动重启，注册 SYSTEM 级 MoneyMore开机任务和当前交易用户的MiniQMT登录任务。原Windows Update策略首次安装时备份至 state/runtime/windows-availability-before.json；脚本不会配置不安全的Windows自动登录。
+# 基线V2风格修正版：独立模拟已启用
+
+本版自首轮成交前起使用**独立10bps单边模拟滑点**（0.10%，佣金税费另计）；已同步至收盘委托预览与开盘模拟撮合。旧策略仍沿用原2bps配置，历史不重算；成本口径不同，比较收益时须同时查看成本说明。10bps为保守假设，不代表已测得真实滑点。
+
+2026-10-29启用“因子基线 V2｜风格修正版（独立模拟）”，版本`20261029`，账户`qlib_candidate_20261029`。在Qlib页面候选策略下拉框选择该版本，可查看逐步风格对照、当前排名、评分贡献、数据剔除明细、委托及成交。原基线与旧候选保留，不替换、不改历史收益。
+
+本版修正因子缺失处理并真正执行市值/行业可比化，使用原训练/验证切分选出的冻结Qlib学习权重；不设科技、行业或上市板块配额。当前1000候选、912可评分、88只逐项说明数据不足原因。20261029收盘计划已生成，下一交易日20261030；当天收盘后没有补造成交。收盘评分和开盘模拟执行由MoneyMore本地服务现有队列运行，不依赖Codex任务。
+
+发布与冻结证据：`state/baseline-v2-style-release/publication.json`、`state/factor-baseline-candidates/20261029.json`。这是用户授权的独立风格修正实验，不代表长期最优或正式晋级；保留原权重稳健性未通过等研究诊断。真实券商下单禁用，首次启用后的实时模拟成交需开盘后另行验收。
+

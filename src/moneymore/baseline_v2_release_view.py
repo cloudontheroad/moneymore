@@ -63,8 +63,19 @@ def release_view(root):
     progress = (
         json.loads(source_progress.read_text(encoding="utf-8")) if source_progress.exists() else {}
     )
+    style_publication = root / "state/baseline-v2-style-release/publication.json"
+    style_experiment = json.loads(style_publication.read_text(encoding="utf-8")) if style_publication.exists() else None
+    if style_experiment:
+        registry = json.loads(Path(style_experiment["registry"]).read_text(encoding="utf-8"))
+        plan_path = root / "state/qlib-portfolio-plans" / registry["candidate_tag"] / (style_experiment["signal_date"] + ".json")
+        plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        style_experiment = {**style_experiment, "display_name": registry["display_name"], "planned_trade_date": registry.get("style_audit", {}).get("next_trade_date"), "target_weights": plan["target_weights"]}
+        report = root / "state/qlib-candidate-shadow" / registry["candidate_tag"] / (style_experiment["signal_date"] + ".json")
+        if report.exists():
+            style_experiment["planned_trade_date"] = json.loads(report.read_text(encoding="utf-8")).get("planned_trade_date")
     return {
         "status": status.get("status", "BLOCKED_NOT_FINAL_V2"),
+        "style_experiment": style_experiment,
         "version": directory.name,
         "stages": stages,
         "annual_accounting": rows,

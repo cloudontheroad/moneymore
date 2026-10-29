@@ -241,6 +241,9 @@ def execute_portfolio_candidate_open(
     *, root, store, broker, config, candidate, provider, trade_date, now=None
 ):
     from .qlib_challenger_daily import _record_account_history
+    from .research.style_v2_experiment import candidate_execution_config, execution_policy_hash
+
+    config = candidate_execution_config(config, candidate)
 
     tag, account = str(candidate["candidate_tag"]), str(candidate["account_id"])
     if candidate.get("validation_hold"):
@@ -268,6 +271,18 @@ def execute_portfolio_candidate_open(
     if trade_date not in calendar or calendar[calendar.index(trade_date) - 1] != path.stem:
         return {"status": "STALE_SIGNAL_PLAN", "account_id": account}
     plan = json.loads(path.read_text(encoding="utf-8"))
+    if candidate.get("execution_policy") and (
+        plan.get("execution_policy_sha256") != execution_policy_hash(candidate)
+        or plan.get("execution_slippage_bps") != config.slippage_bps
+    ):
+        return {"status": "EXECUTION_POLICY_PLAN_MISMATCH", "account_id": account}
+    if candidate.get("factor_policy", {}).get("experimental_linear_model"):
+        from .research.style_v2_experiment import validate_experiment
+
+        validate_experiment(root, candidate["factor_policy"])
+        expected_policy = hashlib.sha256(json.dumps(candidate["factor_policy"], sort_keys=True).encode()).hexdigest()
+        if plan.get("policy_sha256") != expected_policy or plan.get("real_orders_enabled") is not False:
+            return {"status": "EXPERIMENT_POLICY_OR_PAPER_SCOPE_CHANGED", "account_id": account}
     if candidate.get("portfolio_variant") == "factor_baseline_v2":
         created = pd.to_datetime(plan.get("created_at"), utc=True, errors="coerce")
         if pd.isna(created) or created > pd.Timestamp(local):
@@ -345,6 +360,11 @@ def execute_portfolio_candidate_open(
     styles = pd.DataFrame.from_dict(plan["styles"], orient="index")
     can_buy = {s: float(valid[s].get("up_limit", 0)) > marks[s] for s in symbols}
     can_sell = {s: 0 < float(valid[s].get("down_limit", 0)) < marks[s] for s in symbols}
+    if candidate.get("execution_policy"):
+        from .costs import execution_price
+
+        can_buy = {s: execution_price(marks[s], Side.BUY, config.slippage_bps) < float(valid[s].get("up_limit", 0)) for s in symbols}
+        can_sell = {s: 0 < float(valid[s].get("down_limit", 0)) < execution_price(marks[s], Side.SELL, config.slippage_bps) for s in symbols}
     # Missing limits are a quality block, not permission to trade.
     executable = plan_integer_execution(
         plan["target_weights"],
@@ -367,6 +387,8 @@ def execute_portfolio_candidate_open(
         "plan_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         "plan": executable,
         "price_source": getattr(provider, "name", "unknown") + "_VALID_CURRENT_QUOTE",
+        "execution_slippage_bps": config.slippage_bps,
+        "execution_policy_sha256": execution_policy_hash(candidate),
         "created_at": datetime.now(UTC).isoformat(),
         "real_orders_enabled": False,
         "quote_timestamps": {s: valid[s]["timestamp"] for s in symbols},

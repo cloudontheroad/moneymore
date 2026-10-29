@@ -136,6 +136,70 @@ def test_factor_v2_uses_same_paper_executor_without_freezing_style_budget(setup_
     assert len(args["broker"].fills(args["candidate"]["account_id"])) == 2
 
 
+def test_style_v2_frozen_contract_runs_paper_fill_and_reconciliation(setup_case):
+    import hashlib
+    import json
+    from test_style_v2_experiment import contract
+
+    args = setup_case
+    policy = contract(args["root"])
+    args["candidate"].update(portfolio_variant="factor_baseline_v2", factor_policy=policy)
+    path = args["root"] / "state/qlib-portfolio-plans/20261027/20261027.json"
+    plan = json.loads(path.read_text(encoding="utf-8"))
+    plan.update(created_at=args["now"].isoformat(), real_orders_enabled=False, freeze_budget=False,
+                policy_sha256=hashlib.sha256(json.dumps(policy, sort_keys=True).encode()).hexdigest())
+    write_diagnostic(path, plan)
+    result = execute_portfolio_candidate_open(**args)
+    assert result["status"] == "COMPLETED"
+    assert result["reconciliation"]["matched"]
+    assert len(args["broker"].fills(args["candidate"]["account_id"])) == 2
+    assert execute_portfolio_candidate_open(**args)["status"] == "COMPLETED"
+    assert len(args["broker"].fills(args["candidate"]["account_id"])) == 2
+
+
+def test_style_v2_wrong_policy_plan_cannot_submit(setup_case):
+    import json
+    from test_style_v2_experiment import contract
+
+    args = setup_case
+    args["candidate"].update(portfolio_variant="factor_baseline_v2", factor_policy=contract(args["root"]))
+    path = args["root"] / "state/qlib-portfolio-plans/20261027/20261027.json"
+    plan = json.loads(path.read_text(encoding="utf-8"))
+    plan.update(created_at=args["now"].isoformat(), real_orders_enabled=False, policy_sha256="wrong")
+    write_diagnostic(path, plan)
+    assert execute_portfolio_candidate_open(**args)["status"] == "EXPERIMENT_POLICY_OR_PAPER_SCOPE_CHANGED"
+    assert args["broker"].orders() == []
+    assert args["provider"].calls == 0
+
+
+def test_new_v2_uses_10bps_in_optimizer_and_actual_paper_fills(setup_case):
+    import json
+    from moneymore.research.style_v2_experiment import execution_policy_hash
+
+    args = setup_case
+    original = args["config"].slippage_bps
+    args["candidate"].update(portfolio_variant="factor_baseline_v2", execution_policy={"version": "test_10bps", "slippage_bps": 10, "real_orders_enabled": False})
+    path = args["root"] / "state/qlib-portfolio-plans/20261027/20261027.json"
+    plan = json.loads(path.read_text(encoding="utf-8"))
+    plan.update(created_at=args["now"].isoformat(), freeze_budget=False,
+                execution_slippage_bps=10, execution_policy_sha256=execution_policy_hash(args["candidate"]))
+    write_diagnostic(path, plan)
+    result = execute_portfolio_candidate_open(**args)
+    assert result["status"] == "COMPLETED"
+    assert result["execution_slippage_bps"] == 10
+    assert result["reconciliation"]["matched"]
+    assert all(f["price"] == pytest.approx(10.01) for f in args["broker"].fills(args["candidate"]["account_id"]))
+    assert args["config"].slippage_bps == original
+
+
+def test_new_v2_blocks_stale_2bps_plan_before_querying_quotes(setup_case):
+    args = setup_case
+    args["candidate"].update(portfolio_variant="factor_baseline_v2", execution_policy={"version": "test_10bps", "slippage_bps": 10, "real_orders_enabled": False})
+    assert execute_portfolio_candidate_open(**args)["status"] == "EXECUTION_POLICY_PLAN_MISMATCH"
+    assert args["provider"].calls == 0
+    assert args["broker"].orders() == []
+
+
 def test_factor_v2_respects_account_freeze_before_submitting(setup_case):
     import json
     args = setup_case

@@ -2,7 +2,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import DesktopExecution from "./DesktopExecution";
-import BaselineV2Release from "./BaselineV2Release";
 import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts } from "./candidate-view";
 
 type Row = Record<string, unknown>;
@@ -299,7 +298,7 @@ export default function Dashboard() {
       {page === "research" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Research sectors={sectors} models={models}/></SecurityAccountContext.Provider>}
       {page === "risk" && <MarketRiskPage risk={marketRisk} live={live??undefined} names={sectors.symbol_names}/>}
       {page === "leveraged" && <LeveragedEtfPage account={leveragedEtf}/>}
-      {page === "challenger" && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/><ChallengerEvidence challenger={challenger} showArchived={showArchivedCandidates}/><PointInTimeEvidence challenger={challenger}/><GovernanceEvidence challenger={challenger}/><LongTermReview challenger={challenger}/></SecurityAccountContext.Provider>}
+      {page === "challenger" && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/></SecurityAccountContext.Provider>}
       {page === "data" && <DataHealth quality={quality}/>}
       {page === "desktop" && <DesktopExecution names={sectors.symbol_names}/>}
       {page === "operations" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Operations bank={bank} execution={displayedExecution} operations={operations} acceptance={acceptance} intraday={intraday} live={live} names={sectors.symbol_names} onRefresh={refresh}/></SecurityAccountContext.Provider>}
@@ -441,17 +440,25 @@ function FactorBaselineV2Info({candidate,names}:{candidate:Row;names:Record<stri
   const latest=(candidate.latest??{}) as Row;
   const evidence=(latest.score_evidence??{}) as Row;
   const variants=(evidence.variants??{}) as Record<string,Row>;
-  const labels:Record<string,string>={fixed_weight_neutral_missing:"统一权重与缺失处理",size_comparable:"再加市值可比化",industry_size_comparable:"再加行业可比化（V2）"};
+  const learned=Boolean((candidate.factor_policy as Row|undefined)?.experimental_linear_model);
+  const labels:Record<string,string>={fixed_weight_neutral_missing:learned?"学习权重 · 无中性化":"统一权重与缺失处理",size_comparable:learned?"学习权重 · 市值可比化":"再加市值可比化",industry_size_comparable:learned?"学习权重 · 行业与市值可比化":"再加行业可比化（V2）"};
   const rows=Object.entries(variants).map(([id,v])=>({variant:labels[id]??id,eligible:evidence.eligible,tech:v.top_star_chinext_count,best:v.best_star_chinext_rank,size:v.score_size_correlation}));
   const current=variants.industry_size_comparable??{};
   const validation=(candidate.weight_validation??{}) as Row;
+  const styleAudit=(candidate.style_audit??{}) as Row;
+  const styleVariants=(styleAudit.variants??{}) as Record<string,Row>;
+  const styleNames:Record<string,string>={legacy_current_data_path:"旧基线流程",vendor_repaired_legacy_formula:"修正数据，沿用旧公式",fixed_weight_neutral_missing:"统一缺失处理",size_comparable:"再加市值可比化",industry_size_comparable:"再加行业可比化",learned_industry_size_comparable:"V2 · 冻结学习权重"};
+  const styleRows=Object.entries(styleVariants).map(([id,v])=>({step:styleNames[id]??id,eligible:v.eligible,growth:v.growth_board_weight,tech:v.core_information_tech_weight}));
   const scienceRows=(Array.isArray(current.star_chinext_top10)?current.star_chinext_top10 as Row[]:[]).map(row=>({...row,value:Number(row.contribution__earnings_yield??0)+Number(row.contribution__book_to_price??0)+Number(row.contribution__dividend_yield_ttm??0),quality:Number(row.contribution__roe??0),growth:Number(row.contribution__quarterly_revenue_growth??0),trend:Number(row.contribution__momentum_252_21??0)+Number(row.contribution__return_120??0),defense:Number(row.contribution__volatility_60??0)+Number(row.contribution__drawdown_120??0)}));
   return <Panel title={text(candidate.display_name)} subtitle="独立因子基线 V2 · 评分契约验收通过，不代表收益研究通过 · 不自动替换旧基线">
+    {styleRows.length>0&&<><h4>风格偏差修正验收</h4><p>候选池 {num(styleAudit.universe_size)} 只 · 有效 {num(styleAudit.eligible)} 只 · 剔除 {num(styleAudit.excluded)} 只。以下为同日、同池、相同组合规则的目标仓位对照，不是实际持仓，也不是收益比较。</p><Table rows={styleRows} columns={[["step","评分处理"],["eligible","有效候选"],["growth","创业板 / 科创板权重"],["tech","电子 / 计算机 / 通信权重"]]} format={{growth:pct,tech:pct}}/><p>板块不等于行业；核心信息科技仅指电子、计算机、通信。没有行业或板块配额。学习系数来自冻结的训练/验证流程，未按近期收益或含科比例重新挑选；仍属独立实验模拟，不自动晋级。</p></>}
+    {Array.isArray(candidate.style_exclusions)&&<details><summary>查看本轮数据剔除明细（{candidate.style_exclusions.length}）</summary><p>这些股票未参与本轮评分，不是低分淘汰；不以缺失数据触发持仓卖出。</p><Table rows={candidate.style_exclusions as Row[]} columns={[["symbol","股票"],["industry","行业"],["board","上市板块"],["exclusion_reasons","未评分原因"]]} format={{symbol:v=>security(v,names),exclusion_reasons:v=>text(v).split(";").map(x=>({INCOMPLETE_253_SESSION_HISTORY:"历史行情不足或不连续（253日）",MISSING_CORE_FACTOR:"核心因子缺失",MISSING_OR_STALE_FINANCIALS:"同报告期财务缺失",STALE_MARKET_CROSS_SECTION:"当日截面数据缺失",MISSING_OR_STALE_MARKET_METADATA:"市值/估值元数据缺失",MISSING_INDUSTRY:"行业数据缺失"}[x]??x)).join("；")}}/></details>}
     {Boolean(candidate.validation_hold)&&<><h4>尚非最终 V2：权重验证中，新委托已冻结</h4><p>训练、选参与测试分离，历史样本覆盖和权重增益均需通过；不把未通过验证的系数替换进模拟盘。当前状态：{text(validation.status)}</p><p>固定权重测试 Rank IC：{validation.test_mean_rank_ic_fixed==null?"尚未完成":modelScore(validation.test_mean_rank_ic_fixed)} · 学习权重：{validation.test_mean_rank_ic_learned==null?"尚未完成":modelScore(validation.test_mean_rank_ic_learned)} · 增益置信下界：{validation.rank_ic_improvement_ci_low==null?"尚未完成":modelScore(validation.rank_ic_improvement_ci_low)}。下界未大于零，不认定改善可靠。</p></>}
     <p>估值缺失仅在标准化信号层作中性处理，保留缺失标记，不把原始股息率当零，也不放大其他因子权重。行业与市值用于因子可比性，不规定任何行业或科创/创业板仓位。</p>
     <p>信号数据日：{text(latest.signal_date)} · 计划交易日：{text(latest.planned_trade_date)} · 独立100万元模拟账户 · 不补造上线前成交；模拟成交仅使用启用后的有效实时价格。</p>
+    {latest.execution_slippage_bps!=null&&<p>本账户模拟滑点：{num(latest.execution_slippage_bps)} bps（单边，佣金与税费另计）。用于保守评估，不代表实测滑点；旧策略的成本配置与历史收益保持不变。</p>}
     <Table rows={rows} columns={[["variant","处理对照"],["eligible","有效候选"],["tech","前十科创/创业数量"],["best","科创/创业最佳排名"],["size","评分与市值相关"]]} format={{size:num}}/>
-    <p>以下是参考评分排名，不是已成交持仓；仍为零含科也不会强制加入。当前固定因子权重尚未证明最优，后续须用独立前瞻结果和滚动验证判断。</p>
+    <p>以下是参考评分排名，不是已成交持仓；仍为零含科也不会强制加入。{styleRows.length>0?"本版使用冻结学习权重，尚未证明长期最优；保留未通过的研究诊断，依靠独立前瞻观察评审。":"当前固定因子权重尚未证明最优，后续须用独立前瞻结果和滚动验证判断。"}</p>
     <Table rows={Array.isArray(current.top)?current.top as Row[]:[]} columns={[["symbol","股票"],["industry","行业"],["score","评分"],["observed_weight","已观察因子权重"]]} format={{symbol:v=>security(v,names),score:num,observed_weight:pct}}/>
     <h4>科创 / 创业板候选的评分来源</h4>
     <p>各项为评分贡献，不是收益贡献；没有入选不等于被股票池排除。</p>
@@ -465,8 +472,6 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
   const candidateVersions = [...(challenger.candidate_observation?.candidates??[]),...(showArchived?(challenger.candidate_observation?.archived_candidates??[]):[])];
   const [selectedCandidateTag,setSelectedCandidateTag] = useState("");
   const selectedCandidate = candidateVersions.find((row)=>row.candidate_tag===selectedCandidateTag)??challenger.candidate_observation?.candidates?.find((row)=>Boolean(row.latest_trade_date))??challenger.candidate_observation?.candidates?.[0];
-  const metrics = challenger.research.metrics??[];
-  const researchGate = (challenger.research.gate??{}) as Row;
   const selected = new Set(challenger.latest.selected??[]);
   const sectorRanks: Record<string, number> = {};
   const rankedScores = (challenger.latest.scores??[]).map((row) => {
@@ -485,27 +490,19 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
   const candidateLive=live?.accounts[text(selectedCandidate?.account_id??observation?.account_id)];
   const candidatePortfolio = candidateLive?.portfolio??selectedCandidate?.latest?.portfolio??observation?.latest?.portfolio;
   const candidateEquity = Number(candidatePortfolio?.equity??1_000_000);
-  const candidateExecution=(selectedCandidate?.latest_execution??{}) as Row;
+  const candidateRunStatus=[reviewStatusName(selectedCandidate?.review_stage??observation?.status),selectedCandidate?.latest?.planned_trade_date?`计划交易日 ${text(selectedCandidate.latest.planned_trade_date)}`:"",selectedCandidate?.latest?.execution_slippage_bps!=null?`滑点 ${num(selectedCandidate.latest.execution_slippage_bps)} bps`:""].filter(Boolean).join(" · ");
   const globalView = observation?.global_strategy_view??challenger.comparison;
   return <><Intro tag="QLIB CHALLENGER LAB" title="独立策略，通过公平竞赛验证">原基线保持算法不变，因子V2与深度学习候选使用独立账户、信号、订单和持仓；不自动替换，不重写历史。</Intro>
     <CandidateSwitcher observation={observation} selectedTag={text(selectedCandidate?.candidate_tag)} onSelect={setSelectedCandidateTag} showArchived={showArchived} onShowArchived={onShowArchived}/>
-    <BaselineV2Release/>
-    {selectedCandidate?.portfolio_variant==="fixed_budget_v1"&&<Panel title={text(selectedCandidate.display_name)} subtitle="独立模拟组合实验 · 复用既有模型，未重新训练 · 不自动晋级"><p>信号来源：{text(selectedCandidate.source_candidate_tag)}。固定预算在首次实际模拟建仓时冻结；之后不递归收紧。开盘使用有效实时价格重算整数股数，原账户与历史收益不变。</p><p>计划成交日：{text(selectedCandidate.latest?.planned_trade_date)} · {text(selectedCandidate.latest?.planning_status)==="AWAITING_OPEN_REPLAN"?"已生成，等待开盘重算与模拟执行":text(selectedCandidate.latest?.planning_status)} · 最近执行：{candidateExecution.status==="COMPLETED"?`${text(candidateExecution.trade_date)} 已完成并对账`:text(candidateExecution.status??"未到执行时间")} · 收盘参考方案：{text(selectedCandidate.latest?.reference_plan_status)}</p><Table rows={(Array.isArray(selectedCandidate.latest?.orders)?selectedCandidate.latest.orders:[]) as Row[]} columns={[["symbol","股票"],["side","方向"],["quantity","参考股数"],["reference_price","参考价格"],["submit_status","执行状态"]]} format={{symbol:(v)=>security(v,names),side:(v)=>text(v)==="BUY"?"买入":"卖出",reference_price:num,submit_status:(v)=>text(v)==="AWAITING_OPEN_REPLAN"?"待开盘重算":text(v)}}/></Panel>}
-    {selectedCandidate?.portfolio_variant==="factor_baseline_v2"&&<FactorBaselineV2Info candidate={selectedCandidate} names={names}/>}
     <div className="four-col account-columns">
       <AccountColumn title="基线" badge="FACTOR BASELINE" accountId={challenger.baseline.account_id} status={text(challenger.baseline.latest.status)} equity={baselineEquity} portfolio={baselinePortfolio} orders={baselineLive?.orders??challenger.baseline.orders??[]} fills={baselineLive?.fills??challenger.baseline.fills??[]} names={names}/>
       <AccountColumn title="基线·日内执行" badge="ADAPTIVE VWAP" accountId={text(challenger.intraday_baseline?.account_id)} status={text(challenger.intraday_baseline?.status)} equity={Number(intradayLive?.portfolio.equity??challenger.intraday_baseline?.portfolio?.equity??0)} portfolio={intradayLive?.portfolio??challenger.intraday_baseline?.portfolio} orders={intradayLive?.orders??challenger.intraday_baseline?.orders??[]} fills={intradayLive?.fills??challenger.intraday_baseline?.fills??[]} names={names}/>
       <AccountColumn title="挑战者" badge="ACTIVE GRU" accountId={challenger.account_id} status={text(challenger.latest.status)} equity={challengerEquity} portfolio={challengerPortfolio} targetExposure={Number(challenger.latest.target_gross_exposure)} exposurePolicy={challenger.latest.exposure_policy as Row|undefined} orders={challengerLive?.orders??challenger.orders} fills={challengerLive?.fills??challenger.fills} names={names}/>
-      <AccountColumn title="候选者" badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={reviewStatusName(selectedCandidate?.review_stage??observation?.status)} equity={candidateEquity} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
+      <AccountColumn title={text(selectedCandidate?.display_name??"候选者")} badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={candidateRunStatus} equity={candidateEquity} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
     </div>
     <PerformanceComparisonCharts comparison={globalView} observation={observation} showArchived={showArchived}/>
-    <ChallengerDiagnostics challenger={challenger} showArchived={showArchived}/>
-    <CandidateObservation challenger={challenger} selectedTag={text(selectedCandidate?.candidate_tag)}/>
     <TradeCycleComparison challenger={challenger} names={names} candidateAccountId={selectedCandidate?.account_id}/>
-    <Panel title="统一样本外模型竞赛" subtitle="相同股票池、标签、训练切分和Top-K规则"><Table rows={metrics} columns={[["model_id","模型"],["segment","区间"],["samples","样本"],["rank_ic","Rank IC"],["rank_ic_ir","Rank ICIR"],["top_k_excess_return","Top-K超额"]]} format={{rank_ic:num,rank_ic_ir:num,top_k_excess_return:pct}}/></Panel>
     <Panel title="GRU最新全局排名" subtitle="统一候选池横截面评分；全局Top-K进入独立挑战者账户，行业仅用于归因"><Table rows={rankedScores.slice(0,30)} columns={[["instrument","证券"],["sector","行业"],["sector_rank","行业内参考排名"],["score","预测分数"],["selected","入选"]]} format={{instrument:(v)=>security(v,names),sector:(v)=>meta[text(v)]?.label??text(v),score:modelScore,selected:(v)=>v?"全局Top-K":"—"}}/></Panel>
-    <Panel title="下一交易日委托计划" subtitle="信号在收盘后生成，计划在下一交易日开盘撮合；两个日期必须分开理解"><Table rows={[{signal_date:challenger.latest.trade_date,planned_trade_date:challenger.next_trade_date,status:challenger.latest.status,gate:Boolean(researchGate.passed)?"PASSED（可申请晋级）":"BLOCKED（不可晋级）",selected:(challenger.latest.selected??[]).map((symbol:string)=>security(symbol,names)).join("、"),order_action:"实验模拟盘持续生成 T+1 委托"}]} columns={[["signal_date","信号生成日"],["planned_trade_date","计划成交日"],["status","运行状态"],["gate","研究门禁"],["selected","模型入选"],["order_action","下一步"]]}/></Panel>
-    <div className="evidence"><b>隔离边界</b><p>挑战者结果不进入M4.14正式影子验收；只有完成独立样本外、随机种子稳定性和前瞻模拟后，才允许提出模型晋级。</p><span>CHALLENGER_ONLY</span></div>
   </>;
 }
 
