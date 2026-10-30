@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-10-30T10:01:32.647791+00:00",
+  "train_end": "2010-03-30",
+  "holdout_start": "2010-03-31",
+  "canonical_parameters": {
+    "rank_window": 1260,
+    "minimum_rank_history": 504,
+    "base_exposure": 0.45,
+    "cycle_slope": 1.0,
+    "minimum_exposure": 0.1,
+    "maximum_exposure": 1.0,
+    "crash_ma_days": 250,
+    "crash_distance": -0.25,
+    "crash_multiplier": 0.5,
+    "rebalance_band": 0.12,
+    "rebalance_frequency": "monthly"
+  },
+  "bootstrap_sharpe_95pct": [
+    0.44250020627724984,
+    1.4063402490409687
+  ],
+  "production_database_touched": false
+}

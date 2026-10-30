@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import pickle
 import sqlite3
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
+from moneymore.training_artifact_checks import validate_research_checkpoint
 
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,10 +30,8 @@ def _validate_candidate(candidate_dir: Path) -> tuple[bool, str]:
     if len(model_paths) < 5:
         return False, f"only {len(model_paths)} seed models were written"
     try:
-        for model_path in model_paths[:5]:
-            with model_path.open("rb") as stream:
-                pickle.load(stream)
-    except (OSError, EOFError, pickle.UnpicklingError) as exc:
+        validate_research_checkpoint(candidate_dir)
+    except (OSError, ValueError, KeyError) as exc:
         return False, f"model artifact is unreadable: {exc}"
     return True, "validated research report and five seed models"
 
@@ -86,13 +84,14 @@ def main() -> int:
                 stderr=subprocess.STDOUT,
                 text=True,
                 check=False,
-            )
+                timeout=21600,
+            ) if not (completion_marker.parent / "_RESEARCH_COMPLETE").exists() else subprocess.CompletedProcess([], 0)
             exit_code = completed.returncode
             artifacts_valid, validation_message = _validate_candidate(
                 completion_marker.parent
             )
             if (
-                exit_code == 3221226505
+                exit_code in (3221226505, -1073740791)
                 and artifacts_valid
             ):
                 log.write(
@@ -107,6 +106,37 @@ def main() -> int:
                 error = error or f"research process exited with code {exit_code}"
             else:
                 log.write(f"Candidate validation passed: {validation_message}.\n")
+                candidate = completion_marker.parent
+                context = json.loads((candidate / "market-context.json").read_text(encoding="utf-8"))
+                as_of = context["expected_session"]
+                proof = candidate / "weekly-suspension-proof.parquet"
+                def run_step(script, arguments, evidence, validator, timeout=21600):
+                    if evidence.exists() and validator():
+                        return
+                    result = subprocess.run([sys.executable, str(ROOT / "scripts" / script), *arguments],
+                        cwd=ROOT, env={**os.environ, "PYTHONUTF8": "1", "PYTHONUNBUFFERED": "1"},
+                        stdout=log, stderr=subprocess.STDOUT, check=False, timeout=timeout)
+                    if result.returncode not in (0, 3221226505, -1073740791) or not evidence.exists() or not validator():
+                        raise RuntimeError(f"weekly postprocess failed: {script}, exit={result.returncode}")
+                run_step("collect_weekly_suspension_proof.py", ["--context", str(candidate / "market-context.json"),
+                    "--output", str(proof)], proof, lambda: proof.stat().st_size > 0, timeout=180)
+                refit = candidate / "latest-refit"
+                refit_manifest = refit / "manifest.json"
+                def refit_complete():
+                    if not refit_manifest.exists():
+                        return False
+                    result = json.loads(refit_manifest.read_text(encoding="utf-8"))
+                    return result.get("status") == "COMPLETED_ISOLATED_REFIT_NOT_RELEASED" and len(result.get("trained_models", [])) == 6
+                run_step("refit_latest_challenger.py", ["--research-dir", str(candidate), "--as-of", as_of,
+                    "--output", str(refit), "--suspension-proof", str(proof), "--execute"], refit_manifest, refit_complete)
+                review = candidate / "selection-review"
+                review_path = review / "review.json"
+                def review_complete():
+                    return len(json.loads(review_path.read_text(encoding="utf-8")).get("models", [])) == 8
+                run_step("build_weekly_selection_review.py", ["--research-dir", str(candidate),
+                    "--models-dir", str(refit / "models"), "--as-of", as_of, "--output", str(review)],
+                    review_path, review_complete, timeout=1800)
+                log.write("Weekly latest refit and model/style/risk review completed; no automatic model promotion.\n")
                 completion_marker.write_text(
                     f"schedule_key={schedule_key}\n"
                     f"run_id={args.run_id}\n"
@@ -115,6 +145,7 @@ def main() -> int:
                 )
     except Exception as exc:  # noqa: BLE001 - durable job boundary
         error = f"{type(exc).__name__}: {exc}"
+        exit_code = 1
     finished_at = datetime.now(SHANGHAI).isoformat()
     status = "COMPLETED" if exit_code == 0 and error is None else "FAILED"
     with sqlite3.connect(args.database) as connection:

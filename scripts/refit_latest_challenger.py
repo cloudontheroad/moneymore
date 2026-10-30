@@ -5,6 +5,8 @@ import argparse
 import hashlib
 import json
 import pickle
+import os
+import sys
 from datetime import datetime, UTC
 from pathlib import Path
 
@@ -157,6 +159,11 @@ def main():
             "meaning": "same architecture/inputs, research training cutoff versus latest mature labels; not performance proof"}
         manifest["status"] = "COMPLETED_ISOLATED_REFIT_NOT_RELEASED"
         save()
+        if os.name == "nt":
+            # Exit with live CUDA locals still held, after durable completion.
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os._exit(0)
     except Exception as exc:
         manifest.update(status="FAILED", error=f"{type(exc).__name__}: {exc}")
         save()

@@ -138,6 +138,8 @@ def run_qlib_challenger_daily(
     experimental_paper_enabled = bool(
         execution_policy.get("experimental_paper_enabled", True)
     )
+    if account_id == QLIB_CHALLENGER_ACCOUNT and deployment.get("lifecycle") == "RETIRED":
+        experimental_paper_enabled = False
     universe = challenger_universe(root, store)
     frame = build_challenger_dataset(
         store,

@@ -155,6 +155,8 @@ def fit_and_evaluate(model_id: str, model: object) -> tuple[dict[str, object], o
             selected_rounds[model_id] = int(model.model.best_iteration or model.model.current_iteration())
         predictions = model.predict(dataset, "test")
         labels = dataset.prepare("test", "label").iloc[:, 0]
+        pd.concat([predictions.rename("score"), labels.rename("sector_relative_label")], axis=1).to_parquet(
+            MODELS.parent / f"{model_id}-test-predictions.parquet")
         result = evaluate_predictions(
             predictions,
             labels,

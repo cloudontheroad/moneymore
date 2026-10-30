@@ -516,6 +516,13 @@ class PaperBroker:
         return len(keys)
 
     def _candidate_frozen(self, account_id: str) -> bool:
+        if account_id == "qlib_gru_shadow":
+            deployment = self.database.parent / "qlib-governance" / "deployment.json"
+            if deployment.exists():
+                try:
+                    return json.loads(deployment.read_text(encoding="utf-8")).get("lifecycle") == "RETIRED"
+                except (OSError, ValueError):
+                    return True
         if not account_id.startswith("qlib_candidate_"):
             return False
         from ..candidate_lifecycle import trading_allowed

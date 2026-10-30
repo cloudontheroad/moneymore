@@ -81,7 +81,7 @@ type LeveragedEtfPaper = {
   account_id:string; strategy_id:string; initial_cash:number; currency:string; status:string;
   cash:number; market_value:number; equity:number; total_return:number; drawdown:number;
   positions:Row[]; latest_signal:(Row & { indicators?:Row })|null;
-  orders:Row[]; fills:Row[]; history:Row[]; data_source:string; execution_policy:string;
+  orders:Row[]; fills:Row[]; history:Row[]; benchmark_history?:Row[]; data_source:string; execution_policy:string;
   scheduler?:Row;
 };
 type SecurityHistory = {
@@ -310,14 +310,18 @@ function LeveragedEtfPage({account}:{account:LeveragedEtfPaper}) {
   const signal=account.latest_signal;
   const indicators=signal?.indicators??{};
   const allocationRows=signal?[{asset:"TQQQ",weight:signal.tqqq},{asset:"SQQQ",weight:signal.sqqq},{asset:"美元现金",weight:signal.cash}]:[];
-  const history=account.history.map((row)=>({...row,normalized_nav:Number(row.equity)/account.initial_cash}));
+  const benchmark=account.benchmark_history??[];
+  const commonStart=text(benchmark[0]?.trade_date??account.history[0]?.trade_date);
+  const strategyAtStart=account.history.find((row)=>text(row.trade_date)===commonStart)??account.history[0];
+  const startEquity=Number(strategyAtStart?.equity??account.initial_cash);
+  const history=account.history.filter((row)=>text(row.trade_date)>=commonStart).map((row)=>({...row,normalized_nav:Number(row.equity)/startEquity}));
   return <>
-    <section className="portfolio-hero leveraged-hero"><div><small>ISOLATED US ETF PAPER ACCOUNT</small><h2>TQQQ / SQQQ / Cash</h2><p>V5A 信号 · 连续波动预算 · 快速降险 / 渐进加仓 / 无交易带</p></div><div className="exposure"><span>账户净值</span><b>{usd(account.equity)}</b><small>初始资金 {usd(account.initial_cash)} · {account.status}</small></div></section>
+    <section className="portfolio-hero leveraged-hero"><div><small>ISOLATED US ETF PAPER ACCOUNT</small><h2>TQQQ Cycle / Cash</h2><p>五年恐慌分位 · 10年期利率动量 · 深度崩盘保护 · 月度滞回再平衡</p></div><div className="exposure"><span>账户净值</span><b>{usd(account.equity)}</b><small>初始资金 {usd(account.initial_cash)} · {account.status}</small></div></section>
     <section className="kpis"><Kpi label="累计收益" value={pct(account.total_return)} note="仅此独立美元账户" accent/><Kpi label="当前回撤" value={pct(account.drawdown)} note="相对账户历史峰值"/><Kpi label="美元现金" value={usd(account.cash)} note={`市值 ${usd(account.market_value)}`}/><Kpi label="最新信号" value={text(signal?.regime??"等待首次运行")} note={`${text(signal?.signal_date)} · 调度${account.scheduler?.running?"正常":"停止"}`}/></section>
     <Panel title="美股独立调度" subtitle="服务启动立即补齐缺失交易日；按 America/New_York 自动处理夏令时，不依赖 A 股流水线"><Table rows={account.scheduler?[account.scheduler]:[]} columns={[["running","运行中"],["last_startup_run","启动补跑"],["open_schedule","开盘执行"],["close_schedule","收盘计算"],["last_open_run","最近开盘任务"],["last_close_run","最近收盘任务"],["last_error","最近错误"]]} format={{running:(value)=>value?"是":"否"}}/></Panel>
-    <div className="two-col"><Panel title="最新目标配置" subtitle="收盘生成目标；下一交易日开盘成交，不使用未来数据"><Table rows={allocationRows} columns={[["asset","资产"],["weight","目标权重"]]} format={{weight:pct}}/></Panel><Panel title="仓位与信号诊断" subtitle="50%目标持仓波动 · 7%无交易带 · 每日最多加仓10个百分点"><Table rows={signal?[{base_tqqq:indicators.base_tqqq,target_tqqq:signal.tqqq,risk_scalar:indicators.risk_scalar,position_vol:indicators.estimated_position_volatility,qqq_close:indicators.qqq_close,ma180:indicators.ma180,vix:indicators.vix,macd:indicators.macd_histogram,score:signal.score}]:[]} columns={[["base_tqqq","V5A原始仓位"],["target_tqqq","管理后仓位"],["risk_scalar","波动缩放"],["position_vol","估算持仓波动"],["qqq_close","QQQ"],["ma180","MA180"],["vix","VIX"],["macd","MACD柱"],["score","评分"]]} format={{base_tqqq:pct,target_tqqq:pct,risk_scalar:pct,position_vol:pct,qqq_close:num,ma180:num,vix:num,macd:num,score:num}}/></Panel></div>
+    <div className="two-col"><Panel title="最新目标配置" subtitle="收盘生成目标；下一交易日开盘成交，不使用未来数据"><Table rows={allocationRows} columns={[["asset","资产"],["weight","目标权重"]]} format={{weight:pct}}/></Panel><Panel title="周期与仓位诊断" subtitle="五年滚动分位；普通状态只在新月份首个交易日且目标变化达到12%才交易，结构性崩盘立即响应"><Table rows={signal?[{raw_target:indicators.base_tqqq,target_tqqq:signal.tqqq,fear_rank:indicators.fear_rank,rate_rank:indicators.rate_rank,term:indicators.term_structure,rate_change:indicators.rate_change_60d,qqq_close:indicators.qqq_close,ma250:indicators.ma250,distance:indicators.distance_from_ma250,score:signal.score}]:[]} columns={[["raw_target","周期原始仓位"],["target_tqqq","执行目标仓位"],["fear_rank","恐慌分位"],["rate_rank","利率友好分位"],["term","VIX期限比"],["rate_change","利率60日变化"],["qqq_close","QQQ"],["ma250","250日均线"],["distance","距长期均线"],["score","综合分位"]]} format={{raw_target:pct,target_tqqq:pct,fear_rank:num,rate_rank:num,term:num,rate_change:num,qqq_close:num,ma250:num,distance:pct,score:num}}/></Panel></div>
     <div className="two-col"><Panel title="独立持仓" subtitle="不会进入 A 股账户、风控或策略 PK"><Table rows={account.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd,unrealized_pnl:usd}}/></Panel><Panel title="待执行与历史订单" subtitle={account.execution_policy}><Table rows={account.orders.slice(0,30)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"],["reason","原因"]]} format={{target_weight:pct}}/></Panel></div>
-    <Panel title="美元账户净值" subtitle={account.data_source}>{history.length?<LineComparisonChart title="独立模拟盘净值" subtitle="以 $100,000 为 100；不与人民币账户合并" series={[{accountId:account.account_id,label:"V5A Managed Vol v1",color:"#ef7655",rows:history}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set([account.account_id])} onToggle={()=>{}}/>:<p className="empty">首次运行后开始记录每日净值</p>}</Panel>
+    <Panel title="美元账户净值" subtitle={account.data_source}>{history.length?<LineComparisonChart title="策略与满仓TQQQ参照" subtitle={`共同起点 ${commonStart} = 100；基准全程满仓持有TQQQ、不调仓`} series={[{accountId:account.account_id,label:"TQQQ Cycle v2",color:"#ef7655",rows:history},{accountId:"tqqq_buy_hold",label:"TQQQ满仓持有",color:"#6478d3",rows:benchmark}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/>:<p className="empty">首次运行后开始记录每日净值</p>}</Panel>
     <Panel title="模拟成交" subtitle="5 bps 滑点 + 1 bp 手续费"><Table rows={account.fills} columns={[["trade_date","成交日"],["signal_date","信号日"],["symbol","标的"],["side","方向"],["quantity","数量"],["price","成交价"],["fee","费用"]]} format={{price:usd,fee:usd}}/></Panel>
   </>;
 }
@@ -487,6 +491,9 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
   const baselinePortfolio = (baselineLive?.portfolio??challenger.baseline.latest.portfolio) as Row|undefined;
   const baselineEquity = Number(baselinePortfolio?.equity??1_000_000);
   const observation = challenger.candidate_observation;
+  const fixedV2 = [...(observation?.candidates??[]),...(observation?.archived_candidates??[])].find(row=>row.account_id==="qlib_candidate_20261029");
+  const fixedV2Live = live?.accounts["qlib_candidate_20261029"];
+  const fixedV2Portfolio = fixedV2Live?.portfolio??fixedV2?.latest?.portfolio;
   const candidateLive=live?.accounts[text(selectedCandidate?.account_id??observation?.account_id)];
   const candidatePortfolio = candidateLive?.portfolio??selectedCandidate?.latest?.portfolio??observation?.latest?.portfolio;
   const candidateEquity = Number(candidatePortfolio?.equity??1_000_000);
@@ -497,12 +504,12 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
     <div className="four-col account-columns">
       <AccountColumn title="基线" badge="FACTOR BASELINE" accountId={challenger.baseline.account_id} status={text(challenger.baseline.latest.status)} equity={baselineEquity} portfolio={baselinePortfolio} orders={baselineLive?.orders??challenger.baseline.orders??[]} fills={baselineLive?.fills??challenger.baseline.fills??[]} names={names}/>
       <AccountColumn title="基线·日内执行" badge="ADAPTIVE VWAP" accountId={text(challenger.intraday_baseline?.account_id)} status={text(challenger.intraday_baseline?.status)} equity={Number(intradayLive?.portfolio.equity??challenger.intraday_baseline?.portfolio?.equity??0)} portfolio={intradayLive?.portfolio??challenger.intraday_baseline?.portfolio} orders={intradayLive?.orders??challenger.intraday_baseline?.orders??[]} fills={intradayLive?.fills??challenger.intraday_baseline?.fills??[]} names={names}/>
-      <AccountColumn title="挑战者" badge="ACTIVE GRU" accountId={challenger.account_id} status={text(challenger.latest.status)} equity={challengerEquity} portfolio={challengerPortfolio} targetExposure={Number(challenger.latest.target_gross_exposure)} exposurePolicy={challenger.latest.exposure_policy as Row|undefined} orders={challengerLive?.orders??challenger.orders} fills={challengerLive?.fills??challenger.fills} names={names}/>
+      <AccountColumn title="基线V2" badge="FACTOR V2 · 1029" accountId="qlib_candidate_20261029" status={text(fixedV2?.latest?.status??"等待数据")} equity={Number(fixedV2Portfolio?.equity??1_000_000)} portfolio={fixedV2Portfolio} targetExposure={Number(fixedV2?.latest?.target_gross_exposure)} orders={fixedV2Live?.orders??fixedV2?.orders??[]} fills={fixedV2Live?.fills??fixedV2?.fills??[]} names={names}/>
       <AccountColumn title={text(selectedCandidate?.display_name??"候选者")} badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={candidateRunStatus} equity={candidateEquity} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
     </div>
     <PerformanceComparisonCharts comparison={globalView} observation={observation} showArchived={showArchived}/>
     <TradeCycleComparison challenger={challenger} names={names} candidateAccountId={selectedCandidate?.account_id}/>
-    <Panel title="GRU最新全局排名" subtitle="统一候选池横截面评分；全局Top-K进入独立挑战者账户，行业仅用于归因"><Table rows={rankedScores.slice(0,30)} columns={[["instrument","证券"],["sector","行业"],["sector_rank","行业内参考排名"],["score","预测分数"],["selected","入选"]]} format={{instrument:(v)=>security(v,names),sector:(v)=>meta[text(v)]?.label??text(v),score:modelScore,selected:(v)=>v?"全局Top-K":"—"}}/></Panel>
+    <p className="muted">原GRU挑战者已淘汰，停止新交易；历史账本保留。第三列固定为基线V2，第四列随顶部选项切换。</p>
   </>;
 }
 
@@ -516,7 +523,7 @@ function CandidateSwitcher({ observation, selectedTag, onSelect, showArchived, o
   if (!observation) return null;
   const active=observation.candidates??[];
   const rows=[...active,...(showArchived?(observation.archived_candidates??[]):[])];
-  return <div className="candidate-switcher"><b>第三列候选策略</b><select aria-label="候选策略版本" value={selectedTag} onChange={(event)=>onSelect(event.target.value)}>{rows.length===0&&<option value="">暂无活跃候选</option>}{rows.map((row)=><option key={row.candidate_tag} value={row.candidate_tag}>{candidateOptionLabel(row,reviewStatusName(row.review_stage))}</option>)}</select><button type="button" role="switch" aria-label="查看归档策略" aria-checked={showArchived} className={`candidate-archive-toggle${showArchived?" is-active":""}`} onClick={()=>{const next=!showArchived;onShowArchived(next);if(!next&&!active.some(row=>row.candidate_tag===selectedTag))onSelect(active[0]?.candidate_tag??"");}}><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 8h16v12H4zM3 4h18v4H3zM9 12h6"/></svg><span className="candidate-archive-label">查看归档</span><span className="candidate-archive-count">{observation.archived_candidates?.length??0}</span><span className="candidate-archive-track" aria-hidden="true"><i/></span></button><span>默认仅展示有效候选；20 / 40 / 60共同日评审，退出版本保留收益、委托与成交</span></div>;
+  return <div className="candidate-switcher"><b>第四列候选策略</b><select aria-label="候选策略版本" value={selectedTag} onChange={(event)=>onSelect(event.target.value)}>{rows.length===0&&<option value="">暂无活跃候选</option>}{rows.map((row)=><option key={row.candidate_tag} value={row.candidate_tag}>{candidateOptionLabel(row,reviewStatusName(row.review_stage))}</option>)}</select><button type="button" role="switch" aria-label="查看归档策略" aria-checked={showArchived} className={`candidate-archive-toggle${showArchived?" is-active":""}`} onClick={()=>{const next=!showArchived;onShowArchived(next);if(!next&&!active.some(row=>row.candidate_tag===selectedTag))onSelect(active[0]?.candidate_tag??"");}}><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 8h16v12H4zM3 4h18v4H3zM9 12h6"/></svg><span className="candidate-archive-label">查看归档</span><span className="candidate-archive-count">{observation.archived_candidates?.length??0}</span><span className="candidate-archive-track" aria-hidden="true"><i/></span></button><span>默认仅展示有效候选；20 / 40 / 60共同日评审，退出版本保留收益、委托与成交</span></div>;
 }
 
 function ChallengerDiagnostics({challenger,showArchived}:{challenger:Challenger;showArchived:boolean}) {
@@ -551,7 +558,7 @@ function TradeCycleComparison({ challenger, names, candidateAccountId }: { chall
   const accounts = [
     { id:"multi_sector_shadow", label:"因子基线" },
     { id:"multi_sector_intraday_shadow", label:"因子基线·日内执行" },
-    { id:"qlib_gru_shadow", label:"Qlib GRU 挑战者" },
+    { id:"qlib_candidate_20261029", label:"基线V2" },
     ...(candidateAccountId?[{id:candidateAccountId,label:"Qlib 候选者"}]:[]),
   ];
   const summaryRows = accounts.map(({id,label})=>({strategy:label,...(analysis[id]?.summary??{})}));
@@ -581,7 +588,7 @@ function PerformanceComparisonCharts({ comparison, observation, showArchived=fal
   const candidateNames=Object.fromEntries([...(observation?.candidates??[]),...(observation?.archived_candidates??[])].filter(row=>row.display_name).map(row=>[row.account_id,text(row.display_name)]));
   const histories = comparison.independent_histories??comparison.histories??{};
   const visibleAccounts=visibleStrategyAccounts(observation?.candidates??[],observation?.archived_candidates??[],Object.keys(chartPalette),showArchived);
-  const series = Object.entries(histories).filter(([accountId])=>visibleAccounts.has(accountId)).map(([accountId, rows],index) => ({
+  const series = Object.entries(histories).filter(([accountId])=>visibleAccounts.has(accountId)&&(accountId!=="qlib_gru_shadow"||showArchived)).map(([accountId, rows],index) => ({
     accountId,
     label: chartPalette[accountId]?.label??candidateNames[accountId]??(accountId.startsWith("qlib_candidate_")?`Qlib 候选者 ${accountId.replace("qlib_candidate_","")}`:accountId),
     color: chartPalette[accountId]?.color??candidateChartColors[index%candidateChartColors.length],

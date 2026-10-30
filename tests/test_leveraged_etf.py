@@ -10,7 +10,7 @@ from moneymore.leveraged_etf import ACCOUNT_ID, INITIAL_CASH, LeveragedEtfPaper
 
 
 def _market(direction: float = 0.001) -> dict[str, pd.DataFrame]:
-    dates = pd.bdate_range("2025-01-02", periods=240).strftime("%Y-%m-%d")
+    dates = pd.bdate_range("2023-01-02", periods=700).strftime("%Y-%m-%d")
     qqq_close = 400 * np.cumprod(np.full(len(dates), 1 + direction))
     result: dict[str, pd.DataFrame] = {}
     for symbol, close in {
@@ -18,6 +18,8 @@ def _market(direction: float = 0.001) -> dict[str, pd.DataFrame]:
         "TQQQ": 50 * np.cumprod(np.full(len(dates), 1 + direction * 3)),
         "SQQQ": 40 * np.cumprod(np.full(len(dates), 1 - direction * 3)),
         "^VIX": np.full(len(dates), 14.0),
+        "^VIX3M": np.full(len(dates), 16.0),
+        "^TNX": np.full(len(dates), 4.0),
     }.items():
         result[symbol] = pd.DataFrame(
             {
@@ -49,7 +51,7 @@ def test_bull_signal_queues_tqqq_in_isolated_account(tmp_path: Path) -> None:
     assert snapshot["account_id"] == ACCOUNT_ID
     assert snapshot["initial_cash"] == INITIAL_CASH
     assert snapshot["equity"] == INITIAL_CASH
-    assert snapshot["latest_signal"]["regime"] == "BULL"
+    assert snapshot["latest_signal"]["regime"] in {"BALANCED", "RISK_ON"}
     assert snapshot["latest_signal"]["tqqq"] > 0
     assert {row["symbol"] for row in snapshot["orders"]} == {"TQQQ"}
     assert all(row["status"] == "PENDING" for row in snapshot["orders"])
@@ -67,21 +69,14 @@ def test_same_session_is_idempotent(tmp_path: Path) -> None:
     assert second["fills"] == []
 
 
-def test_managed_layer_reduces_risk_fast_and_rebuilds_slowly() -> None:
+def test_cycle_layer_holds_inside_rebalance_band() -> None:
     calm = _market()
-    rebuilding = LeveragedEtfPaper.allocation(calm, previous_tqqq=0.20)
-    inside_band = LeveragedEtfPaper.allocation(calm, previous_tqqq=0.95)
+    raw = LeveragedEtfPaper.allocation(calm)
+    held = LeveragedEtfPaper.allocation(calm, previous_tqqq=raw.tqqq + 0.04)
 
-    assert rebuilding.base_tqqq == 1.0
-    assert rebuilding.tqqq == 0.30
-    assert inside_band.tqqq == 0.95
-
-    reduced, position_volatility, scalar = LeveragedEtfPaper.manage_tqqq(
-        base_tqqq=1.0, qqq_volatility=0.40, previous_tqqq=1.0
-    )
-    assert position_volatility == pytest.approx(1.20)
-    assert scalar < 0.50
-    assert reduced < 0.50
+    assert held.tqqq == pytest.approx(raw.tqqq + 0.04)
+    assert held.sqqq == 0.0
+    assert held.no_trade_band == 0.12
 
 
 def test_outage_replays_every_missing_us_session(tmp_path: Path) -> None:
@@ -97,6 +92,9 @@ def test_outage_replays_every_missing_us_session(tmp_path: Path) -> None:
     assert len(caught_up["history"]) == 6
     assert caught_up["fills"]
     assert caught_up["positions"]
+    assert caught_up["benchmark_history"][0]["normalized_nav"] == pytest.approx(1.0)
+    expected = float(full["TQQQ"].iloc[-1]["close"]) / float(full["TQQQ"].iloc[-6]["close"])
+    assert caught_up["benchmark_history"][-1]["normalized_nav"] == pytest.approx(expected)
 
 
 def test_storage_is_not_the_moneymore_paper_broker_schema(tmp_path: Path) -> None:

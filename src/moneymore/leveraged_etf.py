@@ -13,16 +13,19 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
+from .tqqq_cycle import latest_cycle_decision
+
 ACCOUNT_ID = "tqqq_sqqq_v5a_paper"
-STRATEGY_ID = "v5a_managed_vol_v1"
+STRATEGY_ID = "cycle_rates_fear_v2"
 INITIAL_CASH = 100_000.0
 TRADE_SYMBOLS = ("TQQQ", "SQQQ")
-DATA_SYMBOLS = ("QQQ", "TQQQ", "SQQQ", "^VIX")
+DATA_SYMBOLS = ("QQQ", "TQQQ", "SQQQ", "^VIX", "^VIX3M", "^TNX")
 NEW_YORK = ZoneInfo("America/New_York")
 
 
 @dataclass(frozen=True)
 class Allocation:
+    model_version: str
     signal_date: str
     regime: str
     tqqq: float
@@ -41,6 +44,13 @@ class Allocation:
     risk_scalar: float
     no_trade_band: float
     risk_on_step: float
+    fear_rank: float
+    rate_rank: float
+    term_structure: float
+    rate_change_60d: float
+    ma250: float
+    distance_from_ma250: float
+    crash_guard_active: bool
 
 
 class YahooDailyClient:
@@ -78,7 +88,7 @@ class YahooDailyClient:
 
 
 class LeveragedEtfPaper:
-    """Fully isolated TQQQ/SQQQ/Cash paper account and V5A-style strategy."""
+    """Fully isolated TQQQ/cash paper account using a cycle-aware strategy."""
 
     def __init__(self, database: str | Path, cache_dir: str | Path) -> None:
         self.database = Path(database)
@@ -138,7 +148,7 @@ class LeveragedEtfPaper:
     def refresh_data(self, client: YahooDailyClient | None = None) -> dict[str, pd.DataFrame]:
         client = client or YahooDailyClient()
         end = datetime.now(UTC).date().isoformat()
-        start = (datetime.now(UTC).date() - timedelta(days=900)).isoformat()
+        start = (datetime.now(UTC).date() - timedelta(days=3000)).isoformat()
         result: dict[str, pd.DataFrame] = {}
         for symbol in DATA_SYMBOLS:
             cache = self.cache_dir / f"{symbol.replace('^', '')}.csv"
@@ -157,115 +167,82 @@ class LeveragedEtfPaper:
     @staticmethod
     def _align(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
         common = set(data["QQQ"]["trade_date"].astype(str))
-        for symbol in DATA_SYMBOLS:
+        for symbol in ("TQQQ", "SQQQ"):
             common &= set(data[symbol]["trade_date"].astype(str))
         dates = sorted(common)
-        if len(dates) < 200:
-            raise RuntimeError("TQQQ/SQQQ strategy requires at least 200 aligned sessions")
-        return {
-            symbol: frame.assign(trade_date=frame["trade_date"].astype(str))
-            .loc[lambda item: item["trade_date"].isin(dates)]
-            .sort_values("trade_date")
-            .reset_index(drop=True)
-            for symbol, frame in data.items()
-        }
-
-    @staticmethod
-    def manage_tqqq(base_tqqq: float, qqq_volatility: float, previous_tqqq: float | None) -> tuple[float, float, float]:
-        """Apply the frozen managed-volatility layer to a raw V5A target."""
-        estimated_position_volatility = 3.0 * qqq_volatility
-        risk_scalar = min(1.0, 0.50 / max(estimated_position_volatility, 1e-8))
-        desired_tqqq = base_tqqq * risk_scalar
-        no_trade_band = 0.07
-        risk_on_step = 0.10
-        if previous_tqqq is None or desired_tqqq < previous_tqqq:
-            managed = desired_tqqq
-        else:
-            candidate = min(desired_tqqq, previous_tqqq + risk_on_step)
-            managed = candidate if abs(candidate - previous_tqqq) >= no_trade_band else previous_tqqq
-        return managed, estimated_position_volatility, risk_scalar
+        if len(dates) < 504:
+            raise RuntimeError("TQQQ cycle strategy requires at least 504 aligned sessions")
+        result = {}
+        for symbol, frame in data.items():
+            normalized = (
+                frame.assign(trade_date=frame["trade_date"].astype(str))
+                .drop_duplicates("trade_date", keep="last")
+                .set_index("trade_date")
+                .sort_index()
+            )
+            if symbol in ("QQQ", "TQQQ", "SQQQ"):
+                aligned = normalized.reindex(dates)
+            else:
+                aligned = normalized.reindex(normalized.index.union(dates)).sort_index().ffill().reindex(dates)
+            result[symbol] = aligned.rename_axis("trade_date").reset_index()
+        return result
 
     @staticmethod
     def allocation(
         data: dict[str, pd.DataFrame], index: int = -1, previous_tqqq: float | None = None
     ) -> Allocation:
-        qqq = data["QQQ"].copy()
-        close = qqq["close"].astype(float)
+        position = index if index >= 0 else len(data["QQQ"]) + index
+        sliced = {symbol: frame.iloc[: position + 1].copy() for symbol, frame in data.items()}
+        dates = pd.to_datetime(sliced["QQQ"]["trade_date"])
+
+        def series(symbol: str) -> pd.Series:
+            return pd.Series(
+                sliced[symbol]["close"].astype(float).to_numpy(), index=dates
+            )
+
+        close = series("QQQ")
+        vix = series("^VIX")
+        rate = series("^TNX")
+        vix3m = series("^VIX3M")
+        decision = latest_cycle_decision(
+            close, vix, rate, vix3m, previous_target=previous_tqqq
+        )
         returns = close.pct_change()
-        ma180 = close.rolling(180).mean()
-        volatility = returns.rolling(20).std() * math.sqrt(252)
+        vol = float(returns.rolling(20).std().iloc[-1] * math.sqrt(252))
         ema12 = close.ewm(span=12, adjust=False).mean()
         ema26 = close.ewm(span=26, adjust=False).mean()
         macd = ema12 - ema26
         histogram = macd - macd.ewm(span=9, adjust=False).mean()
-        slope = ma180.pct_change(20) * 100
-        vix = data["^VIX"]["close"].astype(float)
-        vix_sma20 = vix.rolling(20).mean()
-        position = index if index >= 0 else len(qqq) + index
-        values = [
-            ma180.iloc[position], volatility.iloc[position],
-            histogram.iloc[position], slope.iloc[position], vix_sma20.iloc[position],
-        ]
-        if any(pd.isna(value) for value in values):
-            raise RuntimeError("strategy indicators are not ready")
-        price = float(close.iloc[position])
-        long_ma = float(ma180.iloc[position])
-        vol = float(volatility.iloc[position])
-        hist = float(histogram.iloc[position])
-        ma_slope = float(slope.iloc[position])
-        vix_value = float(vix.iloc[position])
-        vix_average = float(vix_sma20.iloc[position])
-        below_ma = price <= long_ma
-        spike = vix_value > vix_average * 1.20
-        genuine_bear = below_ma and (
-            (vix_value > 25.0 and ma_slope < -0.04) or (spike and ma_slope < -0.04)
+        hist = float(histogram.iloc[-1])
+        ma_slope = float(close.rolling(180).mean().pct_change(20).iloc[-1] * 100)
+        vix_value = float(vix.iloc[-1])
+        vix_average = float(vix.rolling(20).mean().iloc[-1])
+        tqqq = decision.target_tqqq
+        sqqq = 0.0
+        cash = 1.0 - tqqq
+        risk_scalar = (
+            decision.raw_target / max(
+                0.45 + (decision.combined_rank / 100.0 - 0.5), 1e-8
+            )
         )
-        score = 0.0
-        if vol <= 0.20:
-            score += 20
-        elif vol < 0.35:
-            score += 20 * (1 - (vol - 0.20) / 0.15)
-        if vix_value <= 15:
-            score += 20
-        elif vix_value < 35:
-            score += 20 * (1 - (vix_value - 15) / 20)
-        score += 20 if hist > 0 else (10 if hist > -1 else 0)
-        score += 20 if ma_slope > 0.05 else (10 if ma_slope > -0.02 else 0)
-        if not below_ma:
-            score += 20
-        if genuine_bear:
-            sqqq = min(0.20, max(0.0, (long_ma - price) / long_ma * 2.5)) if hist < -1 and ma_slope < -0.10 else 0.0
-            tqqq, regime = 0.0, "BEAR_SQQQ" if sqqq else "BEAR_CASH"
-        elif below_ma and hist > 0 and ma_slope > -0.04:
-            tqqq, sqqq, regime = 0.50, 0.0, "EARLY_REENTRY"
-        else:
-            if score >= 80:
-                tqqq = 1.0
-            elif score >= 60:
-                tqqq = 0.70 + 0.30 * (score - 60) / 20
-            elif score >= 40:
-                tqqq = 0.30 + 0.40 * (score - 40) / 20
-            else:
-                tqqq = 0.0
-            sqqq, regime = 0.0, "BULL" if tqqq else "CASH"
-        base_tqqq = tqqq
-        tqqq, estimated_position_volatility, risk_scalar = LeveragedEtfPaper.manage_tqqq(
-            base_tqqq, vol, previous_tqqq
-        )
-        no_trade_band = 0.07
-        risk_on_step = 0.10
-        if sqqq > 0:
-            tqqq = 0.0
-        cash = 1 - tqqq - sqqq
         return Allocation(
-            signal_date=str(qqq.iloc[position]["trade_date"]), regime=regime,
+            model_version=STRATEGY_ID,
+            signal_date=str(sliced["QQQ"].iloc[-1]["trade_date"]), regime=decision.regime,
             tqqq=round(tqqq, 6), sqqq=round(sqqq, 6), cash=round(cash, 6),
-            score=round(score, 4), qqq_close=price, ma180=long_ma, vix=vix_value,
+            score=round(decision.combined_rank, 4), qqq_close=float(close.iloc[-1]),
+            ma180=decision.ma250, vix=vix_value,
             vix_sma20=vix_average, annualized_volatility=vol,
-            macd_histogram=hist, ma_slope=ma_slope, base_tqqq=round(base_tqqq, 6),
-            estimated_position_volatility=round(estimated_position_volatility, 6),
-            risk_scalar=round(risk_scalar, 6), no_trade_band=no_trade_band,
-            risk_on_step=risk_on_step,
+            macd_histogram=hist, ma_slope=ma_slope,
+            base_tqqq=round(decision.raw_target, 6),
+            estimated_position_volatility=round(3.0 * vol, 6),
+            risk_scalar=round(risk_scalar, 6), no_trade_band=decision.rebalance_band,
+            risk_on_step=0.0, fear_rank=round(decision.fear_rank, 4),
+            rate_rank=round(decision.rate_rank, 4),
+            term_structure=round(decision.term_structure, 6),
+            rate_change_60d=round(decision.rate_change_60d, 6),
+            ma250=round(decision.ma250, 6),
+            distance_from_ma250=round(decision.distance_from_ma250, 6),
+            crash_guard_active=decision.crash_guard_active,
         )
 
     def run(self, client: YahooDailyClient | None = None) -> dict[str, object]:
@@ -286,10 +263,15 @@ class LeveragedEtfPaper:
     def _run_aligned(self, data: dict[str, pd.DataFrame]) -> dict[str, object]:
         with self._connect() as connection:
             recent = connection.execute(
-                "SELECT signal_date, tqqq FROM signals ORDER BY signal_date DESC LIMIT 2"
+                "SELECT signal_date, tqqq, indicators_json FROM signals ORDER BY signal_date DESC LIMIT 2"
             ).fetchall()
             last_signal_date = None if not recent else str(recent[0]["signal_date"])
-            previous_tqqq = None if not recent else float(recent[0]["tqqq"])
+            latest_indicators = {} if not recent else json.loads(str(recent[0]["indicators_json"]))
+            previous_tqqq = (
+                float(recent[0]["tqqq"])
+                if recent and latest_indicators.get("model_version") == STRATEGY_ID
+                else None
+            )
         indices = [
             index
             for index, trade_date in enumerate(data["QQQ"]["trade_date"].astype(str))
@@ -311,7 +293,14 @@ class LeveragedEtfPaper:
             previous_tqqq = allocation.tqqq
         closes = {symbol: float(data[symbol].iloc[-1]["close"]) for symbol in TRADE_SYMBOLS}
         if not indices and last_signal_date == str(data["QQQ"].iloc[-1]["trade_date"]):
-            prior_tqqq = float(recent[1]["tqqq"]) if len(recent) > 1 else None
+            prior_indicators = (
+                json.loads(str(recent[1]["indicators_json"])) if len(recent) > 1 else {}
+            )
+            prior_tqqq = (
+                float(recent[1]["tqqq"])
+                if len(recent) > 1 and prior_indicators.get("model_version") == STRATEGY_ID
+                else None
+            )
             self._queue(self.allocation(data, -1, previous_tqqq=prior_tqqq), closes)
         return self.snapshot(closes)
 
@@ -457,6 +446,7 @@ class LeveragedEtfPaper:
         if latest_signal:
             latest_signal["indicators"] = json.loads(str(latest_signal.pop("indicators_json")))
         peak = max([INITIAL_CASH, *(float(row["equity"]) for row in history)])
+        benchmark_history = self._buy_hold_benchmark(history)
         return {
             "account_id": ACCOUNT_ID, "strategy_id": STRATEGY_ID,
             "initial_cash": INITIAL_CASH, "currency": "USD", "status": "PAPER_ONLY",
@@ -464,9 +454,38 @@ class LeveragedEtfPaper:
             "total_return": equity / INITIAL_CASH - 1, "drawdown": equity / peak - 1,
             "positions": positions, "latest_signal": latest_signal,
             "orders": orders, "fills": fills, "history": history,
+            "benchmark_history": benchmark_history,
             "data_source": "Yahoo Finance daily chart; cached independently",
             "execution_policy": "close signal / next session open / 5 bps slippage / 1 bp fee",
         }
+
+    def _buy_hold_benchmark(self, history: list[dict[str, object]]) -> list[dict[str, object]]:
+        """TQQQ buy-and-hold aligned to the paper account's first equity date."""
+        if not history:
+            return []
+        path = self.cache_dir / "TQQQ.csv"
+        if not path.exists():
+            return []
+        prices = pd.read_csv(path, usecols=["trade_date", "close"])
+        prices["trade_date"] = prices["trade_date"].astype(str)
+        price_by_date = dict(zip(prices["trade_date"], prices["close"], strict=False))
+        aligned = [
+            (str(row["trade_date"]), float(price_by_date[str(row["trade_date"])]))
+            for row in history
+            if str(row["trade_date"]) in price_by_date
+        ]
+        if not aligned:
+            return []
+        start_price = aligned[0][1]
+        return [
+            {
+                "trade_date": trade_date,
+                "close": close,
+                "normalized_nav": close / start_price,
+                "equity": INITIAL_CASH * close / start_price,
+            }
+            for trade_date, close in aligned
+        ]
 
     def _cached_marks(self) -> dict[str, float]:
         result: dict[str, float] = {}

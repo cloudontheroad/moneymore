@@ -56,3 +56,14 @@ test("Qlib operating page does not render research and training process panels",
   const route = source.split("\n").find(line => line.includes('page === "challenger"'));
   for (const panel of ["<ChallengerEvidence", "<PointInTimeEvidence", "<GovernanceEvidence", "<LongTermReview"]) assert.ok(!route.includes(panel), panel);
 });
+
+test("Qlib third column is fixed V2 while the fourth remains selectable", async () => {
+  const source = await readFile(new URL("Dashboard.tsx", app), "utf8");
+  const page = source.slice(source.indexOf("function ChallengerPage("), source.indexOf("function AccountColumn("));
+  assert.ok(page.includes('AccountColumn title="基线V2"'));
+  assert.ok(page.includes('accountId="qlib_candidate_20261029"'));
+  assert.ok(page.includes('selectedCandidate?.account_id'));
+  assert.ok(!page.includes('AccountColumn title="挑战者"'));
+  assert.ok(!page.includes('GRU最新全局排名'));
+  assert.ok(source.includes('第四列候选策略'));
+});
