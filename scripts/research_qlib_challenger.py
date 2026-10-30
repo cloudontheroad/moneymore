@@ -6,6 +6,7 @@ import pickle
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import qlib
@@ -27,18 +28,24 @@ from moneymore.qlib_challenger import (
     rank_blend_predictions,
 )
 from moneymore.qlib_governance import register_qlib_candidate
+from moneymore.training_time_contract import weekly_time_contract
+from moneymore.challenger_diagnostics import trading_dates
+from moneymore.weekly_market_context import market_context
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = yaml.safe_load(
     (ROOT / "configs" / "qlib_challenger.yaml").read_text(encoding="utf-8")
 )
-ARTIFACTS = ROOT / "state" / "qlib-challenger"
+ISOLATED = os.environ.get("MONEYMORE_ISOLATED_RESEARCH", "") == "1"
+ARTIFACTS = (ROOT / "state" / "weekly-learning" / "isolated-research") if ISOLATED else ROOT / "state" / "qlib-challenger"
 CANDIDATE_TAG = os.environ.get("MONEYMORE_CANDIDATE_TAG", "").strip()
 MODELS = (
     ARTIFACTS / "candidates" / CANDIDATE_TAG / "models"
     if CANDIDATE_TAG
     else ARTIFACTS / "models"
 )
+if CANDIDATE_TAG and (MODELS.parent / "_RESEARCH_COMPLETE").exists():
+    raise FileExistsError("completed candidate is frozen; choose a new candidate tag")
 MODELS.mkdir(parents=True, exist_ok=True)
 
 store = ParquetStore(ROOT / "data")
@@ -56,21 +63,44 @@ segments = {
     for name, values in CONFIG.items()
     if name in {"train", "valid", "test", "forward"}
 }
+time_contract = None
+selected_rounds = {}
 if CANDIDATE_TAG:
-    dates = sorted(frame.index.get_level_values("datetime").unique())
+    # The frame already drops immature labels. Removing another horizon from
+    # frame dates incorrectly delays training twice. Use exchange sessions.
+    # Conservatively use yesterday until a completed-session service contract
+    # is wired in; an intraday partial daily bar is never a training close.
+    as_of = (pd.Timestamp(datetime.now(ZoneInfo("Asia/Shanghai"))).normalize() - pd.Timedelta(days=1)).strftime("%Y%m%d")
+    raw_dates = store.read("daily", columns=["trade_date"])["trade_date"].astype(str)
+    available_end = raw_dates.loc[raw_dates <= as_of].max()
+    dates = pd.to_datetime([
+        d for d in trading_dates(store, available_end) if d <= available_end
+    ])
     horizon = int(CONFIG["label_horizon"])
-    matured_dates = dates[:-horizon] if len(dates) > horizon else []
-    if len(matured_dates) < 504:
-        raise RuntimeError("weekly training requires at least 504 matured trading days")
-    test_dates = matured_dates[-126:]
-    valid_dates = matured_dates[-252:-126]
-    train_dates = matured_dates[:-252]
+    time_contract = weekly_time_contract(
+        dates, as_of=datetime.now(UTC).date(), horizon=horizon
+    )
+    context_bars = store.read("daily", columns=["ts_code", "trade_date", "close"],
+        filters=[("ts_code", "in", list(universe)), ("trade_date", ">=", "20260101"), ("trade_date", "<=", as_of)])
+    market_summary, market_history = market_context(context_bars,
+        [d for d in trading_dates(store, as_of) if "20260101" <= d <= as_of],
+        universe, as_of=as_of)
+    (MODELS.parent / "market-context.json").write_text(
+        json.dumps(market_summary, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    market_history.to_parquet(MODELS.parent / "market-history.parquet")
     segments = {
-        "train": (str(train_dates[0].date()), str(train_dates[-1].date())),
-        "valid": (str(valid_dates[0].date()), str(valid_dates[-1].date())),
-        "test": (str(test_dates[0].date()), str(test_dates[-1].date())),
-        "forward": (str(dates[-horizon].date()), "2099-12-31"),
+        name: tuple(bounds)
+        for name, bounds in time_contract["research_segments"].items()
     }
+    segments["forward"] = (
+        time_contract["unmatured_features_only"][0], "2099-12-31"
+    )
+    # Research artifacts remain research-only. The latest-data refit needs its
+    # own fitter/manifest and cannot inherit this evaluation model's OOS scores.
+    (MODELS.parent / "time-contract.json").write_text(
+        json.dumps(time_contract, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 dataset = QlibPanelDataset(frame, segments)
 test_dates = frame.loc[(slice(segments["test"][0], segments["test"][1]), slice(None)), :].index.get_level_values("datetime").unique()
 evaluation_correlations = {
@@ -114,9 +144,15 @@ def fit_and_evaluate(model_id: str, model: object) -> tuple[dict[str, object], o
     with R.start(experiment_name="moneymore_qlib_challenger"):
         save_path = MODELS / f"{model_id}.bin"
         if isinstance(model, GRU):
-            model.fit(dataset, save_path=str(save_path))
+            evaluations = {}
+            model.fit(dataset, save_path=str(save_path), evals_result=evaluations)
+            valid_scores = pd.Series(evaluations.get("valid", []), dtype=float)
+            if valid_scores.empty or not valid_scores.notna().any():
+                raise RuntimeError("no finite validation scores for epoch selection")
+            selected_rounds[model_id] = int(valid_scores.idxmax()) + 1
         else:
             model.fit(dataset)
+            selected_rounds[model_id] = int(model.model.best_iteration or model.model.current_iteration())
         predictions = model.predict(dataset, "test")
         labels = dataset.prepare("test", "label").iloc[:, 0]
         result = evaluate_predictions(
@@ -250,11 +286,13 @@ payload = {
     "cuda_device": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
     "protocol": CONFIG,
     "effective_segments": segments,
+    "time_contract": time_contract,
+    "research_selected_rounds": selected_rounds,
     "candidate_tag": CANDIDATE_TAG or None,
     "metrics": metrics,
     "stability": stability,
 }
-payload["candidate_release"] = register_qlib_candidate(
+payload["candidate_release"] = {"lifecycle": "ISOLATED_RESEARCH_NOT_REGISTERED"} if ISOLATED else register_qlib_candidate(
     ROOT,
     model_id=base_model_id,
     artifact_path=ensemble_artifact,

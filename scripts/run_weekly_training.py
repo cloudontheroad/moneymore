@@ -63,34 +63,8 @@ def main() -> int:
         with args.log_path.open("a", encoding="utf-8") as log:
             log.write(f"\n[{started_at}] weekly candidate training started\n")
             log.flush()
-            qmt_python = ROOT / ".runtime" / "qmt-py311" / "Scripts" / "python.exe"
-            qmt_sync = ROOT / "scripts" / "sync_qmt_supplement.py"
-            if qmt_python.exists() and qmt_sync.exists():
-                now = datetime.now(SHANGHAI)
-                qmt_result = subprocess.run(
-                    [
-                        str(qmt_python),
-                        str(qmt_sync),
-                        "--start",
-                        f"{now.year - 1}0101",
-                        "--end",
-                        now.strftime("%Y%m%d"),
-                        "--batch-size",
-                        "100",
-                    ],
-                    cwd=ROOT,
-                    env={**os.environ, "PYTHONUTF8": "1"},
-                    stdout=log,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    check=False,
-                )
-                if qmt_result.returncode:
-                    log.write(
-                        "QMT supplemental sync unavailable; candidate training "
-                        "continues with the last valid point-in-time snapshot.\n"
-                    )
-                log.flush()
+            # MiniQMT external connectivity is retired. Data quality is audited
+            # separately; training must never initiate a legacy client session.
             candidate_tag = schedule_key.replace("-", "")
             completion_marker = (
                 ROOT
