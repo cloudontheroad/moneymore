@@ -158,10 +158,20 @@ def run_execution_replay(
                     raise ValueError("actual opening holdings lack frozen style evidence")
                 active = z.reindex(values.index).T.dot(values / values.sum())
                 bounds = pd.Series(proof["limits"]).reindex(active.index)
-                excess = float((active.abs() - bounds).max())
+                from .research.style_bounds import style_bounds
+                lower,upper=style_bounds(bounds,active.index,proof.get("lower_limits"),proof.get("upper_limits"))
+                if "style_active_lower_limits" in opening_plan and "style_active_upper_limits" in opening_plan:
+                    planned_lower=pd.Series(opening_plan["style_active_lower_limits"]).reindex(active.index)
+                    planned_upper=pd.Series(opening_plan["style_active_upper_limits"]).reindex(active.index)
+                    if (not np.isfinite(planned_lower).all() or not np.isfinite(planned_upper).all()
+                            or (lower<planned_lower-1e-12).any() or (upper>planned_upper+1e-12).any()):
+                        raise ValueError("execution style proof relaxed integer plan bounds")
+                excess = float(max((active-upper).max(),(lower-active).max()))
                 opening_audits[-1]["execution_check"].update(
                     actual_style_exposures=active.to_dict(),
                     maximum_style_excess=excess,
+                    applied_lower_style_limits=lower.to_dict(),
+                    applied_upper_style_limits=upper.to_dict(),
                     style_basis="frozen_prior_close_factors_actual_open_share_values",
                 )
                 if not np.isfinite(active).all() or not np.isfinite(bounds).all() or excess > 1e-5:

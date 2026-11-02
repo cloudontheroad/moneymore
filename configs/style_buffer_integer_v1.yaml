@@ -1,0 +1,16 @@
+scope: paired_one_session_paper_diagnostic_not_live_strategy
+probe: momentum60
+dates: ['20260923', '20260924', '20260928', '20260929', '20260930']
+capital_each_case: 1000000
+slippage_bps_each_side: 10
+commission_rate: 0.00015
+minimum_commission: 5
+integer_feasibility_seconds: 10
+integer_target_seconds: 20
+integer_mip_relative_gap: 0.01
+paired_variants: [unbuffered, buffered]
+integer_limits: propagate_frozen_asymmetric_bounds_no_relaxation
+market_gates: official_daily_limits_and_full_session_suspensions
+excluded_claims: [all_25_diagnostics_validated, sell_side_T1_validated, cross_day_CA_validated, liquidity_capacity_validated]
+unknown_or_timeout: preserve_blocked_case_no_hindsight_or_fallback
+real_orders: false

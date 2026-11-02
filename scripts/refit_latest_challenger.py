@@ -87,7 +87,7 @@ def main():
         import lightgbm as lgb
         frame = build_challenger_dataset(store, universe,
             sequence_length=int(config["sequence_length"]), label_horizon=int(config["label_horizon"]),
-            feature_count=int(config["model"]["d_feat"]))
+            feature_count=int(config["model"]["d_feat"]), label_protocol=config.get("label_protocol", "legacy_sector_relative"))
         dataset = QlibPanelDataset(frame, {"train": tuple(contract["deployment_refit"])})
         train = dataset.prepare("train", ["feature", "label"]).dropna()
         manifest.update(status="RUNNING", actual_train_end=str(train.index.get_level_values("datetime").max().date()), samples=len(train))

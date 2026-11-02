@@ -25,6 +25,102 @@ def config():
     )
 
 
+def test_explicit_style_reference_is_not_silently_replaced_with_equal_weight():
+    result = plan({"A": .75, "B": .25}, {"A": 10., "B": 10.}, limits=0.,
+        benchmark_weights={"A": .75, "B": .25}, style_controls_prestandardized=True)
+    assert result["status"] == "PASS_REFERENCE_QUOTES_ONLY"
+    assert result["style_benchmark"] == "EXPLICIT_WEIGHTS"
+    assert result["style_reference_exposures"]["style"] == -.5
+    assert result["target_quantities"] == {"A": 600, "B": 200}
+
+
+def test_missing_explicit_benchmark_weight_is_blocked():
+    result = plan({"A": .75, "B": .25}, {"A": 10., "B": 10.}, benchmark_weights={"A": 1.})
+    assert result["reason"] == "INVALID_EXPLICIT_STYLE_BENCHMARK"
+
+
+def test_integer_asymmetric_limits_are_enforced_and_reported():
+    result=plan({"A":.5,"B":.5},{"A":10.,"B":10.},limits=.5,
+        style_lower_limits={"style":0.},style_upper_limits={"style":.2},style_controls_prestandardized=True)
+    assert result["status"]=="PASS_REFERENCE_QUOTES_ONLY"
+    assert 0.-1e-5<=result["active_style_exposures"]["style"]<=.2+1e-5
+    assert result["style_active_lower_limits"]=={"style":0.}
+    assert result["style_active_upper_limits"]=={"style":.2}
+    bad=plan({"A":.5,"B":.5},{"A":10.,"B":10.},limits=.5,style_lower_limits={"style":-.6},style_upper_limits={"style":.2})
+    assert bad["reason"]=="INVALID_ASYMMETRIC_STYLE_BOUNDS"
+
+
+def test_invalid_optimality_budget_cannot_relax_constraints():
+    result = plan({"A": .5, "B": .5}, {"A": 10., "B": 10.}, mip_relative_gap=.5)
+    assert result["reason"] == "INVALID_INTEGER_OPTIMALITY_BUDGET"
+
+
+def test_declared_optimality_gap_is_reported_not_hidden():
+    result = plan({"A": .5, "B": .5}, {"A": 10., "B": 10.}, mip_relative_gap=.01)
+    assert result["status"] == "PASS_REFERENCE_QUOTES_ONLY"
+    assert result["solver_diagnostics"]["requested_relative_gap"] == .01
+    assert result["solver_diagnostics"]["mip_gap"] <= .01
+
+
+def test_feasibility_witness_is_never_a_paper_order_plan():
+    result = plan({"A": .5, "B": .5}, {"A": 10., "B": 10.}, diagnostic_feasibility_only=True)
+    assert result["status"] == "FEASIBLE_WITNESS_NOT_TARGET_PLAN"
+    assert result["estimated_cash"] >= 0
+    with pytest.raises(ValueError):
+        paper_intents_from_integer_plan(result, "research", "20261102")
+
+
+def test_parameterized_warm_start_keeps_same_problem_and_contract(monkeypatch):
+    import cvxpy as cp
+    original = cp.Problem.solve
+    calls = []
+    def observe(problem, *args, **kwargs):
+        calls.append((id(problem), kwargs.get("warm_start")))
+        return original(problem, *args, **kwargs)
+    monkeypatch.setattr(cp.Problem, "solve", observe)
+    result = plan({"A": .75, "B": .25}, {"A": 10., "B": 10.}, limits=0.,
+        benchmark_weights={"A": .75, "B": .25}, style_controls_prestandardized=True,
+        research_staged_warm_start=True)
+    assert result["status"] == "PASS_REFERENCE_QUOTES_ONLY"
+    assert calls[0][0] == calls[1][0] and calls[1][1] is True
+    assert result["warm_start_diagnostics"]["same_problem_and_constraints"]
+    assert result["target_quantities"] == {"A": 600, "B": 200}
+
+
+def test_warm_target_timeout_does_not_promote_seed_or_incumbent(monkeypatch):
+    import cvxpy as cp
+    original = cp.Problem.solve
+    calls = []
+    def timeout_target(problem, *args, **kwargs):
+        calls.append(problem)
+        if len(calls) == 2:
+            problem._status = "user_limit"
+            return float("inf")
+        return original(problem, *args, **kwargs)
+    monkeypatch.setattr(cp.Problem, "solve", timeout_target)
+    result = plan({"A": .5, "B": .5}, {"A": 10., "B": 10.}, research_staged_warm_start=True)
+    assert result["status"] == "BLOCKED"
+    assert result["reason"] == "INTEGER_FEASIBILITY_USER_LIMIT"
+    assert result["orders"] == []
+    assert result["warm_start_diagnostics"]["seed_status"] == "optimal"
+
+
+@pytest.mark.parametrize("reference,budget,feasible", [(.37, 0., False), (.375, 0., True), (.37, .005, True), (.37, .01, True)])
+def test_finite_lot_grid_contract(reference, budget, feasible):
+    # At these prices/cash at most nine lots fit after fees. 37/100 cannot
+    # be formed; 3/8 can. Do not conflate exact neutrality with solvability.
+    exact_witnesses = [(a, b) for a in range(10) for b in range(10)
+        if 0 < a+b <= 9 and abs(b/(a+b)-reference) <= budget+1e-8]
+    benchmark = {"A": 1-reference, "B": reference}
+    result = plan_integer_execution(benchmark, {"A": 10., "B": 10.}, {}, {}, 10000., 10000., config(),
+        pd.DataFrame({"unknown_optional": [0., 1.]}, index=["A", "B"]), {"unknown_optional": budget},
+        benchmark_weights=benchmark, style_controls_prestandardized=True, time_limit=5.)
+    assert bool(exact_witnesses) == feasible
+    assert (result["status"] == "PASS_REFERENCE_QUOTES_ONLY") == feasible
+    if not feasible:
+        assert result["reason"] == "INTEGER_FEASIBILITY_INFEASIBLE"
+
+
 @pytest.mark.parametrize("secondary_exception", [False, True])
 def test_secondary_failure_preserves_certified_primary_plan(monkeypatch, secondary_exception):
     import cvxpy as cp

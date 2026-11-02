@@ -34,7 +34,7 @@ from moneymore.weekly_market_context import market_context
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = yaml.safe_load(
-    (ROOT / "configs" / "qlib_challenger.yaml").read_text(encoding="utf-8")
+    Path(os.environ.get("MONEYMORE_RESEARCH_CONFIG", str(ROOT / "configs" / "qlib_challenger.yaml"))).read_text(encoding="utf-8")
 )
 ISOLATED = os.environ.get("MONEYMORE_ISOLATED_RESEARCH", "") == "1"
 ARTIFACTS = (ROOT / "state" / "weekly-learning" / "isolated-research") if ISOLATED else ROOT / "state" / "qlib-challenger"
@@ -57,6 +57,7 @@ frame = build_challenger_dataset(
     sequence_length=int(CONFIG["sequence_length"]),
     label_horizon=int(CONFIG["label_horizon"]),
     feature_count=int(CONFIG["model"]["d_feat"]),
+    label_protocol=CONFIG.get("label_protocol", "legacy_sector_relative"),
 )
 segments = {
     name: (values["start"], values["end"])
@@ -101,7 +102,16 @@ if CANDIDATE_TAG:
         json.dumps(time_contract, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+if CONFIG.get("learn_blend_weights"):
+    validation_dates = pd.DatetimeIndex(dates)
+    validation_dates = validation_dates[(validation_dates >= pd.Timestamp(segments["valid"][0])) & (validation_dates <= pd.Timestamp(segments["valid"][1]))]
+    split = len(validation_dates) // 2
+    segments["blend"] = (str(validation_dates[split].date()), segments["valid"][1])
+    segments["valid"] = (segments["valid"][0], str(validation_dates[split-int(CONFIG["label_horizon"])-1].date()))
+    time_contract["research_segments"] = dict(segments)
+    (MODELS.parent / "time-contract.json").write_text(json.dumps(time_contract, indent=2), encoding="utf-8")
 dataset = QlibPanelDataset(frame, segments)
+blend_predictions = {}
 test_dates = frame.loc[(slice(segments["test"][0], segments["test"][1]), slice(None)), :].index.get_level_values("datetime").unique()
 evaluation_correlations = {
     pd.Timestamp(date): trailing_return_correlation(
@@ -154,8 +164,10 @@ def fit_and_evaluate(model_id: str, model: object) -> tuple[dict[str, object], o
             model.fit(dataset)
             selected_rounds[model_id] = int(model.model.best_iteration or model.model.current_iteration())
         predictions = model.predict(dataset, "test")
-        labels = dataset.prepare("test", "label").iloc[:, 0]
-        pd.concat([predictions.rename("score"), labels.rename("sector_relative_label")], axis=1).to_parquet(
+        if CONFIG.get("learn_blend_weights"):
+            blend_predictions[model_id] = model.predict(dataset, "blend")
+        labels = dataset.prepare("test", "evaluation_label" if CONFIG.get("label_protocol", "legacy_sector_relative") != "legacy_sector_relative" else "label").iloc[:, 0]
+        pd.concat([predictions.rename("score"), labels.rename("evaluation_label")], axis=1).to_parquet(
             MODELS.parent / f"{model_id}-test-predictions.parquet")
         result = evaluate_predictions(
             predictions,
@@ -217,14 +229,22 @@ for seed in CONFIG["model"]["seeds"]:
     deployment_models.append(f"{seed_model_id}.pkl")
 
 ensemble_config = CONFIG.get("ensemble", {})
+member_weights = {"qlib_lightgbm_alpha360_v1": float(ensemble_config.get("lightgbm_weight", .5)),
+    **{Path(name).stem: float(ensemble_config.get("gru_weight", .5))/len(deployment_models) for name in deployment_models}}
+blend_fit = None
+if CONFIG.get("learn_blend_weights"):
+    from moneymore.challenger_objectives import fit_rank_blend
+    blend_fit = fit_rank_blend(blend_predictions, dataset.prepare("blend", "label").iloc[:, 0])
+    member_weights = blend_fit["weights"]
+    (MODELS.parent / "blend-validation.json").write_text(json.dumps(blend_fit, indent=2), encoding="utf-8")
 ensemble_predictions = rank_blend_predictions([
-    (lightgbm_predictions, float(ensemble_config.get("lightgbm_weight", 0.5))),
+    (lightgbm_predictions, member_weights["qlib_lightgbm_alpha360_v1"]),
     *[
-        (prediction, float(ensemble_config.get("gru_weight", 0.5)) / len(seed_predictions))
-        for prediction in seed_predictions
+        (prediction, member_weights[Path(filename).stem])
+        for prediction, filename in zip(seed_predictions, deployment_models)
     ],
 ])
-labels = dataset.prepare("test", "label").iloc[:, 0]
+labels = dataset.prepare("test", "evaluation_label" if CONFIG.get("label_protocol", "legacy_sector_relative") != "legacy_sector_relative" else "label").iloc[:, 0]
 ensemble_metrics = metrics_payload(
     evaluate_predictions(
         ensemble_predictions,
@@ -265,9 +285,9 @@ ensemble_artifact.write_text(
     json.dumps({
         "method": "daily_rank_blend",
         "models": [
-            {"filename": "qlib_lightgbm_alpha360_v1.pkl", "weight": float(ensemble_config.get("lightgbm_weight", 0.5))},
+            {"filename": "qlib_lightgbm_alpha360_v1.pkl", "weight": member_weights["qlib_lightgbm_alpha360_v1"]},
             *[
-                {"filename": filename, "weight": float(ensemble_config.get("gru_weight", 0.5)) / len(deployment_models)}
+                {"filename": filename, "weight": member_weights[Path(filename).stem]}
                 for filename in deployment_models
             ],
         ],
@@ -290,6 +310,7 @@ payload = {
     "effective_segments": segments,
     "time_contract": time_contract,
     "research_selected_rounds": selected_rounds,
+    "blend_fit": blend_fit,
     "candidate_tag": CANDIDATE_TAG or None,
     "metrics": metrics,
     "stability": stability,

@@ -62,6 +62,7 @@ def build_challenger_dataset(
     require_label: bool = True,
     feature_count: int = 6,
     live_as_of: str | None = None,
+    label_protocol: str = "legacy_sector_relative",
 ) -> pd.DataFrame:
     from .challenger_diagnostics import align_trading_observations, trading_dates
 
@@ -76,6 +77,7 @@ def build_challenger_dataset(
             label_horizon,
             require_label,
             feature_count,
+            label_protocol,
         )
         cached = _LIVE_DATASET_CACHE.get(cache_key)
         if cached is not None:
@@ -152,6 +154,10 @@ def build_challenger_dataset(
         future_return = close.shift(-label_horizon) / close - 1
         panel = pd.DataFrame(feature_columns)
         panel["raw_label"] = future_return
+        if label_protocol != "legacy_sector_relative":
+            signal_price = bars["close"].astype(float) if "close" in bars else close
+            panel["future_total_return"] = signal_price.shift(-label_horizon) / signal_price - 1
+            panel["trailing_risk"] = signal_price.pct_change(fill_method=None).rolling(20).std() * np.sqrt(label_horizon)
         panel["datetime"] = pd.to_datetime(bars["date"])
         panel["instrument"] = symbol
         panel["sector"] = sector
@@ -160,6 +166,9 @@ def build_challenger_dataset(
     combined["label"] = combined["raw_label"] - combined.groupby(["datetime", "sector"])[
         "raw_label"
     ].transform("mean")
+    if label_protocol != "legacy_sector_relative":
+        from .challenger_objectives import alternative_label
+        combined["label"] = alternative_label(combined, label_protocol)
     feature_names = [column for column in combined.columns if "_lag" in column]
     required = [*feature_names, *(["label"] if require_label else [])]
     combined = combined.dropna(subset=required)
@@ -175,6 +184,9 @@ def build_challenger_dataset(
     features.columns = pd.MultiIndex.from_product([["feature"], feature_names])
     labels.columns = pd.MultiIndex.from_product([["label"], ["LABEL0"]])
     result = pd.concat([features, labels], axis=1)
+    if label_protocol != "legacy_sector_relative":
+        # Comparable economic evaluation across differently scaled objectives.
+        result[("evaluation_label", "TOTAL_RETURN")] = combined["future_total_return"].astype("float32")
     if cache_key is not None:
         _LIVE_DATASET_CACHE.clear()
         _LIVE_DATASET_CACHE[cache_key] = result.copy()

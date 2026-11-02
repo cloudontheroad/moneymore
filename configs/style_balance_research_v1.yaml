@@ -1,0 +1,48 @@
+version: style_balance_research_v1_20261102
+scope: research_only
+real_orders_enabled: false
+automatic_promotion: false
+existing_accounts_unchanged: true
+known_data_through: '20261102'
+historical_results_are_exploratory: true
+fresh_forward_earliest: '20261103'
+benchmark:
+  proposed: point_in_time_top1000_float_market_cap
+  frozen_for_execution: false
+  missing_history: disclose_and_block_PIT_claim
+  compare_external_broad_index: true
+evaluation:
+  horizon_sessions: 5
+  purge_sessions: 5
+  outer_test_reused_for_selection: false
+  minimum_outer_folds: 4
+  block_bootstrap_sessions: 21
+  bootstrap_repetitions: 2000
+  bootstrap_seed: 20261102
+  rank_ic_minimum: 0.01
+  rank_ic_block_ci_lower_must_exceed: 0.0
+  cost_adjusted_excess_block_ci_lower_must_exceed: 0.0
+  comparisons: [original_baseline, baseline_v2, ridge, lightgbm, gru, learned_blend]
+  labels: [sector_total_return, absolute_total_return, risk_adjusted_total_return]
+  combination_controls: [single_validation_winner, fixed_50_50, learned_blend]
+  max_additional_parameter_trials_before_protocol_revision: 12
+  never_choose_by_lowest_technology_share: true
+costs:
+  reference_slippage_bps_each_side: 10
+  sensitivity_slippage_bps_each_side: [2, 10]
+  fees_and_tax_additional: true
+  preserve_existing_account_costs: true
+style_contract:
+  required_first: [log_size, momentum, residual_volatility, market_beta, industry]
+  subsequent: [value, quality, growth, liquidity]
+  distinguish_listing_board_from_industry: true
+  equal_sector_allocation: false
+  optimize_entire_eligible_universe: true
+  numerical_risk_budgets_status: UNFROZEN_NO_PUBLICATION
+  missing_named_factors: no_unconstrained_topk_fallback
+  native_solver_constraint_relaxation: reject
+publication:
+  requires: [predictive_evidence, style_contract, executable_replay, explicit_paper_activation]
+  observe_initial_days: 20
+  review_promotion_days: 60
+  old_challengers_retire_only_after_effectiveness_evidence: true

@@ -23,6 +23,30 @@ def _config() -> BacktestConfig:
     )
 
 
+@pytest.mark.parametrize("widen_proof",[False,True])
+def test_asymmetric_postfill_proof_cannot_be_ignored_or_widened(tmp_path,widen_proof):
+    from moneymore.research.integer_execution import plan_integer_execution
+    context={}
+    def closing(date,snapshot):
+        context["date"]=date
+        return pd.DataFrame(columns=["date","symbol","target_weight"])
+    def opening(date,snapshot,quotes):
+        if not context:return {"status":"NO_PRIOR_SIGNAL","orders":[]}
+        kwargs={"style_lower_limits":{"style":-1.1},"style_upper_limits":{"style":-.9}} if widen_proof else {}
+        plan=plan_integer_execution({"AAA":.4},quotes.open,{}, {},snapshot["cash"],snapshot["equity"],_config(),
+            pd.DataFrame({"style":[0.,1.]},index=["AAA","BBB"]),{"style":2.},**kwargs)
+        assert plan["status"]=="PASS_REFERENCE_QUOTES_ONLY"
+        plan["signal_date"]=context["date"]
+        plan["execution_style_proof"]={"standardized":{"AAA":{"style":-1.}},"limits":{"style":2.},
+            "lower_limits":{"style":-2. if widen_proof else -.5},"upper_limits":{"style":2.}}
+        return plan
+    bars=pd.DataFrame([{"date":d,"symbol":"AAA","open":10.,"close":10.} for d in ["20260105","20260106"]])
+    match="relaxed integer plan bounds" if widen_proof else "actual opening style boundary failed"
+    with pytest.raises(ValueError,match=match):
+        run_execution_replay(bars=bars,targets=pd.DataFrame(columns=["date","symbol","target_weight"]),config=_config(),
+            database=tmp_path/"asymmetric.sqlite3",strategy_id="test",account_id="test",closing_target_provider=closing,opening_plan_provider=opening)
+
+
 @pytest.mark.parametrize("corrupt_style_proof", [False, True])
 def test_opening_integer_plan_reprices_and_reconciles(tmp_path, corrupt_style_proof):
     from moneymore.research.integer_execution import plan_integer_execution

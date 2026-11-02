@@ -50,6 +50,14 @@ def plan_integer_execution(
     can_sell=None,
     time_limit=10.0,
     solver_threads=None,
+    benchmark_weights=None,
+    style_controls_prestandardized=False,
+    mip_relative_gap=0.0,
+    diagnostic_feasibility_only=False,
+    research_staged_warm_start=False,
+    research_target_time_limit=None,
+    style_lower_limits=None,
+    style_upper_limits=None,
 ):
     """Use supplied (known) quotes. Never promises execution at a future open.
 
@@ -65,6 +73,15 @@ def plan_integer_execution(
         "orders": [],
         "orders_enabled": False,
     }
+    if not np.isfinite(mip_relative_gap) or not 0 <= mip_relative_gap <= .05:
+        return blocked("INVALID_INTEGER_OPTIMALITY_BUDGET")
+    if research_staged_warm_start and diagnostic_feasibility_only:
+        return blocked("CONFLICTING_RESEARCH_SOLVER_MODES")
+    if research_target_time_limit is not None and (
+        not research_staged_warm_start or not np.isfinite(research_target_time_limit)
+        or not 0 < research_target_time_limit <= 60
+    ):
+        return blocked("INVALID_RESEARCH_TARGET_TIME_LIMIT")
     targets = pd.Series(targets, dtype=float)
     prices = pd.Series(prices, dtype=float)
     quantities = pd.Series(quantities, dtype=float)
@@ -93,9 +110,25 @@ def plan_integer_execution(
         return blocked("EMPTY_SUPPORT")
     if set(symbols) - set(styles.index):
         return blocked("MISSING_STYLE_FOR_REQUIRED_ASSET")
-    z = (styles - styles.mean()) / styles.std(ddof=0).replace(0, 1)
+    z = styles.copy() if style_controls_prestandardized else (styles - styles.mean()) / styles.std(ddof=0).replace(0, 1)
+    if not np.isfinite(z.to_numpy(float)).all() or not z.index.is_unique:
+        return blocked("INVALID_STYLE_UNIVERSE")
+    if benchmark_weights is None:
+        benchmark = z.mean().to_numpy()
+    else:
+        reference = pd.Series(benchmark_weights, dtype=float)
+        if (not reference.index.is_unique or set(reference.index) != set(z.index)
+                or not np.isfinite(reference.to_numpy()).all()
+                or (reference < 0).any() or abs(reference.sum()-1) > 1e-8):
+            return blocked("INVALID_EXPLICIT_STYLE_BENCHMARK")
+        benchmark = reference.reindex(z.index).to_numpy() @ z.to_numpy(float)
     exposure = z.reindex(symbols).to_numpy(float)
     bounds = pd.Series(style_limits).reindex(styles.columns).to_numpy(float)
+    from .style_bounds import style_bounds
+    try:
+        lower_style,upper_style=style_bounds(style_limits,styles.columns,style_lower_limits,style_upper_limits)
+    except ValueError:
+        return blocked("INVALID_ASYMMETRIC_STYLE_BOUNDS" if style_lower_limits is not None or style_upper_limits is not None else "INVALID_QUOTES_QUANTITIES_OR_STYLE_BOUNDS")
     p = prices.reindex(symbols).to_numpy(float)
     cur = quantities.reindex(symbols, fill_value=0).to_numpy(float)
     avail = available.reindex(symbols, fill_value=0).to_numpy(float)
@@ -191,13 +224,12 @@ def plan_integer_execution(
     if initial_value.sum() > 0:
         w0 = initial_value / initial_value.sum()
         constraints.append(cp.norm1(values - cp.multiply(w0, invested)) <= turnover * invested)
-    benchmark = z.mean().to_numpy()
     active_value = (exposure - benchmark).T @ values
     constraints += [
-        active_value <= cp.multiply(bounds, invested),
-        active_value >= -cp.multiply(bounds, invested),
+        active_value <= cp.multiply(upper_style.to_numpy(), invested),
+        active_value >= cp.multiply(lower_style.to_numpy(), invested),
     ]
-    options = {"time_limit": time_limit, "mip_rel_gap": 0.0}
+    options = {"time_limit": time_limit, "mip_rel_gap": float(mip_relative_gap)}
     if solver_threads is not None:
         options["threads"] = max(1, min(4, int(solver_threads)))
     primary_optimal_fallback = False
@@ -207,26 +239,54 @@ def plan_integer_execution(
         tracking = cp.norm1(values / equity - target) + cp.abs(
             cash_end / equity - (1 - targets.sum())
         )
-        first = cp.Problem(cp.Minimize(tracking), constraints)
+        objective_scale = cp.Parameter(nonneg=True, value=0. if research_staged_warm_start else 1.)
+        first = cp.Problem(cp.Minimize(0. if diagnostic_feasibility_only else objective_scale*tracking), constraints)
+        warm_start_diagnostics = None
         first.solve(solver=cp.HIGHS, **options)
+        if research_staged_warm_start:
+            seed_info = getattr(getattr(first, "solver_stats", None), "extra_stats", None)
+            warm_start_diagnostics = {"seed_status": first.status,
+                "seed_primal_solution_status": getattr(seed_info, "primal_solution_status", None),
+                "same_problem_and_constraints": True, "warm_start_requested": False}
+            if first.status != "optimal":
+                return {**blocked("WARM_START_SEED_"+first.status.upper()), "warm_start_diagnostics": warm_start_diagnostics}
+            warm_start_diagnostics["seed_tracking_l1"] = float(tracking.value)
+            if not first.is_dpp():
+                return blocked("NON_PARAMETERIZED_WARM_START_PROBLEM")
+            objective_scale.value = 1.
+            warm_start_diagnostics["warm_start_requested"] = True
+            # Same parameterized Problem preserves HiGHS' canonical ordering
+            # and solver cache; installed adapter calls setSolution on it.
+            target_options = dict(options)
+            target_options["time_limit"] = research_target_time_limit or time_limit
+            warm_start_diagnostics["target_time_limit"] = float(target_options["time_limit"])
+            first.solve(solver=cp.HIGHS, warm_start=True, **target_options)
+        info = getattr(getattr(first, "solver_stats", None), "extra_stats", None)
+        diagnostics = {"requested_relative_gap": float(mip_relative_gap), "solver_status": first.status}
+        for key in ("mip_gap", "mip_node_count", "primal_solution_status", "objective_function_value",
+                "mip_dual_bound", "num_primal_infeasibilities", "max_primal_infeasibility"):
+            value = getattr(info, key, None)
+            diagnostics[key] = float(value) if value is not None and np.isfinite(value) else None
         if first.status != "optimal":
-            return blocked("INTEGER_FEASIBILITY_" + first.status.upper())
-        best_tracking = float(tracking.value)
-        primary_values = [(v, np.array(v.value, copy=True)) for v in first.variables()]
-        constraints.append(tracking <= best_tracking + 1e-8)
-        second = cp.Problem(cp.Maximize(invested), constraints)
-        try:
-            second.solve(solver=cp.HIGHS, **options)
-            secondary_status = second.status
-        except cp.error.SolverError:
-            secondary_status = "solver_error"
-        if secondary_status != "optimal":
-            # A secondary tie-break must not erase an already optimal primary
-            # plan. Restore it, then run the SAME exact lot/cash/style checks.
-            # This is not permission to use an infeasible or timed-out primary.
-            for variable, value in primary_values:
-                variable.save_value(value)
-            primary_optimal_fallback = True
+            if diagnostics.get("primal_solution_status") == 2 and tracking.value is not None and np.isfinite(tracking.value):
+                diagnostics["unapproved_incumbent_tracking_l1"] = float(tracking.value)
+            return {**blocked("INTEGER_FEASIBILITY_" + first.status.upper()), "solver_diagnostics": diagnostics,
+                "warm_start_diagnostics": warm_start_diagnostics}
+        if not diagnostic_feasibility_only:
+            best_tracking = float(tracking.value)
+            primary_values = [(v, np.array(v.value, copy=True)) for v in first.variables()]
+            constraints.append(tracking <= best_tracking + 1e-8)
+            second = cp.Problem(cp.Maximize(invested), constraints)
+            try:
+                second.solve(solver=cp.HIGHS, **options)
+                secondary_status = second.status
+            except cp.error.SolverError:
+                secondary_status = "solver_error"
+            if secondary_status != "optimal":
+                # Preserve a certified primary result when tie-break fails.
+                for variable, value in primary_values:
+                    variable.save_value(value)
+                primary_optimal_fallback = True
     except cp.error.SolverError:
         return blocked("INTEGER_SOLVER_ERROR")
     if q.value is None or not np.isfinite(q.value).all():
@@ -293,7 +353,8 @@ def plan_integer_execution(
         or (actual_values > config.max_position_weight * equity + 0.01).any()
         or actual_invested > min(float(targets.sum()), config.max_gross_exposure) * equity + 0.01
         or actual_turnover > turnover + 1e-5
-        or (np.abs(active) > bounds + 1e-5).any()
+        or (active > upper_style.to_numpy() + 1e-5).any()
+        or (active < lower_style.to_numpy() - 1e-5).any()
     ):
         return {
             **blocked("INTEGER_POSTCHECK_CASH_COST_WEIGHT_OR_STYLE"),
@@ -305,7 +366,7 @@ def plan_integer_execution(
                     np.max(actual_values - config.max_position_weight * equity)
                 ),
                 "turnover_l1": actual_turnover,
-                "maximum_style_excess": float(np.max(np.abs(active) - bounds)),
+                "maximum_style_excess": float(max(np.max(active-upper_style.to_numpy()),np.max(lower_style.to_numpy()-active))),
                 "fee_rows": [
                     {
                         "symbol": symbols[i],
@@ -323,8 +384,10 @@ def plan_integer_execution(
             },
         }
     return {
-        "status": "PASS_REFERENCE_QUOTES_ONLY",
+        "status": "FEASIBLE_WITNESS_NOT_TARGET_PLAN" if diagnostic_feasibility_only else "PASS_REFERENCE_QUOTES_ONLY",
         "primary_optimal_fallback": primary_optimal_fallback,
+        "solver_diagnostics": diagnostics,
+        "warm_start_diagnostics": warm_start_diagnostics,
         "secondary_optimizer_status": secondary_status,
         "orders": sorted(
             orders,
@@ -342,10 +405,15 @@ def plan_integer_execution(
         "estimated_gross": actual_invested / equity,
         "turnover_l1": actual_turnover,
         "active_style_exposures": dict(zip(styles.columns, map(float, active))),
+        "style_active_lower_limits": lower_style.to_dict(),
+        "style_active_upper_limits": upper_style.to_dict(),
         "tracking_optimal_stock_value": actual_invested,
-        "tracking_l1": float(tracking.value),
+        "tracking_l1": float(np.abs(actual_values/equity-target).sum()+abs(expected_cash/equity-(1-targets.sum()))),
         "excluded_dust_target_mass": float(dust),
         "orders_enabled": False,
+        "style_benchmark": "EXPLICIT_WEIGHTS" if benchmark_weights is not None else "LEGACY_EQUAL_WEIGHT",
+        "style_reference_exposures": dict(zip(styles.columns, map(float, benchmark))),
+        "style_controls_prestandardized": style_controls_prestandardized,
         "future_prices_used": False,
         "warning": "Only valid at supplied quotes and availability; requires revalidation before execution. No real order is submitted.",
     }
