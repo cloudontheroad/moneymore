@@ -24,7 +24,7 @@ class EnhancedPolicy:
     objective_preconditioning: bool = False
 
 
-def check_weights(w, w0, wb, exposures, factor_limits, policy, tolerance=1e-5):
+def check_weights(w, w0, wb, exposures, factor_limits, policy, tolerance=1e-5, enforce_turnover=True):
     failures = []
     if not np.isfinite(w).all():
         return ["NONFINITE_WEIGHTS"]
@@ -32,7 +32,7 @@ def check_weights(w, w0, wb, exposures, factor_limits, policy, tolerance=1e-5):
         failures.append("GROSS_EXPOSURE")
     if w.min() < -tolerance or w.max() > policy.maximum_weight + tolerance:
         failures.append("WEIGHT_BOUNDS")
-    if float(np.abs(w - w0).sum()) > policy.delta + tolerance:
+    if enforce_turnover and float(np.abs(w - w0).sum()) > policy.delta + tolerance:
         failures.append("TURNOVER_LIMIT")
     if factor_limits is not None and np.any(
         np.abs((w - wb) @ exposures) > factor_limits + tolerance
@@ -53,6 +53,12 @@ def optimize_snapshot(
     style_retention: float | None = None,
     style_limits: dict[str, float] | None = None,
     solver_max_iters: int = 200,
+    benchmark_weights: pd.Series | None = None,
+    controls_prestandardized: bool = False,
+    allow_cash_bootstrap: bool = False,
+    reject_turnover_relaxation: bool = False,
+    forced_sell_symbols: set | None = None,
+    forced_hold_symbols: set | None = None,
 ) -> dict:
     """Fully-invested STOCK sleeve; current_weights and benchmark both sum to one.
 
@@ -82,9 +88,19 @@ def optimize_snapshot(
     if not set(current_weights[current_weights > 1e-10].index).issubset(symbols):
         raise ValueError("HELD_ASSET_MISSING_FROM_RISK_UNIVERSE")
     w0 = current_weights.reindex(symbols, fill_value=0).to_numpy(dtype=float)
-    if abs(w0.sum() - 1) > 1e-6 or (w0 < 0).any():
+    if set(forced_sell_symbols or ()) & set(forced_hold_symbols or ()):
+        raise ValueError('CONFLICTING_FORCED_HOLD_AND_EXIT')
+    if (set(forced_sell_symbols or ()) | set(forced_hold_symbols or ())) - set(symbols):
+        raise ValueError('FORCED_SYMBOL_MISSING_RISK')
+    cash_bootstrap = bool(allow_cash_bootstrap and np.abs(w0).sum() < 1e-12)
+    if (not cash_bootstrap and abs(w0.sum() - 1) > 1e-6) or (w0 < 0).any():
         raise ValueError("CURRENT_STOCK_SLEEVE_MUST_SUM_TO_ONE")
-    wb = np.full(len(symbols), 1 / len(symbols))
+    wb = (np.full(len(symbols), 1 / len(symbols)) if benchmark_weights is None
+          else benchmark_weights.reindex(symbols, fill_value=0).to_numpy(float))
+    if not np.isfinite(wb).all() or (wb < 0).any() or abs(wb.sum()-1)>1e-6:
+        raise ValueError('INVALID_BENCHMARK_WEIGHTS')
+    if wb.max() > policy.maximum_weight+1e-12:
+        raise ValueError('BENCHMARK_SINGLE_WEIGHT_ABOVE_CAP')
     risk = StructuredCovEstimator(
         num_factors=min(policy.num_factors, len(symbols) - 1),
         factor_model="pca",
@@ -124,7 +140,8 @@ def optimize_snapshot(
         controls = style_controls.reindex(symbols)
         if controls.empty or not np.isfinite(controls.to_numpy()).all():
             raise ValueError("INVALID_NAMED_STYLE_CONTROLS")
-        controls = (controls - controls.mean()) / controls.std(ddof=0).replace(0, 1)
+        if not controls_prestandardized:
+            controls = (controls - controls.mean()) / controls.std(ddof=0).replace(0, 1)
         factors = np.column_stack([factors, controls.to_numpy()])
         extended = np.zeros((factors.shape[1], factors.shape[1]))
         extended[: cov.shape[0], : cov.shape[1]] = cov
@@ -174,18 +191,27 @@ def optimize_snapshot(
             # r'=r/u, Cov'=Cov/u^2, lambda'=lambda*u.
             lamb=policy.lamb * objective_unit,
             delta=policy.delta,
-            b_dev=policy.maximum_weight - 1 / len(symbols),
+            b_dev=max(0., policy.maximum_weight - float(wb.max())),
             f_dev=limits,
             scale_return=True,
             epsilon=0.0,
             solver_kwargs={"max_iters": solver_max_iters},
         )
-        weights = optimizer(
-            signal.copy(), factors, cov / objective_unit**2, specific / objective_unit**2, w0, wb
-        )
+        masks = {}
+        if forced_sell_symbols:
+            masks['mfs'] = np.array([s in forced_sell_symbols for s in symbols])
+        if forced_hold_symbols:
+            masks['mfh'] = np.array([s in forced_hold_symbols for s in symbols])
+        weights = optimizer(signal.copy(), factors, cov / objective_unit**2, specific / objective_unit**2, w0, wb, **masks)
     finally:
         native.logger.removeHandler(handler)
-    failures = check_weights(weights, w0, wb, factors, limits, policy)
+    failures = check_weights(weights, w0, wb, factors, limits, policy, enforce_turnover=not cash_bootstrap)
+    if forced_sell_symbols and any(weights[i]>1e-5 for i,s in enumerate(symbols) if s in forced_sell_symbols):
+        failures.append('FORCED_EXIT_NOT_SATISFIED')
+    if forced_hold_symbols and any(abs(weights[i]-w0[i])>1e-5 for i,s in enumerate(symbols) if s in forced_hold_symbols):
+        failures.append('FORCED_HOLD_NOT_SATISFIED')
+    if reject_turnover_relaxation and any('removing turnover' in event for event in events):
+        failures.append('NATIVE_REMOVED_TURNOVER_CONSTRAINT')
     if any("optimization failed, will return" in e for e in events):
         failures.append("NATIVE_SOLVER_FALLBACK")
     if any("optimization is inaccurate" in e for e in events):
@@ -198,7 +224,7 @@ def optimize_snapshot(
         return {
             "annualized_tracking_error": float(np.sqrt(max(variance, 0) * 252)),
             "active_log_size_exposure": float(active @ log_size),
-            "effective_holdings": float(1 / np.sum(w**2)),
+            "effective_holdings": float(1 / np.sum(w**2)) if np.sum(w**2) > 0 else 0.0,
             "maximum_weight": float(w.max()),
             "holdings_above_1bp": int((w > 0.0001).sum()),
         }
@@ -211,6 +237,8 @@ def optimize_snapshot(
         "failures": failures,
         "weights": dict(zip(symbols, map(float, weights))) if not failures else {},
         "stock_sleeve_gross": 1.0,
+        "cash_bootstrap": cash_bootstrap,
+        "controls_prestandardized": controls_prestandardized,
         "turnover_l1": float(np.abs(weights - w0).sum()),
         "turnover_constraint_relaxed_by_native": any("removing turnover" in e for e in events),
         "before": metrics(w0),

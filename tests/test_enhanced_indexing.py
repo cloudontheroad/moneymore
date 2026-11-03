@@ -45,6 +45,31 @@ def test_constant_scores_and_missing_returns_are_not_imputed():
         optimize_snapshot(scores, returns, size, w0, EnhancedPolicy())
 
 
+def test_cash_bootstrap_uses_actual_empty_holdings_and_cap_reference():
+    scores,returns,size,w0=inputs()
+    reference=pd.Series(np.linspace(.07,.095,12),index=w0.index);reference/=reference.sum()
+    controls=pd.DataFrame({'industry_A':[1.]*6+[0.]*6},index=w0.index)
+    result=optimize_snapshot(scores,returns,size,pd.Series(dtype=float),EnhancedPolicy(num_factors=3,objective_preconditioning=True),
+        benchmark_weights=reference,controls_prestandardized=True,allow_cash_bootstrap=True,
+        style_controls=controls,style_limits={'industry_A':.03})
+    assert result['status']=='PASS_OFFLINE_ONLY' and result['cash_bootstrap']
+    assert result['before']['effective_holdings']==0
+    assert pd.Series(result['benchmark_weights']).equals(reference)
+    active=(pd.Series(result['weights'])-reference)@controls.industry_A
+    assert abs(active)<=.03001
+
+
+def test_explicit_exit_and_halted_holding_are_native_masks_not_missing_scores():
+    scores,returns,size,w0=inputs()
+    result=optimize_snapshot(scores,returns,size,w0,EnhancedPolicy(delta=2,num_factors=3),
+        forced_sell_symbols={'0'},forced_hold_symbols={'1'})
+    assert result['status']=='PASS_OFFLINE_ONLY'
+    assert result['weights']['0']<1e-5
+    assert abs(result['weights']['1']-w0['1'])<1e-5
+    with pytest.raises(ValueError,match='CONFLICTING'):
+        optimize_snapshot(scores,returns,size,w0,EnhancedPolicy(),forced_sell_symbols={'0'},forced_hold_symbols={'0'})
+
+
 def test_named_style_constraint_uses_native_factor_limits():
     scores, returns, size, w0 = inputs()
     styles = pd.DataFrame({"momentum": returns.tail(20).sum(), "volatility": returns.std()})

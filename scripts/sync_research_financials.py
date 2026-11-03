@@ -31,6 +31,8 @@ if __name__ == "__main__":
         max_requests=args.max_requests,
     )
     if result.get("status") != "ALREADY_RUNNING":
+        from moneymore.data.global_financials import publish_global_financials
+        result['global_publication']=publish_global_financials(root,store,args.as_of)
         comparison = build_financial_research_comparison(
             root, store, active_strategy_universe(store).symbol.tolist(), args.as_of
         )

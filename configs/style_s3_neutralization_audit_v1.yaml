@@ -1,0 +1,17 @@
+scope: fixed_two_price_only_rank_models_style_audit_not_new_model_search
+models: [ridge, lightgbm]
+continuous_controls: [log_size, book_to_price, dividend_yield, return_20, volatility_20]
+categorical_controls: [effective_date_industry, unknown_industry]
+missing_values: current_cross_section_median_plus_explicit_indicator
+ols: intercept_and_scaled_controls_svd_no_regularization_search
+industry_equal_budget: false
+listing_board_quota: false
+evaluation:
+  views: [raw_ic, score_residual_vs_raw_return, score_residual_vs_return_residual]
+  future_return_residual: evaluation_only_not_prediction
+  block_sessions: 21
+  repetitions: 2000
+  seed: 20261102
+  comparisons: 14
+orders_enabled: false
+automatic_promotion: false

@@ -87,6 +87,28 @@ def test_parameterized_warm_start_keeps_same_problem_and_contract(monkeypatch):
     assert result["target_quantities"] == {"A": 600, "B": 200}
 
 
+def test_secondary_budget_does_not_reduce_primary_precision_or_budget(monkeypatch):
+    import cvxpy as cp
+    original=cp.Problem.solve;limits=[]
+    def observe(problem,*args,**kwargs):
+        limits.append(kwargs['time_limit'])
+        return original(problem,*args,**kwargs)
+    monkeypatch.setattr(cp.Problem,'solve',observe)
+    result=plan({'A':.75,'B':.25},{'A':10.,'B':10.},time_limit=5,research_secondary_time_limit=1)
+    assert result['status']=='PASS_REFERENCE_QUOTES_ONLY'
+    assert limits==[5,1]
+    assert result['solver_diagnostics']['solver_status']=='optimal'
+
+
+def test_currency_objective_scaling_preserves_optimal_plan_and_gap_contract():
+    normal=plan({'A':.75,'B':.25},{'A':10.,'B':10.})
+    scaled=plan({'A':.75,'B':.25},{'A':10.,'B':10.},research_objective_scale=10000.)
+    assert normal['status']==scaled['status']=='PASS_REFERENCE_QUOTES_ONLY'
+    assert normal['target_quantities']==scaled['target_quantities']
+    assert abs(normal['tracking_l1']-scaled['tracking_l1'])<1e-8
+    assert scaled['solver_diagnostics']['positive_equivalent_objective_multiplier']==10000.
+
+
 def test_warm_target_timeout_does_not_promote_seed_or_incumbent(monkeypatch):
     import cvxpy as cp
     original = cp.Problem.solve

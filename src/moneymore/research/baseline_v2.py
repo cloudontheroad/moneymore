@@ -109,7 +109,7 @@ def run_baseline_v2_research(root, store, symbols, as_of):
 
         def read(self, table, **kwargs):
             if table == "fina_indicator" and self.repaired:
-                return financial[kwargs["columns"]].copy()
+                return financial[kwargs["columns"]].copy() if kwargs.get('columns') else financial.copy()
             frame = store.read(table, **kwargs)
             column = "ann_date" if table == "fina_indicator" else "trade_date"
             if column in frame:

@@ -1,0 +1,41 @@
+scope: four_fixed_episodes_exploratory_cost_style_ablation
+models: [ridge, lightgbm]
+signal_variants: [raw, contemporaneous_style_component, contemporaneous_score_residual]
+episodes: first_21_execution_sessions_after_each_outer_fold_start
+rebalance_execution_offsets: [1, 6, 11, 16]
+liquidate_execution_offset: 21
+capital_each_episode: 10000000
+slippage_bps_each_side: 10
+commission_rate: 0.00015
+minimum_commission: 5
+stamp_duty_rate: 0.0005
+transfer_fee_rate: 0.00001
+future_label_eligibility: forbidden
+style_components: computed_on_full_feature_eligible_pool_not_label_complete_subset
+unknown_execution_data: block_not_assume_tradable
+holding_membership_policy:
+  membership_source: dated_historical_pool_not_score_presence
+  risk_universe: scored_candidates_union_actual_holdings
+  exited_pool: zero_benchmark_and_explicit_exit_subject_to_all_constraints
+  in_pool_missing_score: block_rebalance_no_zero_or_stale_score_imputation
+  missing_required_risk: block_not_force_liquidate
+  historical_halt: diagnosis_only_not_permission_to_fill_prices_or_forecasts
+reference: lagged_total_cap_dated_top1000_limited_research_reference
+risk_contract:
+  quality: explicit_upper_only_v1
+  required_history_sessions: 120
+  continuous_active_limit: 0.10
+  industry_and_board_active_limit: 0.03
+  unknown_active_upper_limit: 0.01
+  single_stock_weight_limit: 0.15
+  normal_rebalance_l1_turnover_limit: 0.20
+  temporal_error_buffer: none_do_not_reuse_2026_calibration_for_2024_2025
+terminal_exit:
+  policy: attempt_full_available_liquidation_with_market_gates
+  normal_rebalance_turnover_limit_applies: false
+  blocked_exit: retain_and_report_unliquidated_positions_not_fictional_sale
+  unsettled_corporate_rights: value_and_disclose_not_spendable_cash
+dividends: gross_cash_with_explicit_rights_and_settlement_not_after_tax_investor_return
+orders_enabled: false
+automatic_promotion: false
+not_claimed: [full_year_continuous_returns, fresh_forward_evidence, independent_alpha, production_strategy]

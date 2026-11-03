@@ -149,6 +149,8 @@ def run_execution_replay(
             if not quantities_match or abs(cash_error) > 0.01:
                 raise ValueError("integer opening plan execution mismatch; research replay stopped")
             proof = opening_plan.get("execution_style_proof")
+            if proof is None and opening_plan.get("research_style_contract")=="quality_upper_only_v1":
+                raise ValueError("explicit quality execution proof missing")
             if proof is not None:
                 z = pd.DataFrame.from_dict(proof["standardized"], orient="index")
                 values = pd.Series(
@@ -159,7 +161,23 @@ def run_execution_replay(
                 active = z.reindex(values.index).T.dot(values / values.sum())
                 bounds = pd.Series(proof["limits"]).reindex(active.index)
                 from .research.style_bounds import style_bounds
-                lower,upper=style_bounds(bounds,active.index,proof.get("lower_limits"),proof.get("upper_limits"))
+                quality_proof=proof.get("quality_contract")
+                if quality_proof is not None:
+                    if opening_plan.get("research_style_contract")!="quality_upper_only_v1":
+                        raise ValueError("quality proof requires explicitly revised integer contract")
+                    from .research.quality_contract import quality_upper_only_bounds
+                    raw_controls=pd.DataFrame.from_dict(quality_proof["controls"],orient="index")
+                    reference=pd.Series(quality_proof["benchmark_weights"],dtype=float)
+                    lower,upper=quality_upper_only_bounds(raw_controls,reference,bounds,quality_proof["envelope"])
+                    centered=raw_controls-(reference.reindex(raw_controls.index) @ raw_controls)
+                    if (set(centered.index)!=set(z.index) or set(centered.columns)!=set(z.columns)
+                            or not np.allclose(centered.reindex(index=z.index,columns=z.columns),z,atol=1e-12,rtol=0)):
+                        raise ValueError("quality proof controls do not match frozen execution evidence")
+                    lower=lower.reindex(active.index);upper=upper.reindex(active.index)
+                else:
+                    if opening_plan.get("research_style_contract")=="quality_upper_only_v1":
+                        raise ValueError("explicit quality execution proof missing")
+                    lower,upper=style_bounds(bounds,active.index,proof.get("lower_limits"),proof.get("upper_limits"))
                 if "style_active_lower_limits" in opening_plan and "style_active_upper_limits" in opening_plan:
                     planned_lower=pd.Series(opening_plan["style_active_lower_limits"]).reindex(active.index)
                     planned_upper=pd.Series(opening_plan["style_active_upper_limits"]).reindex(active.index)

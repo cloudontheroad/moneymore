@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import DesktopExecution from "./DesktopExecution";
+import StyleResearchReview, { type StyleResearchReviewData } from "./StyleResearchReview";
 import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts } from "./candidate-view";
 
 type Row = Record<string, unknown>;
@@ -96,6 +97,8 @@ type MonthlyAcceptance = {
 };
 type Challenger = {
   diagnostics?: { as_of_date?:string; forward?:{ accounts?:Row[] }; style_attribution?:Row & { accounts?:(Row & { contributions?:Row; skipped_days?:Row[] })[] }; recommendations?:Row[] };
+  style_research_review?: StyleResearchReviewData | null;
+  mature_multifactor_pair?: Row & { accounts?:Row[]; historical_replay?:Row[] };
   account_id: string; research: Row & { metrics?: Row[] };
   next_trade_date?: string | null;
   forward: Row & { daily?: Row[] };
@@ -496,7 +499,7 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
   const fixedV2Portfolio = fixedV2Live?.portfolio??fixedV2?.latest?.portfolio;
   const candidateLive=live?.accounts[text(selectedCandidate?.account_id??observation?.account_id)];
   const candidatePortfolio = candidateLive?.portfolio??selectedCandidate?.latest?.portfolio??observation?.latest?.portfolio;
-  const candidateEquity = Number(candidatePortfolio?.equity??1_000_000);
+  const candidateEquity = Number(candidatePortfolio?.equity??selectedCandidate?.initial_cash??1_000_000);
   const candidateRunStatus=[reviewStatusName(selectedCandidate?.review_stage??observation?.status),selectedCandidate?.latest?.planned_trade_date?`计划交易日 ${text(selectedCandidate.latest.planned_trade_date)}`:"",selectedCandidate?.latest?.execution_slippage_bps!=null?`滑点 ${num(selectedCandidate.latest.execution_slippage_bps)} bps`:""].filter(Boolean).join(" · ");
   const globalView = observation?.global_strategy_view??challenger.comparison;
   return <><Intro tag="QLIB CHALLENGER LAB" title="独立策略，通过公平竞赛验证">原基线保持算法不变，因子V2与深度学习候选使用独立账户、信号、订单和持仓；不自动替换，不重写历史。</Intro>
@@ -505,18 +508,50 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
       <AccountColumn title="基线" badge="FACTOR BASELINE" accountId={challenger.baseline.account_id} status={text(challenger.baseline.latest.status)} equity={baselineEquity} portfolio={baselinePortfolio} orders={baselineLive?.orders??challenger.baseline.orders??[]} fills={baselineLive?.fills??challenger.baseline.fills??[]} names={names}/>
       <AccountColumn title="基线·日内执行" badge="ADAPTIVE VWAP" accountId={text(challenger.intraday_baseline?.account_id)} status={text(challenger.intraday_baseline?.status)} equity={Number(intradayLive?.portfolio.equity??challenger.intraday_baseline?.portfolio?.equity??0)} portfolio={intradayLive?.portfolio??challenger.intraday_baseline?.portfolio} orders={intradayLive?.orders??challenger.intraday_baseline?.orders??[]} fills={intradayLive?.fills??challenger.intraday_baseline?.fills??[]} names={names}/>
       <AccountColumn title="基线V2" badge="FACTOR V2 · 1029" accountId="qlib_candidate_20261029" status={text(fixedV2?.latest?.status??"等待数据")} equity={Number(fixedV2Portfolio?.equity??1_000_000)} portfolio={fixedV2Portfolio} targetExposure={Number(fixedV2?.latest?.target_gross_exposure)} orders={fixedV2Live?.orders??fixedV2?.orders??[]} fills={fixedV2Live?.fills??fixedV2?.fills??[]} names={names}/>
-      <AccountColumn title={text(selectedCandidate?.display_name??"候选者")} badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={candidateRunStatus} equity={candidateEquity} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
+      <AccountColumn title={text(selectedCandidate?.display_name??"候选者")} badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={candidateRunStatus} equity={candidateEquity} initialCash={Number(selectedCandidate?.initial_cash??1_000_000)} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orderPreview={selectedCandidate?.order_preview as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
     </div>
     <PerformanceComparisonCharts comparison={globalView} observation={observation} showArchived={showArchived}/>
+    <MaturePairSummary pair={challenger.mature_multifactor_pair} live={live} names={names} candidates={observation?.candidates??[]}/>
+    {challenger.mature_multifactor_pair?<details className="mature-history-review"><summary>S系列历史研究评审（已结项）</summary><StyleResearchReview review={challenger.style_research_review}/></details>:<StyleResearchReview review={challenger.style_research_review}/>}
     <TradeCycleComparison challenger={challenger} names={names} candidateAccountId={selectedCandidate?.account_id}/>
     <p className="muted">原GRU挑战者已淘汰，停止新交易；历史账本保留。第三列固定为基线V2，第四列随顶部选项切换。</p>
   </>;
 }
 
-function AccountColumn({ title, badge, accountId, status, equity, portfolio, targetExposure, exposurePolicy, orders, fills, names, accent=false }: { title:string; badge:string; accountId:string; status:string; equity:number; portfolio?:Row; targetExposure?:number; exposurePolicy?:Row; orders:Row[]; fills:Row[]; names:Record<string,string>; accent?:boolean }) {
+function AccountColumn({ title, badge, accountId, status, equity, portfolio, targetExposure, exposurePolicy, orderPreview, orders, fills, names, initialCash=1_000_000, accent=false }: { title:string; badge:string; accountId:string; status:string; equity:number; initialCash?:number; portfolio?:Row; targetExposure?:number; exposurePolicy?:Row; orderPreview?:Row; orders:Row[]; fills:Row[]; names:Record<string,string>; accent?:boolean }) {
   const positions = (portfolio?.positions??[]) as Row[];
   const marketValue = Number(portfolio?.market_value??0);
-  return <SecurityAccountContext.Provider value={accountId}><article className={`account-column${accent?" account-column-accent":""}`}><header><span>{badge}</span><h3>{title}</h3><small>{accountId}</small></header><div className="account-equity"><b>{money(equity)}</b><span>累计 {pct(equity/1_000_000-1)} · 仓位 {pct(equity?marketValue/equity:0)}{Number.isFinite(targetExposure)?` / 目标 ${pct(targetExposure)}`:""}</span>{exposurePolicy?.realized_volatility!=null&&<small>组合波动 {pct(exposurePolicy.realized_volatility)} · 风险目标 {pct(exposurePolicy.annual_target)}</small>}<i>{status}</i></div><h4>当前持仓 · {positions.length}</h4><Table rows={positions.slice(0,12)} columns={[["symbol","证券"],["quantity","数量"],["avg_cost","成本"],["last","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{symbol:(v)=>security(v,names),avg_cost:num,last:num,market_value:money,unrealized_pnl:money}}/><h4>最近委托</h4><Table rows={orders.slice(0,8)} columns={[["signal_date","信号日"],["symbol","证券"],["side","方向"],["status","状态"]]} format={{symbol:(v)=>security(v,names)}}/><h4>最近成交</h4><Table rows={fills.slice(-8).reverse()} columns={[["trade_date","成交日"],["symbol","股票"],["side","方向"],["quantity","数量"],["price","成交价"]]} format={{symbol:(v)=>names[text(v)]??"未知证券",price:num}}/></article></SecurityAccountContext.Provider>;
+  return <SecurityAccountContext.Provider value={accountId}><article className={`account-column${accent?" account-column-accent":""}`}>
+    <header><span>{badge}</span><h3>{title}</h3><small>{accountId}</small></header>
+    <div className="account-equity"><b>{money(equity)}</b><span>累计 {pct(equity/initialCash-1)} · 仓位 {pct(equity?marketValue/equity:0)}{Number.isFinite(targetExposure)?` / 目标 ${pct(targetExposure)}`:""}</span>{exposurePolicy?.realized_volatility!=null&&<small>组合波动 {pct(exposurePolicy.realized_volatility)} · 风险目标 {pct(exposurePolicy.annual_target)}</small>}<i>{status}</i></div>
+    <h4>当前持仓 · {positions.length}</h4><Table rows={positions.slice(0,12)} columns={[["symbol","证券"],["quantity","数量"],["avg_cost","成本"],["last","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{symbol:(v)=>security(v,names),avg_cost:num,last:num,market_value:money,unrealized_pnl:money}}/>
+    {orderPreview&&<><h4>{text(orderPreview.planned_trade_date)}计划委托 · {orderPreview.model_quality_hold?'已暂停，不可执行':'待开盘核验'}</h4><p className="empty">{orderPreview.model_quality_hold?text(orderPreview.notice):'参考价测算，尚未提交；行业与板块详见下方双路对照。'}</p><Table rows={orderPreview.orders as Row[]??[]} columns={[["symbol","证券"],["quantity","预计数量"],["reference_price","参考价"],["estimated_weight","预计仓位"]]} format={{symbol:v=>security(v,names),reference_price:num,estimated_weight:v=>`${(Number(v)*100).toFixed(2)}%`}}/></>}
+    <h4>最近委托（已提交）</h4><Table rows={orders.slice(0,8)} columns={[["signal_date","信号日"],["symbol","证券"],["side","方向"],["status","状态"]]} format={{symbol:(v)=>security(v,names)}}/>
+    <h4>最近成交</h4><Table rows={fills.slice(-8).reverse()} columns={[["trade_date","成交日"],["symbol","股票"],["side","方向"],["quantity","数量"],["price","成交价"]]} format={{symbol:(v)=>names[text(v)]??"未知证券",price:num}}/>
+  </article></SecurityAccountContext.Provider>;
+}
+
+function MaturePairSummary({pair,live,names,candidates}:{pair?:Challenger['mature_multifactor_pair'];live?:LiveAccounts|null;names:Record<string,string>;candidates:Row[]}) {
+  if(!pair)return null;
+  const accounts=pair.accounts??[];
+  const rows=accounts.map(a=>{const p=live?.accounts[text(a.account_id)]?.portfolio??a.portfolio as Row;const style=a.style as Row;return {...a,actual_gross:Number(p?.equity)?Number(p.market_value)/Number(p.equity):0,chinext:style?.chinext_weight,star:style?.star_weight,effective:style?.effective_holdings,target_count:style?.target_count_above_1bp};});
+  return <div className="mature-pair"><Panel title="成熟多因子 · 双路独立模拟" subtitle="同一个 Alpha158 + Qlib Ridge 连续预测，比较原选股与 Qlib 风格约束；每路1000万元，仅模拟观察，尚未证明预测收益优势。">
+    <Table rows={rows} columns={[["name","策略"],["signal_date","数据日"],["planned_trade_date","下一计划日"],["actual_gross","实际仓位"],["target_gross","目标仓位"],["chinext","创业板目标"],["star","科创板目标"],["target_count","目标股数"],["effective","有效持股数"]]} format={{actual_gross:pct,target_gross:pct,chinext:pct,star:pct,effective:num}}/>
+    <p className="muted">计划不等于成交：开盘行情和风险核验后才生成模拟委托。风格约束控制相对参照的风险，不设科技股配额；当前账户收益只来自实际模拟流水，不接历史回放净值。</p>
+    <div className="two-col">{accounts.map(a=>{
+      const preview=candidates.find(c=>c.account_id===a.account_id)?.order_preview as Row|undefined;
+      if(!preview)return null;
+      const industries=Object.entries(preview.industry_weights as Record<string,number>??{}).sort((a,b)=>b[1]-a[1]);
+      return <Panel key={text(a.account_id)} title={`${text(a.name)} · ${text(preview.planned_trade_date)}计划委托`} subtitle="待开盘核验 · 未提交 · 非成交记录">
+        <p>{text(preview.notice)} 参考日：{text(preview.reference_date)}</p>
+        <p>行业分布：{industries.map(([name,w])=>`${name} ${pct(w)}`).join(' · ')}</p>
+        {preview.status==='PREVIEW_BLOCKED'?<p className="error">计划测算受阻：{text(preview.reason)}</p>:null}
+        <div className="planned-order-table"><Table rows={preview.orders as Row[]??[]} strategyAccountId={text(a.account_id)} columns={[["symbol","证券"],["industry","行业"],["board","板块"],["side","方向"],["quantity","预计数量"],["reference_price","参考收盘价"],["estimated_weight","预计仓位"],["status","状态"]]} format={{symbol:v=>security(v,names),side:v=>v==='BUY'?'买入':'卖出',reference_price:num,estimated_weight:v=>`${(Number(v)*100).toFixed(2)}%`}}/></div>
+      </Panel>;
+    })}</div>
+    {accounts.map(a=><details key={text(a.account_id)}><summary>{text(a.name)} · 目标持仓方案</summary><Table rows={a.targets as Row[]??[]} strategyAccountId={text(a.account_id)} columns={[["symbol","证券"],["weight","目标权重"]]} format={{symbol:v=>security(v,names),weight:pct}}/></details>)}
+    <details><summary>固定历史窗口对照（非当前账户收益）</summary><Table rows={pair.historical_replay??[]} columns={[["name","策略"],["net_return","净收益"],["executed_sessions","执行日"],["fills","成交笔数"]]} format={{net_return:pct}}/><p className="muted">单个20日窗口，两路均亏损，不代表已证明盈利或未来风格不会集中。</p></details>
+  </Panel></div>;
 }
 
 function CandidateSwitcher({ observation, selectedTag, onSelect, showArchived, onShowArchived }: { observation:Challenger["candidate_observation"]; selectedTag:string; onSelect:(tag:string)=>void; showArchived:boolean; onShowArchived:(value:boolean)=>void }) {

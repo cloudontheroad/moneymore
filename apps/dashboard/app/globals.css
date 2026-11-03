@@ -74,4 +74,12 @@ nav{display:grid;gap:5px}nav button{border:0;background:none;color:#809d94;paddi
 .candidate-switcher .candidate-archive-track i{position:absolute;top:3px;left:3px;width:8px;height:8px;border-radius:50%;background:#b5c7bd;transition:transform .15s,background .15s}
 .candidate-switcher .is-active .candidate-archive-track{background:#b9ed682e}
 .candidate-switcher .is-active .candidate-archive-track i{transform:translateX(10px);background:var(--lime)}
+.mature-pair p{font-size:11px;line-height:1.7;color:var(--muted)}
+.mature-pair table{font-size:10px}
+.planned-order-table .table-wrap{max-height:430px;overflow:auto}
+.mature-pair details{border-top:1px solid var(--line);padding:11px 0}
+.mature-pair summary,.mature-history-review>summary{font-size:11px;font-weight:600;cursor:pointer;color:var(--forest)}
+.mature-pair details .table-wrap{max-height:360px;margin-top:12px;overflow:auto}
+.mature-history-review{padding:15px 19px;border:1px solid var(--line);border-radius:11px;margin-bottom:13px;background:var(--paper)}
+.mature-history-review[open]>summary{margin-bottom:15px}
 @media(max-width:1000px){.candidate-switcher{flex-wrap:wrap}.candidate-switcher>span{flex-basis:100%;line-height:1.6}.candidate-switcher select{max-width:100%}}

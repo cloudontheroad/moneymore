@@ -32,6 +32,7 @@ def run_data_health_checks(
     trade_date: str,
     symbols: set[str],
     disclosure_date: str | None = None,
+    score_table: str = "sector_model_scores",
 ) -> DataHealthReport:
     ordered = sorted(symbols)
     checks: list[QualityCheck] = []
@@ -146,17 +147,17 @@ def run_data_health_checks(
     )
 
     try:
-        scores = store.read("sector_model_scores")
+        scores = store.read(score_table)
         score_symbols = set(
             scores.loc[
                 scores["date"].astype(str).str.replace("-", "").str[:8] == trade_date,
                 "symbol",
             ].astype(str)
         )
-        non_bank = {symbol for symbol in ordered if symbol in set(scores["symbol"].astype(str))}
+        non_bank = set(ordered) if score_table=='global_factor_recommendation' else {symbol for symbol in ordered if symbol in set(scores["symbol"].astype(str))}
         checks.append(
             _coverage_check(
-                "SECTOR_SCORE_FRESHNESS",
+                "GLOBAL_SCORE_FRESHNESS" if score_table=='global_factor_recommendation' else "SECTOR_SCORE_FRESHNESS",
                 "research",
                 sorted(non_bank),
                 score_symbols,

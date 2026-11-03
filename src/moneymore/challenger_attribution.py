@@ -34,6 +34,8 @@ def matched_day(
     features: pd.DataFrame,
     pool: list[str],
     neighbors: int = 5,
+    industries: pd.Series | None = None,
+    allow_partial: bool = False,
 ) -> dict[str, Any]:
     if equity <= 0:
         return {"status": "INVALID_EQUITY"}
@@ -44,9 +46,21 @@ def matched_day(
     complete = set(ranks.dropna().index)
     stock_return = peer_return = exposure = 0.0
     matches = []
+    unmatched = []
+    def unavailable(reason, symbol, quantity):
+        if not allow_partial:return {'status':reason,'symbol':symbol}
+        price=prices.get(symbol,np.nan);ret=returns.get(symbol,np.nan)
+        weight=quantity*float(price)/equity if np.isfinite(price) else None
+        unmatched.append({'symbol':symbol,'reason':reason,'weight':weight,
+            'stock_return_proxy':weight*float(ret) if weight is not None and np.isfinite(ret) else None})
+        return None
     for position in positions:
         symbol, quantity = str(position["symbol"]), int(position["quantity"])
         if quantity <= 0:
+            continue
+        if industries is not None and (pd.isna(industries.get(symbol)) or industries.get(symbol)=='UNKNOWN'):
+            failed=unavailable('UNKNOWN_HELD_INDUSTRY',symbol,quantity)
+            if failed:return failed
             continue
         if (
             symbol not in ranks.index
@@ -54,18 +68,25 @@ def matched_day(
             or not np.isfinite(prices.get(symbol, np.nan))
             or not np.isfinite(returns.get(symbol, np.nan))
         ):
-            return {"status": "MISSING_HELD_STYLE_OR_PRICE", "symbol": symbol}
+            failed=unavailable('MISSING_HELD_STYLE_OR_PRICE',symbol,quantity)
+            if failed:return failed
+            continue
         peers = [
             s for s in universe if s not in held and board(s) == board(symbol) and s in complete
+            and (industries is None or (pd.notna(industries.get(symbol)) and industries.get(s)==industries.get(symbol)))
         ]
         if len(peers) < neighbors:
-            return {"status": "INSUFFICIENT_STYLE_PEERS", "symbol": symbol}
+            failed=unavailable('INSUFFICIENT_STYLE_PEERS',symbol,quantity)
+            if failed:return failed
+            continue
         distances = ((ranks.loc[peers] - ranks.loc[symbol]) ** 2).sum(axis=1)
         # Match on t-1 only. Never select peers based on t return availability.
         chosen = distances.sort_values(kind="stable").head(neighbors).index.tolist()
         peer_returns = returns.reindex(chosen)
         if not np.isfinite(peer_returns).all():
-            return {"status": "MISSING_MATCHED_PEER_RETURN", "symbol": symbol}
+            failed=unavailable('MISSING_MATCHED_PEER_RETURN',symbol,quantity)
+            if failed:return failed
+            continue
         weight = quantity * float(prices[symbol]) / equity
         exposure += weight
         stock_return += weight * float(returns[symbol])
@@ -84,13 +105,17 @@ def matched_day(
         return {"status": "INSUFFICIENT_MARKET_COVERAGE", "coverage": coverage}
     market = exposure * float(market_returns.mean())
     costs = -fee / equity
+    unmatched_proxy=sum(row['stock_return_proxy'] for row in unmatched if row['stock_return_proxy'] is not None)
+    unmatched_weight=sum(row['weight'] for row in unmatched if row['weight'] is not None)
     return {
-        "status": "MATCHED",
+        "status": "PARTIALLY_MATCHED" if unmatched else "MATCHED",
         "actual_return": actual_return,
         "market": market,
         "style": peer_return - market,
         "selection": stock_return - peer_return,
-        "trading_and_other": actual_return - stock_return - costs,
+        "trading_and_other": actual_return - stock_return - costs - unmatched_proxy,
+        **({'unmatched_stock':unmatched_proxy,'unmatched':unmatched,'matched_prior_exposure':exposure,
+            'total_known_prior_exposure':exposure+unmatched_weight,'valuation_complete':all(row['weight'] is not None for row in unmatched)} if allow_partial else {}),
         "costs": costs,
         "prior_exposure": exposure,
         "matches": matches,
@@ -98,9 +123,9 @@ def matched_day(
     }
 
 
-def linked_attribution(daily: list[dict[str, Any]]) -> dict[str, Any]:
+def linked_attribution(daily: list[dict[str, Any]], component_names=None) -> dict[str, Any]:
     components = {
-        name: 0.0 for name in ("market", "style", "selection", "trading_and_other", "costs")
+        name: 0.0 for name in (component_names or ("market", "style", "selection", "trading_and_other", "costs"))
     }
     wealth = 1.0
     for row in daily:

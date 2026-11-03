@@ -187,6 +187,7 @@ def run_multi_sector_daily(
     trade_date: str,
     signal_dir: str | Path,
     report_dir: str | Path,
+    planning_only: bool = False,
 ) -> MultiSectorDailyResult:
     execution_model_id = execution_strategy_id(MULTI_SECTOR_STRATEGY, store)
     broker.initialize_account(config.initial_cash, MULTI_SECTOR_ACCOUNT)
@@ -204,7 +205,7 @@ def run_multi_sector_daily(
     }
     target_weights = theoretical_target_weights
     data_health_report = run_data_health_checks(
-        store, trade_date, set(target_weights)
+        store, trade_date, set(target_weights), score_table='global_factor_recommendation'
     )
     data_health = asdict(data_health_report)
     quality_ok = data_health_report.status != "BLOCKED"
@@ -325,7 +326,7 @@ def run_multi_sector_daily(
     }
     execution_order = (
         sorted(bars, key=lambda symbol: symbol not in pending_sells)
-        if quality_ok and effective_risk_state != "SUSPENDED"
+        if quality_ok and effective_risk_state != "SUSPENDED" and not planning_only
         else []
     )
     executions = []
@@ -336,7 +337,7 @@ def run_multi_sector_daily(
             )
         )
 
-    corporate_actions = process_corporate_actions(
+    corporate_actions = {"settled": [], "registered": []} if planning_only else process_corporate_actions(
         store, broker, MULTI_SECTOR_ACCOUNT, trade_date, set(symbols)
     )
     account = broker.account_snapshot(marks, MULTI_SECTOR_ACCOUNT)
@@ -496,6 +497,7 @@ def run_multi_sector_daily(
         if not quality_ok
         else "SUSPENDED_RISK"
         if effective_risk_state == "SUSPENDED"
+        else "PLAN_READY" if planning_only and reconciliation["matched"]
         else "COMPLETED"
         if reconciliation["matched"]
         else "FAILED_RECONCILIATION"
@@ -504,6 +506,7 @@ def run_multi_sector_daily(
     directory.mkdir(parents=True, exist_ok=True)
     target = directory / f"{trade_date}.json"
     payload = {
+        "planning_only": planning_only,
         "trade_date": trade_date,
         "status": status,
         "target_weights": target_weights,
@@ -537,6 +540,8 @@ def run_multi_sector_daily(
     if target.exists():
         existing = json.loads(target.read_text(encoding="utf-8"))
         should_replace = (
+            bool(existing.get('planning_only'))
+            or
             existing.get("strategy_universe", {}).get("universe_version")
             != payload["strategy_universe"]["universe_version"]
             or (
@@ -553,7 +558,8 @@ def run_multi_sector_daily(
         temporary.replace(target)
     else:
         payload["created_at"] = existing["created_at"]
-    _persist_daily_analytics(
+    if not planning_only:
+      _persist_daily_analytics(
         store,
         trade_date,
         status,
@@ -574,7 +580,7 @@ def run_multi_sector_daily(
         start_date="20260727",
         observation_date=trade_date,
     )
-    freeze_passed_report(
+    if not planning_only: freeze_passed_report(
         acceptance,
         state_dir / "monthly-acceptance",
     )

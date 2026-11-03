@@ -7,6 +7,16 @@ from moneymore.costs import execution_price, transaction_fee
 from moneymore.models import Side
 
 
+def redundant_trade_caps(prices, current, available, locked, equity, max_weight, lot, order_caps):
+    """Conservative upper bounds implied by the original feasible set.
+
+    Including the old odd shares is intentionally conservative; final value
+    remains independently constrained, so this never rounds a valid bound down.
+    """
+    maximum = np.floor((max_weight * equity / prices - locked) / lot) * lot + current % lot
+    return np.minimum(order_caps, np.maximum(0., maximum-current)), np.minimum(order_caps, available)
+
+
 def paper_intents_from_integer_plan(plan, strategy_id, signal_date):
     """Exact quantities for the isolated PaperBroker, not a real-broker adapter."""
     from moneymore.execution.risk import OrderIntent, RiskResult
@@ -58,6 +68,9 @@ def plan_integer_execution(
     research_target_time_limit=None,
     style_lower_limits=None,
     style_upper_limits=None,
+    research_quality_envelope=None,
+    research_secondary_time_limit=None,
+    research_objective_scale=None,
 ):
     """Use supplied (known) quotes. Never promises execution at a future open.
 
@@ -77,6 +90,11 @@ def plan_integer_execution(
         return blocked("INVALID_INTEGER_OPTIMALITY_BUDGET")
     if research_staged_warm_start and diagnostic_feasibility_only:
         return blocked("CONFLICTING_RESEARCH_SOLVER_MODES")
+    if research_secondary_time_limit is not None and (not np.isfinite(research_secondary_time_limit) or not 0<research_secondary_time_limit<=time_limit):
+        return blocked('INVALID_SECONDARY_TIME_BUDGET')
+    if research_objective_scale is not None and (not np.isfinite(research_objective_scale) or not 0<research_objective_scale<=1e9):
+        return blocked('INVALID_EQUIVALENT_OBJECTIVE_SCALE')
+    objective_multiplier=research_objective_scale or 1.
     if research_target_time_limit is not None and (
         not research_staged_warm_start or not np.isfinite(research_target_time_limit)
         or not 0 < research_target_time_limit <= 60
@@ -126,7 +144,14 @@ def plan_integer_execution(
     bounds = pd.Series(style_limits).reindex(styles.columns).to_numpy(float)
     from .style_bounds import style_bounds
     try:
-        lower_style,upper_style=style_bounds(style_limits,styles.columns,style_lower_limits,style_upper_limits)
+        if research_quality_envelope is not None:
+            if benchmark_weights is None or not style_controls_prestandardized or style_lower_limits is not None or style_upper_limits is not None:
+                return blocked("QUALITY_CONTRACT_REQUIRES_RAW_CONTROLS_REFERENCE_AND_NO_LEGACY_OVERRIDE")
+            from .quality_contract import quality_upper_only_bounds
+            lower_style,upper_style=quality_upper_only_bounds(z,reference,style_limits,research_quality_envelope)
+            if (lower_style>upper_style).any():return blocked("QUALITY_CONTRACT_INFEASIBLE_INTERVALS")
+        else:
+            lower_style,upper_style=style_bounds(style_limits,styles.columns,style_lower_limits,style_upper_limits)
     except ValueError:
         return blocked("INVALID_ASYMMETRIC_STYLE_BOUNDS" if style_lower_limits is not None or style_upper_limits is not None else "INVALID_QUOTES_QUANTITIES_OR_STYLE_BOUNDS")
     p = prices.reindex(symbols).to_numpy(float)
@@ -195,9 +220,18 @@ def plan_integer_execution(
     ]
     # Conservative single MARKET-order caps; splitting would incur extra fees.
     order_caps = np.array([50000 if s.startswith(("688", "689")) else 1000000 for s in symbols])
+    # Redundant but tighter bounds from existing position/availability/order
+    # constraints. They preserve the feasible set and strengthen the LP used
+    # by branch-and-bound, especially minimum-commission disjunctions.
+    max_buy_shares, max_sell_shares = redundant_trade_caps(
+        p, cur, avail, locked, equity, config.max_position_weight, lot, order_caps)
+    if can_buy is not None:
+        max_buy_shares = np.where([can_buy.get(s, False) for s in symbols], max_buy_shares, 0.)
+    if can_sell is not None:
+        max_sell_shares = np.where([can_sell.get(s, False) for s in symbols], max_sell_shares, 0.)
     constraints += [
-        buy <= cp.multiply(order_caps, buy_on),
-        sell <= cp.multiply(order_caps, sell_on),
+        buy <= cp.multiply(max_buy_shares, buy_on),
+        sell <= cp.multiply(max_sell_shares, sell_on),
     ]
     for i in range(n):
         if odd[i] > 0:
@@ -208,18 +242,36 @@ def plan_integer_execution(
             constraints.append(buy[i] == 0)
         if can_sell is not None and not can_sell.get(symbols[i], False):
             constraints.append(sell[i] == 0)
-    for comm, notional, on, high, execution_p in (
-        (buy_comm, buy_notional, buy_on, buy_high, buy_price),
-        (sell_comm, sell_notional, sell_on, sell_high, sell_price),
+    for comm, notional, on, high, execution_p, max_shares, traded in (
+        (buy_comm, buy_notional, buy_on, buy_high, buy_price, max_buy_shares, buy),
+        (sell_comm, sell_notional, sell_on, sell_high, sell_price, max_sell_shares, sell),
     ):
         linear = config.commission_rate * notional
-        max_linear = config.commission_rate * big_shares * execution_p
+        max_linear = config.commission_rate * max_shares * execution_p
         constraints += [
+            high <= on,
+            # Explicit threshold facets already implied by the exact max-fee
+            # disjunction. Exposing them strengthens its fractional relaxation.
+            linear >= config.minimum_commission * high,
+            linear <= config.minimum_commission * on + cp.multiply(
+                np.maximum(0., max_linear-config.minimum_commission), high),
             comm >= linear,
             comm >= config.minimum_commission * on,
             comm <= linear + config.minimum_commission * (1 - high),
             comm <= config.minimum_commission * on + cp.multiply(max_linear, high),
         ]
+        low_only=np.flatnonzero(max_linear < config.minimum_commission-1e-12)
+        if len(low_only):constraints.append(high[low_only]==0)
+        if config.commission_rate>0:
+            # Every possible trade is a multiple of gcd(existing quantity, lot)
+            # even when a complete odd-lot liquidation is permitted. Expose
+            # integer-rounded fee thresholds without removing a legal trade.
+            step=np.gcd(cur.astype(int),lot).astype(float)
+            threshold=config.minimum_commission/(config.commission_rate*execution_p)
+            below=np.floor(threshold/step+1e-10)*step
+            above=np.ceil(threshold/step-1e-10)*step
+            constraints += [traded>=cp.multiply(above,high),
+                traded<=cp.multiply(below,on)+cp.multiply(np.maximum(0.,max_shares-below),high)]
     initial_value = p * (cur + locked)
     if initial_value.sum() > 0:
         w0 = initial_value / initial_value.sum()
@@ -239,7 +291,7 @@ def plan_integer_execution(
         tracking = cp.norm1(values / equity - target) + cp.abs(
             cash_end / equity - (1 - targets.sum())
         )
-        objective_scale = cp.Parameter(nonneg=True, value=0. if research_staged_warm_start else 1.)
+        objective_scale = cp.Parameter(nonneg=True, value=0. if research_staged_warm_start else objective_multiplier)
         first = cp.Problem(cp.Minimize(0. if diagnostic_feasibility_only else objective_scale*tracking), constraints)
         warm_start_diagnostics = None
         first.solve(solver=cp.HIGHS, **options)
@@ -253,7 +305,7 @@ def plan_integer_execution(
             warm_start_diagnostics["seed_tracking_l1"] = float(tracking.value)
             if not first.is_dpp():
                 return blocked("NON_PARAMETERIZED_WARM_START_PROBLEM")
-            objective_scale.value = 1.
+            objective_scale.value = objective_multiplier
             warm_start_diagnostics["warm_start_requested"] = True
             # Same parameterized Problem preserves HiGHS' canonical ordering
             # and solver cache; installed adapter calls setSolution on it.
@@ -262,7 +314,8 @@ def plan_integer_execution(
             warm_start_diagnostics["target_time_limit"] = float(target_options["time_limit"])
             first.solve(solver=cp.HIGHS, warm_start=True, **target_options)
         info = getattr(getattr(first, "solver_stats", None), "extra_stats", None)
-        diagnostics = {"requested_relative_gap": float(mip_relative_gap), "solver_status": first.status}
+        diagnostics = {"requested_relative_gap": float(mip_relative_gap), "solver_status": first.status,
+            'positive_equivalent_objective_multiplier':float(objective_multiplier)}
         for key in ("mip_gap", "mip_node_count", "primal_solution_status", "objective_function_value",
                 "mip_dual_bound", "num_primal_infeasibilities", "max_primal_infeasibility"):
             value = getattr(info, key, None)
@@ -278,7 +331,9 @@ def plan_integer_execution(
             constraints.append(tracking <= best_tracking + 1e-8)
             second = cp.Problem(cp.Maximize(invested), constraints)
             try:
-                second.solve(solver=cp.HIGHS, **options)
+                secondary_options=dict(options)
+                if research_secondary_time_limit is not None:secondary_options['time_limit']=research_secondary_time_limit
+                second.solve(solver=cp.HIGHS, **secondary_options)
                 secondary_status = second.status
             except cp.error.SolverError:
                 secondary_status = "solver_error"
@@ -414,6 +469,7 @@ def plan_integer_execution(
         "style_benchmark": "EXPLICIT_WEIGHTS" if benchmark_weights is not None else "LEGACY_EQUAL_WEIGHT",
         "style_reference_exposures": dict(zip(styles.columns, map(float, benchmark))),
         "style_controls_prestandardized": style_controls_prestandardized,
+        "research_style_contract": "quality_upper_only_v1" if research_quality_envelope is not None else "legacy",
         "future_prices_used": False,
         "warning": "Only valid at supplied quotes and availability; requires revalidation before execution. No real order is submitted.",
     }

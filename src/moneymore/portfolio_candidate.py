@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
-from .candidate_lifecycle import trading_allowed
+from .candidate_lifecycle import trading_allowed, FROZEN
 from .challenger_diagnostics import trading_dates, write_diagnostic
 from .execution.paper import ExecutionBar
 from .execution.risk import OrderIntent, RiskResult
@@ -41,7 +41,9 @@ def derived_execution_complete(root, candidates, date):
             not candidate.get("portfolio_variant")
             or candidate.get("archived")
             or candidate.get("validation_hold")
+            or (candidate.get('lifecycle') or {}).get('status') in FROZEN
             or str(candidate.get("activation_date", candidate["candidate_tag"])) > date
+            or str(candidate.get('first_execution_date','')) > date
         ):
             continue
         path = (
@@ -271,6 +273,16 @@ def execute_portfolio_candidate_open(
     if trade_date not in calendar or calendar[calendar.index(trade_date) - 1] != path.stem:
         return {"status": "STALE_SIGNAL_PLAN", "account_id": account}
     plan = json.loads(path.read_text(encoding="utf-8"))
+    if str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_'):
+        forecast=(candidate.get('latest_report') or {}).get('scores',[])
+        if forecast:
+            from .research.prediction_quality import prediction_quality
+            quality=prediction_quality([row['score'] for row in forecast])
+            if not quality['passed']:
+                blocked={'status':'PREDICTION_QUALITY_BLOCKED','account_id':account,'trade_date':trade_date,
+                    'signal_date':plan['signal_date'],'prediction_quality':quality,'real_orders_enabled':False}
+                write_diagnostic(receipt_path,blocked)
+                return blocked
     if candidate.get("execution_policy") and (
         plan.get("execution_policy_sha256") != execution_policy_hash(candidate)
         or plan.get("execution_slippage_bps") != config.slippage_bps
@@ -378,7 +390,26 @@ def execute_portfolio_candidate_open(
         plan["style_limits"],
         can_buy=can_buy,
         can_sell=can_sell,
+        **({'benchmark_weights':plan['benchmark_weights'],'style_controls_prestandardized':True,
+            'time_limit':300,'solver_threads':4,'mip_relative_gap':.01,'research_secondary_time_limit':10}
+           if str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_') else {}),
     )
+    if executable['status']=='PASS_REFERENCE_QUOTES_ONLY' and str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_'):
+        from .mature_multifactor_runtime import reprice_reference_plan
+        try:
+            fresh=provider.intraday_quotes(symbols)
+            fresh_rows={} if fresh is None else {str(r['symbol']):r for r in fresh.to_dict('records')}
+            now_ms=(now if now is not None else datetime.now(UTC)).timestamp()*1000
+            if set(symbols)-set(fresh_rows) or any(r.get('execution_ready') is not True or not 0<=now_ms-float(r.get('timestamp',0))<=10000 for r in fresh_rows.values()):
+                raise ValueError('FRESH_QUOTE_AGE_OR_QUALITY_BLOCKED')
+            fresh_marks={s:float(fresh_rows[s]['last']) for s in symbols}
+            from .costs import execution_price
+            fresh_buy={s:execution_price(fresh_marks[s],Side.BUY,config.slippage_bps)<float(fresh_rows[s].get('up_limit',0)) for s in symbols}
+            fresh_sell={s:0<float(fresh_rows[s].get('down_limit',0))<execution_price(fresh_marks[s],Side.SELL,config.slippage_bps) for s in symbols}
+            executable=reprice_reference_plan(executable,fresh_marks,held,snapshot['cash'],config,styles,plan['style_limits'],plan['benchmark_weights'],fresh_buy,fresh_sell)
+            marks=fresh_marks;valid=fresh_rows;can_buy=fresh_buy;can_sell=fresh_sell
+        except (ValueError,KeyError,TypeError) as error:
+            executable={'status':'BLOCKED','reason':'POST_SOLVE_FRESH_QUOTE_VALIDATION:'+str(error),'orders':[],'orders_enabled':False}
     receipt = {
         "status": "PLAN_BLOCKED",
         "account_id": account,

@@ -27,6 +27,20 @@ research_gate:
     )
 
 
+def test_mature_queue_is_not_blocked_by_other_model_families(tmp_path,monkeypatch):
+    import moneymore.qlib_candidate_observer as module
+    _write_config(tmp_path)
+    rows=[{'candidate_tag':'20261103A','activation_date':'20261103','portfolio_variant':'mature_alpha158_raw','validation_hold':True},
+          {'candidate_tag':'20261103B','activation_date':'20261103','portfolio_variant':'mature_alpha158_balanced','validation_hold':True},
+          {'candidate_tag':'20261010','portfolio_variant':'old_gru','validation_hold':True}]
+    observed=[]
+    monkeypatch.setattr(module,'candidate_catalog',lambda root:rows)
+    monkeypatch.setattr(module,'run_lifecycle_review',lambda root,store,candidates,policy,date:observed.append([x['candidate_tag'] for x in candidates]) or {})
+    module.run_candidate_queue_daily(root=tmp_path,store=None,broker=None,config=None,trade_date='20261103',portfolio_variants={'mature_alpha158_raw'})
+    module.run_candidate_queue_daily(root=tmp_path,store=None,broker=None,config=None,trade_date='20261103',exclude_mature=True)
+    assert observed==[['20261103A'],['20261103A'],['20261010'],['20261010']]
+
+
 def _write_candidate(root: Path, tag: str, rank_ic: float) -> None:
     target = root / "state" / "qlib-challenger" / "candidates" / tag
     target.mkdir(parents=True)

@@ -178,7 +178,7 @@ def build_v2_snapshot(root: Path, store, as_of: str, policy=None):
     class PITStore:
         def read(self, table, **kwargs):
             if table == "fina_indicator":
-                return financial[kwargs["columns"]].copy()
+                return financial[kwargs["columns"]].copy() if kwargs.get('columns') else financial.copy()
             frame = store.read(table, **kwargs)
             if table == "daily_basic":
                 try:

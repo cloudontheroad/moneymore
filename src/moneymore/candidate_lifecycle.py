@@ -68,6 +68,8 @@ def review_candidate(
     from .long_term_review import evaluate_paired_performance
 
     previous = previous or {}
+    if previous.get('model_quality_hold'):
+        return previous
     if previous.get("status") in ARCHIVED or as_of < str(previous.get("review_date", "")):
         return previous
     state = {
@@ -215,16 +217,19 @@ def run_lifecycle_review(
         }
         for candidate in candidates:
             tag = str(candidate["candidate_tag"])
-            if tag > trade_date:
+            if (str(candidate.get('activation_date',tag)) if str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_') else tag) > trade_date:
                 continue
             own = (
                 history.loc[history.account_id.astype(str) == candidate["account_id"]]
                 if not history.empty
                 else history
             )
+            secondary = challenger
+            if candidate.get('comparison_reference_account') and not history.empty:
+                secondary = history.loc[history.account_id.astype(str).eq(candidate['comparison_reference_account'])]
             state = review_candidate(
                 candidate,
-                {"baseline": baseline, "challenger": challenger, "candidate": own},
+                {"baseline": baseline, "challenger": secondary, "candidate": own},
                 as_of=trade_date,
                 trustworthy_start=trust,
                 policy=policy,

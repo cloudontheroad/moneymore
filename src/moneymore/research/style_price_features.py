@@ -3,6 +3,23 @@ import numpy as np
 import pandas as pd
 
 
+def registered_liquidity_on_calendar(basic, calendar, symbols):
+    """Existing liquidity descriptor, with calendar gaps kept unobserved.
+
+    Input turnover_rate is provider percentage points; output is decimal.
+    This is our registered 20-session mean, not a full Barra liquidity factor.
+    """
+    from moneymore.factors.builtin import build_default_registry
+
+    if list(calendar) != sorted(set(calendar)) or len(symbols) != len(set(symbols)):
+        raise ValueError("DUPLICATE_OR_UNORDERED_LIQUIDITY_GRID")
+    grid = pd.MultiIndex.from_product([symbols, calendar], names=["symbol", "date"])
+    aligned = basic.set_index(["symbol", "date"]).reindex(grid).reset_index()
+    aligned["turnover_rate"] /= 100
+    result = build_default_registry().compute(aligned, ["turnover_mean_20"])
+    return result, aligned
+
+
 def price_features(bars, basis="raw"):
     if basis not in ("raw", "adjusted"):
         raise ValueError("unknown basis")

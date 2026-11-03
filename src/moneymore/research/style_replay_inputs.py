@@ -74,19 +74,33 @@ def daily_risk_snapshot(date, scores, held, calendar, daily, basic, finances, me
     return selected, controls, F, covariance, specific, wb, limits, missing
 
 
-def optimize_daily(scores, selected, controls, F, covariance, specific, wb, limits, held_values, *, lower_limits=None, upper_limits=None):
+def optimize_daily(scores, selected, controls, F, covariance, specific, wb, limits, held_values, *, lower_limits=None, upper_limits=None, research_quality_envelope=None, candidate_symbols=None):
     observed = scores.reindex(selected.index)
-    exits = ~selected.index.isin(scores.index)
-    if observed.loc[~exits].isna().any() or observed.loc[~exits].std() <= 0:
+    if candidate_symbols is None:
+        exits = ~selected.index.isin(scores.index)
+    else:
+        from .holding_eligibility import explicit_score_membership
+        exits = explicit_score_membership(selected.index, scores, candidate_symbols)
+    if observed.loc[~exits].isna().any():
         raise ValueError("MISSING_SCORES_NOT_A_POOL_EXIT")
-    calibrated = observed.fillna(0.).to_numpy()/observed.loc[~exits].to_numpy().std() * np.sqrt(np.mean(np.sum((F @ covariance)*F, axis=1)+specific))
+    score_scale=observed.loc[~exits].std()
+    if not np.isfinite(score_scale) or score_scale<=0:
+        raise ValueError('NONINFORMATIVE_SCORE_SCALE')
+    calibrated = observed.where(~exits, 0.).fillna(0.).to_numpy()/observed.loc[~exits].to_numpy().std() * np.sqrt(np.mean(np.sum((F @ covariance)*F, axis=1)+specific))
     weights = cp.Variable(len(selected)); active = weights-wb.to_numpy()
     C = controls.to_numpy()
-    if (lower_limits is None) != (upper_limits is None):
+    if research_quality_envelope is not None:
+        if lower_limits is not None or upper_limits is not None:
+            raise ValueError("QUALITY_CONTRACT_CANNOT_MIX_LEGACY_OVERRIDE")
+        from .quality_contract import quality_upper_only_bounds
+        lower,upper=quality_upper_only_bounds(controls,wb,limits,research_quality_envelope)
+        if (lower>upper).any():raise ValueError("QUALITY_CONTRACT_INFEASIBLE_INTERVAL")
+    elif (lower_limits is None) != (upper_limits is None):
         raise ValueError("BOTH_ASYMMETRIC_LIMITS_REQUIRED")
-    lower = -limits.reindex(controls.columns) if lower_limits is None else lower_limits.reindex(controls.columns)
-    upper = limits.reindex(controls.columns) if upper_limits is None else upper_limits.reindex(controls.columns)
-    if (not np.isfinite(lower).all() or not np.isfinite(upper).all() or (lower>upper).any()
+    else:
+        lower = -limits.reindex(controls.columns) if lower_limits is None else lower_limits.reindex(controls.columns)
+        upper = limits.reindex(controls.columns) if upper_limits is None else upper_limits.reindex(controls.columns)
+    if research_quality_envelope is None and (not np.isfinite(lower).all() or not np.isfinite(upper).all() or (lower>upper).any()
             or (lower < -limits.reindex(controls.columns)-1e-12).any() or (upper > limits.reindex(controls.columns)+1e-12).any()):
         raise ValueError("ASYMMETRIC_LIMITS_MISSING_INFEASIBLE_OR_RELAXED")
     constraints = [weights >= 0, weights <= .15, cp.sum(weights) == 1,

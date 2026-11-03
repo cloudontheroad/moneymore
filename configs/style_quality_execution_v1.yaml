@@ -1,0 +1,5 @@
+research_initial_capital: 10000000
+currency: CNY
+scope: new_quality_contract_isolated_execution_research
+legacy_accounts: unchanged_pending_separate_migration
+real_orders: false

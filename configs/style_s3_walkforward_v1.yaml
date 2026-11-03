@@ -1,0 +1,33 @@
+scope: historical_dated_pool_exploration_not_fresh_forward_or_release
+orders_enabled: false
+input_start: '20231001'
+input_end: '20250630'
+horizon: 5
+purge: 5
+validation_sessions: 20
+folds:
+  - ['20240701', '20240930']
+  - ['20241001', '20241231']
+  - ['20250101', '20250331']
+  - ['20250401', '20250630']
+variants: [price_only, price_plus_market_factors]
+models: [ridge, lightgbm]
+negative_control: shuffled_training_labels_ridge_price_only
+seed: 17
+ridge_alpha: 1.0
+lightgbm_rounds: 200
+lightgbm_early_stop: 20
+lightgbm_leaves: 31
+lightgbm_learning_rate: 0.03
+threads: 4
+bootstrap_block: 21
+bootstrap_repetitions: 2000
+bootstrap_seed: 20261102
+comparisons: 4
+rank_ic_minimum: 0.01
+limits:
+  - no_cost_or_executable_return_claim
+  - pool_source_before_signal_not_original_vintage_certification
+  - historical_adjustment_data_not_fully_event_certified
+  - new_2026_risk_patch_does_not_certify_2024_training_prices
+  - no_model_selection_or_blend_fitting_on_outer_tests

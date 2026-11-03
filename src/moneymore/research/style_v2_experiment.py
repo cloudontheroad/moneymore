@@ -19,12 +19,18 @@ def candidate_execution_config(config, candidate):
     override = candidate.get("execution_policy")
     if not override:
         return config
-    if candidate.get("portfolio_variant") != "factor_baseline_v2" or override.get("real_orders_enabled") is not False:
+    mature = candidate.get('portfolio_variant') in {'mature_alpha158_raw','mature_alpha158_balanced'}
+    if (candidate.get("portfolio_variant") != "factor_baseline_v2" and not mature) or override.get("real_orders_enabled") is not False:
         raise ValueError("INVALID_PAPER_EXECUTION_COST_POLICY")
     slippage = float(override["slippage_bps"])
     if not np.isfinite(slippage) or slippage < 0 or not override.get("version"):
         raise ValueError("INVALID_EXECUTION_SLIPPAGE")
-    return type(config).model_validate({**config.model_dump(), "slippage_bps": slippage})
+    updated={**config.model_dump(), 'slippage_bps':slippage}
+    if mature:
+        capital=float(candidate['initial_cash'])
+        if not np.isfinite(capital) or capital<=0:raise ValueError('INVALID_MATURE_PAPER_CAPITAL')
+        updated['initial_cash']=capital
+    return type(config).model_validate(updated)
 
 
 def public_style_details(root, candidate):

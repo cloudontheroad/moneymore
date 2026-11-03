@@ -21,6 +21,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 import yaml
+from .research.s3_review import read_public_review
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -563,7 +564,7 @@ def _refresh_research_financial_pool(store: ParquetStore, trade_date: str) -> di
 def _factor_research_quality(store: ParquetStore, symbols: list[str]) -> dict:
     as_of = datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%Y%m%d")
     try:
-        live = financial_quality(store.read("fina_indicator"), symbols, as_of)
+        live = financial_quality(store.read("fina_indicator"), symbols, as_of, per_field=True)
     except FileNotFoundError:
         live = {"complete": 0, "requested": len(symbols), "gate": "BLOCK"}
     result = {"live": live}
@@ -1151,7 +1152,7 @@ class TaskService:
                     # quotes, not flow into the legacy immutable-open executor.
                     from .portfolio_candidate import execute_portfolio_candidate_open
                     portfolio_candidates = [row for row in candidate_catalog(ROOT)
-                                            if row.get("portfolio_variant") in {"fixed_budget_v1", "factor_baseline_v2"} and not row.get("archived") and not row.get("validation_hold")]
+                                            if row.get("portfolio_variant") in {"fixed_budget_v1", "factor_baseline_v2", "mature_alpha158_raw", "mature_alpha158_balanced"} and not row.get("archived") and not row.get("validation_hold")]
                     prepare_intraday_branch_orders(broker, trade_date)
                     prepare_exposure_intraday_branch_orders(broker, trade_date)
                     result = execute_accounts_at_qmt_open(
@@ -1713,6 +1714,10 @@ class TaskService:
                         f"baseline_exposure_league_execution: {type(overlay_error).__name__}: {overlay_error}"
                     )
             independent_steps = [
+                *[("mature_multifactor_"+kind,
+                    lambda kind=kind:run_candidate_queue_daily(root=ROOT,store=store,broker=broker,
+                        config=config,trade_date=trade_date,portfolio_variants={'mature_alpha158_'+kind}))
+                    for kind in ('raw','balanced')],
                 (
                     "tqqq_sqqq_paper_execution",
                     lambda: LeveragedEtfPaper(
@@ -1739,6 +1744,7 @@ class TaskService:
                         broker=broker,
                         config=config,
                         trade_date=trade_date,
+                        exclude_mature=True,
                     ),
                 ),
                 (
@@ -3034,11 +3040,12 @@ def qlib_challenger() -> dict[str, object]:
             public_row["weight_validation"] = (
                 json.loads(validation_path.read_text(encoding="utf-8")) if validation_path.exists() else {}
             )
-        broker.initialize_account(1_000_000, account_id)
+        broker.initialize_account(float(row.get('initial_cash',1_000_000)), account_id)
         candidate_details.append(
             {
                 **public_row,
                 "latest": row.get("latest_report") or {},
+                "order_preview": __import__('moneymore.mature_order_preview',fromlist=['read_preview']).read_preview(ROOT,row),
                 "orders": [
                     order
                     for order in reversed(broker.orders())
@@ -3096,7 +3103,7 @@ def qlib_challenger() -> dict[str, object]:
     }
     if observed_candidate is not None:
         candidate_account = str(observed_candidate["account_id"])
-        broker.initialize_account(1_000_000, candidate_account)
+        broker.initialize_account(float(observed_candidate.get('initial_cash',1_000_000)), candidate_account)
         try:
             candidate_history = store.read(CANDIDATE_HISTORY_TABLE)
             candidate_history = candidate_history.loc[
@@ -3211,6 +3218,8 @@ def qlib_challenger() -> dict[str, object]:
         }
     return {
         "account_id": QLIB_CHALLENGER_ACCOUNT,
+        "style_research_review": read_public_review(STATE / 'style-balance/s3-release-review.json'),
+        "mature_multifactor_pair": __import__('moneymore.mature_multifactor_runtime',fromlist=['pair_view']).pair_view(ROOT),
         "research": research,
         "forward": forward_evaluation,
         "diagnostics": (

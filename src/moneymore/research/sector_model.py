@@ -191,22 +191,11 @@ def build_global_factor_snapshot(
         )
 
     financial_columns = ["roe", "q_sales_yoy"]
-    financial = store.read(
-        "fina_indicator",
-        columns=["ts_code", "ann_date", "end_date", *financial_columns],
-        filters=[("ts_code", "in", requested)],
-    ).rename(columns={"ts_code": "symbol"})
-    financial["available_date"] = pd.to_datetime(
-        financial["ann_date"], format="%Y%m%d"
-    ) + pd.offsets.Day(1)
-    financial = financial.merge(latest_by_symbol, on="symbol", how="inner")
-    financial = (
-        financial.loc[financial["available_date"] <= financial["latest_date"]]
-        .sort_values(["symbol", "available_date", "end_date"])
-        .groupby("symbol", as_index=False)
-        .tail(1)
-        .set_index("symbol")
-    )
+    financial = store.read("fina_indicator",filters=[("ts_code", "in", requested)])
+    from ..data.global_financials import latest_global_financials
+    financial = latest_global_financials(financial,latest_by_symbol)
+    if audit_capture is not None:
+        audit_capture['financial_provenance']=financial.reset_index()
     for column in financial_columns:
         panel[column] = np.nan
         panel.loc[latest_mask, column] = panel.loc[latest_mask, "symbol"].map(

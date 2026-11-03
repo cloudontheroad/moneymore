@@ -139,6 +139,8 @@ def candidate_catalog(root: Path) -> list[dict[str, Any]]:
                      "archived": lifecycle.get(tag, {}).get("status") in {
                          "EARLY_REJECTED", "REJECTED", "GATE_REJECTED", "REVIEW_EXPIRED"}})
         used_tags.add(tag)
+    from .mature_multifactor_runtime import mature_candidates
+    rows.extend(mature_candidates(root))
     return sorted(rows, key=lambda r: r["candidate_tag"], reverse=True)
 
 
@@ -162,6 +164,13 @@ def run_candidate_daily(
     if not trading_allowed(root, tag, trade_date):
         broker.cancel_pending(candidate_account_id(tag), "CANDIDATE_LIFECYCLE_FROZEN")
         raise ValueError(f"candidate {tag} is frozen by lifecycle review")
+    from .mature_multifactor_runtime import is_mature, prepare_mature_daily
+    if is_mature(candidate):
+        result=prepare_mature_daily(root=root,store=store,broker=broker,config=config,candidate=candidate,trade_date=trade_date)
+        # A reference preview cannot submit orders or replace the next-session replan.
+        from .mature_order_preview import build_preview
+        build_preview(root,candidate,trade_date)
+        return result
     if candidate.get("portfolio_variant") == "factor_baseline_v2":
         from .baseline_v2_candidate import prepare_factor_v2
         return prepare_factor_v2(root=root, store=store, broker=broker, config=config,
@@ -201,6 +210,8 @@ def run_candidate_queue_daily(
     broker: PaperBroker,
     config: BacktestConfig,
     trade_date: str,
+    portfolio_variants: set[str] | None = None,
+    exclude_mature: bool = False,
 ) -> list[ChallengerDailyResult]:
     challenger_config = yaml.safe_load(
         (root / "configs" / "qlib_challenger.yaml").read_text(encoding="utf-8")
@@ -208,11 +219,15 @@ def run_candidate_queue_daily(
     policy = challenger_config.get("candidate_observation_policy", {})
     formal_days = int(policy.get("formal_review_days", 60))
     candidates = candidate_catalog(root)
+    if portfolio_variants is not None:
+        candidates=[row for row in candidates if row.get('portfolio_variant') in portfolio_variants]
+    if exclude_mature:
+        candidates=[row for row in candidates if not str(row.get('portfolio_variant','')).startswith('mature_alpha158_')]
     lifecycle = run_lifecycle_review(root, store, candidates, policy, trade_date)
     results = []
     for candidate in reversed(candidates):
         tag = str(candidate["candidate_tag"])
-        if tag > trade_date:
+        if (str(candidate.get('activation_date',tag)) if str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_') else tag) > trade_date:
             continue
         if candidate.get("validation_hold"):
             continue
@@ -230,6 +245,9 @@ def run_candidate_queue_daily(
         )
         if existing_report.exists():
             payload = json.loads(existing_report.read_text(encoding="utf-8"))
+            if str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_') and payload.get('status') in {'AWAITING_FRESH_CLOSE','DATA_QUALITY_BLOCKED'}:
+                results.append(run_candidate_daily(candidate=candidate,root=root,store=store,broker=broker,config=config,trade_date=trade_date))
+                continue
             if candidate.get("portfolio_variant") == "factor_baseline_v2" and str(payload.get("signal_date", trade_date)) < trade_date:
                 results.append(run_candidate_daily(candidate=candidate, root=root, store=store,
                                                    broker=broker, config=config, trade_date=trade_date))

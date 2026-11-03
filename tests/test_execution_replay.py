@@ -8,6 +8,34 @@ from moneymore.config import BacktestConfig
 from moneymore.execution_replay import run_execution_replay
 
 
+@pytest.mark.parametrize("proof_mode",["valid","missing","changed_controls"])
+def test_explicit_quality_integer_contract_requires_matching_postfill_proof(tmp_path,proof_mode):
+    from moneymore.research.integer_execution import plan_integer_execution
+    context={};c=pd.DataFrame({"unknown_x":[0.,1.]},index=["AAA","BBB"])
+    wb=pd.Series({"AAA":.5,"BBB":.5});envelope={"unknown_x":{"upper":0.,"lower":0.}}
+    def close(day,snapshot):
+        context['day']=day
+        return pd.DataFrame(columns=['date','symbol','target_weight'])
+    def opening(day,snapshot,quotes):
+        if not context:return {'status':'NO_PRIOR_SIGNAL','orders':[]}
+        plan=plan_integer_execution({'AAA':.4},quotes.open,{}, {},snapshot['cash'],snapshot['equity'],_config(),c,{'unknown_x':.01},
+            benchmark_weights=wb,style_controls_prestandardized=True,research_quality_envelope=envelope)
+        assert plan['status']=='PASS_REFERENCE_QUOTES_ONLY'
+        plan['signal_date']=context['day']
+        if proof_mode!='missing':
+            raw=c.copy()
+            if proof_mode=='changed_controls':raw['unknown_x']=[1.,0.]
+            plan['execution_style_proof']={'standardized':(c-(wb @ c)).to_dict('index'),'limits':{'unknown_x':.01},
+                'quality_contract':{'controls':raw.to_dict('index'),'benchmark_weights':wb.to_dict(),'envelope':envelope}}
+        return plan
+    bars=pd.DataFrame([{'date':d,'symbol':'AAA','open':10.,'close':10.} for d in ['20260105','20260106']])
+    expectation=nullcontext() if proof_mode=='valid' else pytest.raises(ValueError)
+    with expectation:
+        result=run_execution_replay(bars=bars,targets=pd.DataFrame(columns=['date','symbol','target_weight']),config=_config(),
+            database=tmp_path/'quality.sqlite3',strategy_id='quality-test',account_id='isolated',closing_target_provider=close,opening_plan_provider=opening)
+        assert len(result.fills)>0 and result.reconciliation['matched']
+
+
 def _config() -> BacktestConfig:
     return BacktestConfig(
         initial_cash=100_000,

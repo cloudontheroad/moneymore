@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {"incremental": false},
+  "include": ["app/**/*.ts", "app/**/*.tsx", "build/**/*.ts", "*.ts"],
+  "exclude": ["node_modules", "worker", "db", "dist", ".next"]
+}
