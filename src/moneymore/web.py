@@ -60,6 +60,7 @@ from .intraday_execution import (
     run_baseline_intraday_once,
 )
 from .leveraged_etf import LeveragedEtfPaper, LeveragedEtfScheduler
+from .leveraged_etf_v3 import LeveragedEtfV3Paper
 from .long_term_review import evaluate_long_term_review
 from .market_risk import build_market_risk_snapshot
 from .model_registry import ModelRegistry
@@ -113,11 +114,17 @@ DATA = ROOT / "data"
 PAPER_DATABASE = STATE / "paper_orders.sqlite3"
 SERVICE_DATABASE = STATE / "service.sqlite3"
 LEVERAGED_ETF_DATABASE = STATE / "tqqq_sqqq_paper.sqlite3"
+LEVERAGED_ETF_V3_DATABASE = STATE / "tqqq_momentum_dip_v3_paper.sqlite3"
 LEVERAGED_ETF_CACHE = DATA / "leveraged-etf"
+LEVERAGED_ETF_V3_CACHE = DATA / "leveraged-etf-v3"
 leveraged_etf_paper_service = LeveragedEtfPaper(
     LEVERAGED_ETF_DATABASE, LEVERAGED_ETF_CACHE
 )
 leveraged_etf_scheduler = LeveragedEtfScheduler(leveraged_etf_paper_service)
+leveraged_etf_v3_paper_service = LeveragedEtfV3Paper(
+    LEVERAGED_ETF_V3_DATABASE, LEVERAGED_ETF_V3_CACHE
+)
+leveraged_etf_v3_scheduler = LeveragedEtfScheduler(leveraged_etf_v3_paper_service)
 SYMBOL = "600036.SH"
 ACCOUNT = "default"
 SHANGHAI = ZoneInfo("Asia/Shanghai")
@@ -218,7 +225,7 @@ def _live_account_snapshot() -> dict[str, object]:
             orders = [
                 row for row in reversed(all_orders) if row.get("account_id") == account_id
             ][:100]
-            fills = broker.fills(account_id)
+            fills = __import__('moneymore.execution.paper_branch',fromlist=['annotate_inherited_fills']).annotate_inherited_fills(broker,account_id)
             accounts[account_id] = {
                 "portfolio": portfolio,
                 "positions": enriched_positions,
@@ -1153,9 +1160,14 @@ class TaskService:
                     from .portfolio_candidate import execute_portfolio_candidate_open
                     portfolio_candidates = [row for row in candidate_catalog(ROOT)
                                             if row.get("portfolio_variant") in {"fixed_budget_v1", "factor_baseline_v2", "mature_alpha158_raw", "mature_alpha158_balanced"} and not row.get("archived") and not row.get("validation_hold")]
-                    prepare_intraday_branch_orders(broker, trade_date)
-                    prepare_exposure_intraday_branch_orders(broker, trade_date)
-                    result = execute_accounts_at_qmt_open(
+                    from .execution.isolation import isolated_execution_call
+                    preparation_results = [
+                        isolated_execution_call(INTRADAY_ACCOUNT,
+                            lambda: prepare_intraday_branch_orders(broker, trade_date)),
+                        isolated_execution_call(EXPOSURE_INTRADAY_ACCOUNT,
+                            lambda: prepare_exposure_intraday_branch_orders(broker, trade_date)),
+                    ]
+                    result = isolated_execution_call("legacy_open_execution", lambda: execute_accounts_at_qmt_open(
                         provider=create_realtime_provider(root=ROOT),
                         broker=broker,
                         config=BacktestConfig.from_yaml(ROOT / "configs" / "default.yaml"),
@@ -1174,7 +1186,7 @@ class TaskService:
                             ],
                         ],
                         audit_dir=STATE / "open-execution",
-                    )
+                    ))
                     # Finish existing accounts first; experimental optimization
                     # latency and errors cannot delay their order intake.
                     portfolio_results = []
@@ -1187,12 +1199,12 @@ class TaskService:
                         except Exception as candidate_error:  # noqa: BLE001
                             portfolio_results.append({"status": "EXECUTION_ERROR", "account_id": row["account_id"],
                                                       "error": f"{type(candidate_error).__name__}: {candidate_error}"})
-                    for outcome in portfolio_results:
+                    for outcome in [*preparation_results, result, *portfolio_results]:
                         if outcome["status"] not in {"COMPLETED", "OUTSIDE_EXECUTION_SESSION"}:
-                            self._notify("WARN", "PORTFOLIO_CANDIDATE_EXECUTION", "固定预算候选执行待处理",
-                                         f"{outcome['account_id']}: {outcome['status']}", trade_date=trade_date,
-                                         dedupe_key=f"{trade_date}:{outcome['account_id']}:{outcome['status']}")
-                    if result["status"] == "COMPLETED" and all(r["status"] == "COMPLETED" for r in portfolio_results):
+                            self._notify("WARN", "PORTFOLIO_CANDIDATE_EXECUTION", "模拟执行步骤待处理",
+                                         f"{outcome.get('account_id', 'legacy_open_execution')}: {outcome['status']}; {outcome.get('error', '')}", trade_date=trade_date,
+                                         dedupe_key=f"{trade_date}:{outcome.get('account_id', 'legacy_open_execution')}:{outcome['status']}")
+                    if result["status"] == "COMPLETED" and all(r["status"] == "COMPLETED" for r in [*preparation_results, *portfolio_results]):
                         self._last_open_execution_date = trade_date
                 except Exception as open_error:  # noqa: BLE001
                     self._notify(
@@ -1397,6 +1409,29 @@ class TaskService:
         try:
             self._set_running(run_id)
             store = ParquetStore(DATA)
+            # Official data must advance even when an older candidate's
+            # chronological strategy recovery remains blocked. Never let that
+            # account's risk error hold the entire market-data frontier back.
+            now = datetime.now(SHANGHAI)
+            config = self.config()
+            cutoff = min(as_of_date, now.strftime("%Y%m%d"))
+            if (now.hour, now.minute) < (int(config["hour"]), int(config["minute"])):
+                cutoff = min(cutoff, (now - timedelta(days=1)).strftime("%Y%m%d"))
+            load_dotenv(ROOT / ".env")
+            from .data.sync import sync_daily_frontier
+            from .data.tushare_provider import TushareProvider
+            self._run_step(
+                run_id, cutoff, "official_daily_frontier",
+                lambda: sync_daily_frontier(TushareProvider(), store, cutoff),
+            )
+            # NAV marking is bookkeeping, not model inference or order replay.
+            # Run it before any older candidate can block strategy recovery.
+            from .close_valuation import recover_close_valuations
+            valuation = recover_close_valuations(ROOT, cutoff, store)
+            if valuation["failures"]:
+                self._notify("WARN", "CLOSE_VALUATION_PARTIAL", "部分账户正式收盘估值待补",
+                    json.dumps(valuation["failures"], ensure_ascii=False), trade_date=cutoff,
+                    run_id=run_id, dedupe_key=f"{cutoff}:close-valuation-partial")
             dates = self._recovery_dates(store, as_of_date, force_current_session)
             if force_current_session and as_of_date in dates:
                 load_dotenv(ROOT / ".env")
@@ -1420,16 +1455,24 @@ class TaskService:
                 )
                 return
             completed: list[str] = []
+            isolated_failures: list[str] = []
             for trade_date in dates:
                 child_run_id = self._create_run("daily_pipeline", trade_date, "RECOVERY")
                 self._execute(child_run_id, trade_date, historical_recovery=True)
                 child = next(row for row in self.runs(100) if row["id"] == child_run_id)
                 if child["status"] != "COMPLETED":
+                    if "independent strategy failures:" in str(child.get("error", "")):
+                        # Keep the failed account/date failed, but do not pin
+                        # all later dates and other accounts behind its model.
+                        isolated_failures.append(f"{trade_date}: {child.get('error')}")
+                        continue
                     raise RuntimeError(
                         f"recovery stopped at {trade_date}: {child['status']} {child.get('error') or ''}"
                     )
                 completed.append(trade_date)
-            self._finish(run_id, "COMPLETED", report_path=",".join(completed))
+            self._finish(run_id, "FAILED" if isolated_failures else "COMPLETED",
+                report_path=",".join(completed),
+                error=" | ".join(isolated_failures) if isolated_failures else None)
         except Exception as error:  # noqa: BLE001 - recovery must remain observable
             detail = f"{type(error).__name__}: {error}"
             self._finish(run_id, "FAILED", error=detail)
@@ -1725,6 +1768,12 @@ class TaskService:
                     ).run(),
                 ),
                 (
+                    "tqqq_momentum_dip_v3_paper_execution",
+                    lambda: LeveragedEtfV3Paper(
+                        LEVERAGED_ETF_V3_DATABASE, LEVERAGED_ETF_V3_CACHE
+                    ).run(),
+                ),
+                (
                     "qlib_challenger_execution",
                     lambda: run_qlib_challenger_daily(
                         root=ROOT,
@@ -1957,6 +2006,7 @@ async def lifespan(_: FastAPI):
     weekly_training_service.start()
     finrl_training_service.start()
     leveraged_etf_scheduler.start()
+    leveraged_etf_v3_scheduler.start()
     if task_service.config().get("enabled"):
         try:
             _refresh_research_financial_pool(ParquetStore(DATA), datetime.now(SHANGHAI).strftime("%Y%m%d"))
@@ -1964,6 +2014,7 @@ async def lifespan(_: FastAPI):
             # Research repair is optional; failure must not take the trading API down.
             pass
     yield
+    leveraged_etf_v3_scheduler.stop()
     leveraged_etf_scheduler.stop()
     finrl_training_service.stop()
     weekly_training_service.stop()
@@ -2015,6 +2066,14 @@ def run_leveraged_etf_paper() -> dict[str, object]:
         return payload
     except Exception as error:
         raise HTTPException(status_code=503, detail=f"US ETF paper run failed: {error}") from error
+
+
+@app.get("/api/leveraged-etf-v3-paper")
+def leveraged_etf_v3_paper() -> dict[str, object]:
+    payload = leveraged_etf_v3_paper_service.snapshot()
+    payload["scheduler"] = leveraged_etf_v3_scheduler.status()
+    payload["research_gate"] = "FAILED_HISTORICAL_GATE_EXPERIMENT_ONLY"
+    return payload
 
 
 @app.get("/api/live-accounts")
@@ -2223,6 +2282,10 @@ def security_history(symbol: str) -> dict[str, object]:
         and str(row.get("trade_date", "")) < INTRADAY_BASELINE_ACTIVATION_DATE
     ]
     fills.extend(inherited_fills)
+    with sqlite3.connect(PAPER_DATABASE) as inheritance:
+        if inheritance.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='paper_inherited_fills'").fetchone():
+            lineage={(account,int(fill_id)):source for account,fill_id,source in inheritance.execute('SELECT account_id,fill_id,source_account FROM paper_inherited_fills')}
+            fills=[{**row,'inherited':True,'source_account_id':lineage[(row['account_id'],int(row['id']))]} if (row['account_id'],int(row['id'])) in lineage else row for row in fills]
     fills.sort(key=lambda row: (str(row.get("trade_date", "")), int(row.get("id", 0))))
     names = _instrument_names(store)
     return {
@@ -3051,7 +3114,7 @@ def qlib_challenger() -> dict[str, object]:
                     for order in reversed(broker.orders())
                     if order.get("account_id") == account_id
                 ][:100],
-                "fills": broker.fills(account_id),
+                "fills": __import__('moneymore.execution.paper_branch',fromlist=['annotate_inherited_fills']).annotate_inherited_fills(broker,account_id),
                 "reconciliation": asdict(broker.reconcile(account_id)),
                 "comparison": version_comparison,
             }

@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {candidateOptionLabel,candidateObservationLabel,candidateReviewReason,visibleStrategyAccounts} from "../app/candidate-view.ts";
+import {candidateOptionLabel,candidateObservationLabel,candidateReviewReason,visibleStrategyAccounts,costExecutionLabel} from "../app/candidate-view.ts";
+
+test("cost policy distinguishes real fills, no-trade and blocked compensation",()=>{
+  assert.match(costExecutionLabel({status:"COMPLETED",trade_date:"20261105",plan:{orders:[]}}),/无需交易/);
+  assert.match(costExecutionLabel({status:"COMPLETED",plan:{orders:[{}]}}),/已模拟成交 1 笔/);
+  assert.match(costExecutionLabel({status:"COST_EXECUTION_BUDGET_EXHAUSTED"}),/预算用尽，未成交/);
+  assert.match(costExecutionLabel({status:"PLAN_BLOCKED",plan:{reason:"NO_FEASIBLE_QUANTITIES"}}),/执行受阻.*NO_FEASIBLE/);
+  assert.match(costExecutionLabel(),/尚未进入/);
+});
 
 test("weight-validation experiment is excluded from active performance curves",()=>{
   const active=[{account_id:"v2",research_gate_passed:true,validation_hold:true}];

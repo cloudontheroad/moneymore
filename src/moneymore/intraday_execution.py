@@ -43,7 +43,10 @@ def _ensure_comparison_account_and_orders(
         raise RuntimeError(f"no prior target report for {source_account} on {trade_date}")
     plan_date = reports[-1].stem
     plan = json.loads(reports[-1].read_text(encoding="utf-8"))
-    if plan.get("status") != "COMPLETED" or not isinstance(plan.get("target_weights"), dict):
+    ready = plan.get("status") == "COMPLETED" or (
+        plan.get("status") == "PLAN_READY" and plan.get("planning_only") is True
+    )
+    if not ready or not isinstance(plan.get("target_weights"), dict):
         raise RuntimeError(f"invalid target report: {reports[-1]}")
     with sqlite3.connect(broker.database, timeout=30) as connection:
         source = connection.execute(

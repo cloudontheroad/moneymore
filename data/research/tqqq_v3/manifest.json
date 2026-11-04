@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-11-04T14:14:34.473981+00:00",
+  "selection_status": "FAILED_NO_POSITIVE_DEV_VALIDATION",
+  "selected_parameters": {
+    "momentum_days": 40,
+    "volatility_days": 20,
+    "volatility_median_days": 504,
+    "volatility_floor": 1.0,
+    "volatility_ceiling": 2.5,
+    "negative_momentum_scale": 0.5,
+    "rsi_days": 14,
+    "oversold_rsi": 30.0,
+    "dip_buy_allocation": 1.0,
+    "rebalance_band": 0.05,
+    "use_relative_volatility": true,
+    "use_dip_buy": true,
+    "use_vix_confirmation": false,
+    "use_reversal_confirmation": false
+  },
+  "benchmark_metrics": {
+    "development": {
+      "cagr": 0.4190182408698664,
+      "sharpe_rf0": 0.9422660456565066,
+      "annualized_volatility": 0.5106361110100615,
+      "max_drawdown": -0.4453691092015075,
+      "annual_turnover": 0.0,
+      "average_exposure": 1.0
+    },
+    "validation": {
+      "cagr": 0.5879402731048766,
+      "sharpe_rf0": 1.1655592469768432,
+      "annualized_volatility": 0.5097627122113669,
+      "max_drawdown": -0.5808275946255392,
+      "annual_turnover": 0.0,
+      "average_exposure": 1.0
+    },
+    "external_replication": {
+      "cagr": 0.2774138945964566,
+      "sharpe_rf0": 0.7061352188750217,
+      "annualized_volatility": 0.7342217244062252,
+      "max_drawdown": -0.81754544537549,
+      "annual_turnover": 0.0,
+      "average_exposure": 1.0
+    },
+    "full_real": {
+      "cagr": 0.3923918984411916,
+      "sharpe_rf0": 0.8512859882616602,
+      "annualized_volatility": 0.6119091068319616,
+      "max_drawdown": -0.8175454453754899,
+      "annual_turnover": 0.0,
+      "average_exposure": 1.0
+    }
+  },
+  "selected_external_metrics": {
+    "cagr": 0.28361063844942924,
+    "sharpe_rf0": 0.7501189312728396,
+    "annualized_volatility": 0.5053489547228226,
+    "max_drawdown": -0.6079474645801985,
+    "annual_turnover": 12.197242342836038,
+    "average_exposure": 0.7509962079265117
+  },
+  "bootstrap": {
+    "annual_excess_ci_low": -0.42064344015457195,
+    "annual_excess_median": -0.14499146087574405,
+    "annual_excess_ci_high": 0.14057599323902883,
+    "probability_positive": 0.161
+  },
+  "gates": {
+    "development_excess_positive": false,
+    "validation_excess_positive": false,
+    "external_replication_excess_positive": true,
+    "cost_25bps_external_excess_positive": false,
+    "majority_walk_forward_folds_positive": false,
+    "external_drawdown_not_worse": true,
+    "bootstrap_probability_positive_at_least_95pct": false
+  },
+  "historical_gate_passed": false,
+  "paper_account_created": false,
+  "production_v2_changed": false,
+  "true_prospective_start": "2026-11-04"
+}

@@ -231,7 +231,7 @@ def run_lifecycle_review(
                 candidate,
                 {"baseline": baseline, "challenger": secondary, "candidate": own},
                 as_of=trade_date,
-                trustworthy_start=trust,
+                trustworthy_start=(max(str(trust),str(candidate['first_execution_date'])) if trust and candidate.get('cost_policy_version') else trust),
                 policy=policy,
                 previous=previous.get(tag),
                 trial_count=len(candidates),

@@ -333,6 +333,16 @@ def execute_portfolio_candidate_open(
         return receipt
     marks = {s: float(valid[s]["last"]) for s in symbols}
     snapshot = broker.account_snapshot(marks, account)
+    if candidate.get('cost_policy_version'):
+        from .research.replay_actions import economic_snapshot,official_replay_actions
+        from .cost_ab_runtime import account_actions
+        snapshot=economic_snapshot(broker,snapshot,marks,account,trade_date,account_actions(store,broker,account))
+        plan={**plan,'locked_shares':snapshot['unsettled_stock_rights'],'receivable_cash':snapshot['receivable_cash']}
+        if not broker.reconcile(account).matched:
+            return {'status':'ACCOUNT_RECONCILIATION_BLOCKED','account_id':account,'real_orders_enabled':False}
+        risk_state=broker.risk_state(account)
+        if risk_state['effective_state']!='NORMAL':
+            return {'status':'ACCOUNT_RISK_BLOCKED','account_id':account,'risk_state':risk_state,'real_orders_enabled':False}
     if candidate.get("portfolio_variant") == "factor_baseline_v2":
         from .execution.risk_state import evaluate_account_risk_state
 
@@ -378,7 +388,16 @@ def execute_portfolio_candidate_open(
         can_buy = {s: execution_price(marks[s], Side.BUY, config.slippage_bps) < float(valid[s].get("up_limit", 0)) for s in symbols}
         can_sell = {s: 0 < float(valid[s].get("down_limit", 0)) < execution_price(marks[s], Side.SELL, config.slippage_bps) for s in symbols}
     # Missing limits are a quality block, not permission to trade.
-    executable = plan_integer_execution(
+    if candidate.get('cost_policy_version'):
+        from .cost_ab_runtime import execute_cost_plan,reserve_execution_attempt
+        attempt_block=reserve_execution_attempt(root,tag,trade_date,local.timestamp())
+        if attempt_block:
+            receipt={'status':attempt_block,'account_id':account,'trade_date':trade_date,'real_orders_enabled':False}
+            write_diagnostic(receipt_path,receipt)
+            return receipt
+        executable=execute_cost_plan(plan,marks,held,available,snapshot['cash'],snapshot['equity'],config,can_buy,can_sell)
+    else:
+      executable = plan_integer_execution(
         plan["target_weights"],
         marks,
         held,
@@ -406,7 +425,12 @@ def execute_portfolio_candidate_open(
             from .costs import execution_price
             fresh_buy={s:execution_price(fresh_marks[s],Side.BUY,config.slippage_bps)<float(fresh_rows[s].get('up_limit',0)) for s in symbols}
             fresh_sell={s:0<float(fresh_rows[s].get('down_limit',0))<execution_price(fresh_marks[s],Side.SELL,config.slippage_bps) for s in symbols}
-            executable=reprice_reference_plan(executable,fresh_marks,held,snapshot['cash'],config,styles,plan['style_limits'],plan['benchmark_weights'],fresh_buy,fresh_sell)
+            if candidate.get('cost_policy_version'):
+                fresh_equity=snapshot['cash']+sum(q*fresh_marks[s] for s,q in held.items())+sum(q*fresh_marks[s] for s,q in plan.get('locked_shares',{}).items())+plan.get('receivable_cash',0)
+                executable=execute_cost_plan(plan,fresh_marks,held,available,snapshot['cash'],fresh_equity,config,fresh_buy,fresh_sell,fixed_quantities=executable['target_quantities'])
+                if executable['status']=='PASS_REFERENCE_QUOTES_ONLY':executable['fresh_quote_revalidated']=True
+            else:
+                executable=reprice_reference_plan(executable,fresh_marks,held,snapshot['cash'],config,styles,plan['style_limits'],plan['benchmark_weights'],fresh_buy,fresh_sell)
             marks=fresh_marks;valid=fresh_rows;can_buy=fresh_buy;can_sell=fresh_sell
         except (ValueError,KeyError,TypeError) as error:
             executable={'status':'BLOCKED','reason':'POST_SOLVE_FRESH_QUOTE_VALIDATION:'+str(error),'orders':[],'orders_enabled':False}
@@ -455,6 +479,8 @@ def execute_portfolio_candidate_open(
             account,
         )
     actual = broker.account_snapshot(marks, account)
+    if candidate.get('cost_policy_version'):
+        actual=economic_snapshot(broker,actual,marks,account,trade_date,account_actions(store,broker,account))
     quantities = {p["symbol"]: int(p["quantity"]) for p in actual["positions"] if p["quantity"] > 0}
     expected = {s: q for s, q in executable["target_quantities"].items() if q > 0}
     matched = quantities == expected and abs(actual["cash"] - executable["estimated_cash"]) < 0.01

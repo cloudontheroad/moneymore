@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import DesktopExecution from "./DesktopExecution";
 import StyleResearchReview, { type StyleResearchReviewData } from "./StyleResearchReview";
-import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts } from "./candidate-view";
+import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts, costExecutionLabel } from "./candidate-view";
 
 type Row = Record<string, unknown>;
 type Page = "overview" | "sectors" | "research" | "risk" | "leveraged" | "challenger" | "data" | "operations" | "desktop";
@@ -84,6 +84,7 @@ type LeveragedEtfPaper = {
   positions:Row[]; latest_signal:(Row & { indicators?:Row })|null;
   orders:Row[]; fills:Row[]; history:Row[]; benchmark_history?:Row[]; data_source:string; execution_policy:string;
   scheduler?:Row;
+  research_gate?:string;
 };
 type SecurityHistory = {
   symbol:string; name:string; bars:Row[]; fills:Row[];
@@ -214,6 +215,7 @@ export default function Dashboard() {
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [marketRisk, setMarketRisk] = useState<MarketRisk | null>(null);
   const [leveragedEtf,setLeveragedEtf]=useState<LeveragedEtfPaper|null>(null);
+  const [leveragedEtfV3,setLeveragedEtfV3]=useState<LeveragedEtfPaper|null>(null);
   const [securityDetail,setSecurityDetail]=useState<SecurityHistory|null>(null);
   const [securityDetailAccount,setSecurityDetailAccount]=useState("");
   const [securityDetailLoading,setSecurityDetailLoading]=useState(false);
@@ -226,13 +228,14 @@ export default function Dashboard() {
     if(refreshing.current)return;
     refreshing.current=true;
     try {
-      const [b, s, e, q, o, m, a, c, i, r, l] = await Promise.all([
+      const [b, s, e, q, o, m, a, c, i, r, l, l3] = await Promise.all([
         json<Bank>("/api/bank-dashboard"), json<Sectors>("/api/sector-portfolio"), json<Execution>("/api/multi-sector-execution"), json<DataQuality>("/api/data-quality"), json<OperationsCenter>("/api/operations-center"), json<ModelRegistry>("/api/model-registry"), json<MonthlyAcceptance>("/api/monthly-acceptance"), json<Challenger>("/api/qlib-challenger"),
         json<IntradayExecution>("/api/intraday-execution"),
         json<MarketRisk>("/api/market-risk"),
         json<LeveragedEtfPaper>("/api/leveraged-etf-paper"),
+        json<LeveragedEtfPaper>("/api/leveraged-etf-v3-paper"),
       ]);
-      setBank(b); setSectors(s); setExecution(e); setQuality(q); setOperations(o); setModels(m); setAcceptance(a); setChallenger(c); setIntraday(i); setMarketRisk(r); setLeveragedEtf(l); setError("");
+      setBank(b); setSectors(s); setExecution(e); setQuality(q); setOperations(o); setModels(m); setAcceptance(a); setChallenger(c); setIntraday(i); setMarketRisk(r); setLeveragedEtf(l); setLeveragedEtfV3(l3); setError("");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "服务暂不可用"); }
     finally { refreshing.current=false; }
   }, []);
@@ -281,7 +284,7 @@ export default function Dashboard() {
     },10_000);
     return ()=>clearInterval(id);
   },[securityDetail?.symbol]);
-  if (!bank || !sectors || !execution || !quality || !operations || !models || !acceptance || !challenger || !intraday || !marketRisk || !leveragedEtf) return <main className="loading"><span>M</span><b>MoneyMore</b><p>{error || "正在装载综合组合…"}</p><button onClick={() => void refresh()}>重新连接</button><a href="/desktop-execution">独立打开桌面执行（不等待报表）</a></main>;
+  if (!bank || !sectors || !execution || !quality || !operations || !models || !acceptance || !challenger || !intraday || !marketRisk || !leveragedEtf || !leveragedEtfV3) return <main className="loading"><span>M</span><b>MoneyMore</b><p>{error || "正在装载综合组合…"}</p><button onClick={() => void refresh()}>重新连接</button><a href="/desktop-execution">独立打开桌面执行（不等待报表）</a></main>;
   const current = nav.find((item) => item.id === page)!;
   const liveBaseline=live?.accounts[execution.account_id];
   const displayedExecution=liveBaseline?{...execution,portfolio:liveBaseline.portfolio,positions:liveBaseline.positions,orders:liveBaseline.orders,fills:liveBaseline.fills}:execution;
@@ -300,7 +303,7 @@ export default function Dashboard() {
       {page === "sectors" && <SecurityAccountContext.Provider value="multi_sector_shadow"><SectorPage sectors={sectors}/></SecurityAccountContext.Provider>}
       {page === "research" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Research sectors={sectors} models={models}/></SecurityAccountContext.Provider>}
       {page === "risk" && <MarketRiskPage risk={marketRisk} live={live??undefined} names={sectors.symbol_names}/>}
-      {page === "leveraged" && <LeveragedEtfPage account={leveragedEtf}/>}
+      {page === "leveraged" && <LeveragedEtfPage account={leveragedEtf} experiment={leveragedEtfV3}/>}
       {page === "challenger" && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/></SecurityAccountContext.Provider>}
       {page === "data" && <DataHealth quality={quality}/>}
       {page === "desktop" && <DesktopExecution names={sectors.symbol_names}/>}
@@ -309,22 +312,29 @@ export default function Dashboard() {
   </div>{(securityDetailLoading||securityDetailError||securityDetail)&&<SecurityHistoryModal detail={securityDetail} initialAccountId={securityDetailAccount} loading={securityDetailLoading} error={securityDetailError} onClose={()=>{setSecurityDetail(null);setSecurityDetailError("");}}/>}</SecurityNavigationContext.Provider>;
 }
 
-function LeveragedEtfPage({account}:{account:LeveragedEtfPaper}) {
+function LeveragedEtfPage({account,experiment}:{account:LeveragedEtfPaper;experiment:LeveragedEtfPaper}) {
   const signal=account.latest_signal;
   const indicators=signal?.indicators??{};
   const allocationRows=signal?[{asset:"TQQQ",weight:signal.tqqq},{asset:"SQQQ",weight:signal.sqqq},{asset:"美元现金",weight:signal.cash}]:[];
-  const benchmark=account.benchmark_history??[];
-  const commonStart=text(benchmark[0]?.trade_date??account.history[0]?.trade_date);
+  const v3Signal=experiment.latest_signal;
+  const v3Indicators=v3Signal?.indicators??{};
+  const benchmark=experiment.benchmark_history??[];
+  const commonStart=text(benchmark[0]?.trade_date??experiment.history[0]?.trade_date);
   const strategyAtStart=account.history.find((row)=>text(row.trade_date)===commonStart)??account.history[0];
   const startEquity=Number(strategyAtStart?.equity??account.initial_cash);
   const history=account.history.filter((row)=>text(row.trade_date)>=commonStart).map((row)=>({...row,normalized_nav:Number(row.equity)/startEquity}));
+  const v3AtStart=experiment.history.find((row)=>text(row.trade_date)===commonStart)??experiment.history[0];
+  const v3StartEquity=Number(v3AtStart?.equity??experiment.initial_cash);
+  const v3History=experiment.history.filter((row)=>text(row.trade_date)>=commonStart).map((row)=>({...row,normalized_nav:Number(row.equity)/v3StartEquity}));
   return <>
     <section className="portfolio-hero leveraged-hero"><div><small>ISOLATED US ETF PAPER ACCOUNT</small><h2>TQQQ Cycle / Cash</h2><p>五年恐慌分位 · 10年期利率动量 · 深度崩盘保护 · 月度滞回再平衡</p></div><div className="exposure"><span>账户净值</span><b>{usd(account.equity)}</b><small>初始资金 {usd(account.initial_cash)} · {account.status}</small></div></section>
     <section className="kpis"><Kpi label="累计收益" value={pct(account.total_return)} note="仅此独立美元账户" accent/><Kpi label="当前回撤" value={pct(account.drawdown)} note="相对账户历史峰值"/><Kpi label="美元现金" value={usd(account.cash)} note={`市值 ${usd(account.market_value)}`}/><Kpi label="最新信号" value={text(signal?.regime??"等待首次运行")} note={`${text(signal?.signal_date)} · 调度${account.scheduler?.running?"正常":"停止"}`}/></section>
+    <Panel title="v3独立实验账户" subtitle="独立$100,000 · 不替换v2 · 历史门槛未通过，仅作前瞻A/B"><section className="kpis"><Kpi label="v3净值" value={usd(experiment.equity)} note={experiment.strategy_id} accent/><Kpi label="v3累计收益" value={pct(experiment.total_return)} note={text(experiment.research_gate)}/><Kpi label="v3目标仓位" value={pct(v3Signal?.tqqq)} note={`${text(v3Signal?.regime)} · 现金 ${pct(v3Signal?.cash)}`}/><Kpi label="动量 / RSI" value={`${pct(v3Indicators.momentum)} / ${num(v3Indicators.rsi)}`} note={`相对波动 ${num(v3Indicators.relative_volatility)} · 调度${experiment.scheduler?.running?"正常":"停止"}`}/></section></Panel>
     <Panel title="美股独立调度" subtitle="服务启动立即补齐缺失交易日；按 America/New_York 自动处理夏令时，不依赖 A 股流水线"><Table rows={account.scheduler?[account.scheduler]:[]} columns={[["running","运行中"],["last_startup_run","启动补跑"],["open_schedule","开盘执行"],["close_schedule","收盘计算"],["last_open_run","最近开盘任务"],["last_close_run","最近收盘任务"],["last_error","最近错误"]]} format={{running:(value)=>value?"是":"否"}}/></Panel>
     <div className="two-col"><Panel title="最新目标配置" subtitle="收盘生成目标；下一交易日开盘成交，不使用未来数据"><Table rows={allocationRows} columns={[["asset","资产"],["weight","目标权重"]]} format={{weight:pct}}/></Panel><Panel title="周期与仓位诊断" subtitle="五年滚动分位；普通状态只在新月份首个交易日且目标变化达到12%才交易，结构性崩盘立即响应"><Table rows={signal?[{raw_target:indicators.base_tqqq,target_tqqq:signal.tqqq,fear_rank:indicators.fear_rank,rate_rank:indicators.rate_rank,term:indicators.term_structure,rate_change:indicators.rate_change_60d,qqq_close:indicators.qqq_close,ma250:indicators.ma250,distance:indicators.distance_from_ma250,score:signal.score}]:[]} columns={[["raw_target","周期原始仓位"],["target_tqqq","执行目标仓位"],["fear_rank","恐慌分位"],["rate_rank","利率友好分位"],["term","VIX期限比"],["rate_change","利率60日变化"],["qqq_close","QQQ"],["ma250","250日均线"],["distance","距长期均线"],["score","综合分位"]]} format={{raw_target:pct,target_tqqq:pct,fear_rank:num,rate_rank:num,term:num,rate_change:num,qqq_close:num,ma250:num,distance:pct,score:num}}/></Panel></div>
     <div className="two-col"><Panel title="独立持仓" subtitle="不会进入 A 股账户、风控或策略 PK"><Table rows={account.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd,unrealized_pnl:usd}}/></Panel><Panel title="待执行与历史订单" subtitle={account.execution_policy}><Table rows={account.orders.slice(0,30)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"],["reason","原因"]]} format={{target_weight:pct}}/></Panel></div>
-    <Panel title="美元账户净值" subtitle={account.data_source}>{history.length?<LineComparisonChart title="策略与满仓TQQQ参照" subtitle={`共同起点 ${commonStart} = 100；基准全程满仓持有TQQQ、不调仓`} series={[{accountId:account.account_id,label:"TQQQ Cycle v2",color:"#ef7655",rows:history},{accountId:"tqqq_buy_hold",label:"TQQQ满仓持有",color:"#6478d3",rows:benchmark}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/>:<p className="empty">首次运行后开始记录每日净值</p>}</Panel>
+    <Panel title="美元账户净值" subtitle={account.data_source}>{history.length?<LineComparisonChart title="v2、v3与满仓TQQQ A/B" subtitle={`共同起点 ${commonStart} = 100；三个账户资金与账本完全隔离`} series={[{accountId:account.account_id,label:"TQQQ Cycle v2",color:"#ef7655",rows:history},{accountId:experiment.account_id,label:"TQQQ Momentum Dip v3",color:"#31a48d",rows:v3History},{accountId:"tqqq_buy_hold",label:"TQQQ满仓持有",color:"#6478d3",rows:benchmark}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/>:<p className="empty">首次运行后开始记录每日净值</p>}</Panel>
+    <div className="two-col"><Panel title="v3独立持仓" subtitle="与v2数据库物理隔离"><Table rows={experiment.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd,unrealized_pnl:usd}}/></Panel><Panel title="v3待执行与历史订单" subtitle={experiment.execution_policy}><Table rows={experiment.orders.slice(0,30)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"],["reason","原因"]]} format={{target_weight:pct}}/></Panel></div>
     <Panel title="模拟成交" subtitle="5 bps 滑点 + 1 bp 手续费"><Table rows={account.fills} columns={[["trade_date","成交日"],["signal_date","信号日"],["symbol","标的"],["side","方向"],["quantity","数量"],["price","成交价"],["fee","费用"]]} format={{price:usd,fee:usd}}/></Panel>
   </>;
 }
@@ -510,6 +520,12 @@ function ChallengerPage({ challenger, names, live, showArchived, onShowArchived 
       <AccountColumn title="基线V2" badge="FACTOR V2 · 1029" accountId="qlib_candidate_20261029" status={text(fixedV2?.latest?.status??"等待数据")} equity={Number(fixedV2Portfolio?.equity??1_000_000)} portfolio={fixedV2Portfolio} targetExposure={Number(fixedV2?.latest?.target_gross_exposure)} orders={fixedV2Live?.orders??fixedV2?.orders??[]} fills={fixedV2Live?.fills??fixedV2?.fills??[]} names={names}/>
       <AccountColumn title={text(selectedCandidate?.display_name??"候选者")} badge={text(selectedCandidate?.candidate_tag??observation?.candidate_tag)} accountId={text(selectedCandidate?.account_id??observation?.account_id)} status={candidateRunStatus} equity={candidateEquity} initialCash={Number(selectedCandidate?.initial_cash??1_000_000)} portfolio={candidatePortfolio} targetExposure={Number(selectedCandidate?.latest?.target_gross_exposure??observation?.latest?.target_gross_exposure)} exposurePolicy={(selectedCandidate?.latest?.exposure_policy??observation?.latest?.exposure_policy) as Row|undefined} orderPreview={selectedCandidate?.order_preview as Row|undefined} orders={candidateLive?.orders??selectedCandidate?.orders??observation?.orders??[]} fills={candidateLive?.fills??selectedCandidate?.fills??observation?.fills??[]} names={names} accent={!Boolean(selectedCandidate?.research_gate_passed??observation?.research_gate_passed)}/>
     </div>
+    {selectedCandidate?.cost_policy_version?<Panel title="成本感知调仓" subtitle="独立模拟分支 · 沿用原预测模型，改变预测转持仓与执行的方法">
+      <p>{selectedCandidate.alpha_evidence_enabled?'已启用成本后预测优势判断。':'当前样本外校准未证明可靠交易优势：不为排名小幅变化或重新贴权重制造交易；必要风险调整和退出候选池仍单独执行。'}</p>
+      <p>父账户：{text(selectedCandidate.source_account_id)} · 分支日：{text(selectedCandidate.activation_date)} · 原现金、持仓与权益继承，不重置成100。</p>
+      <p>最近执行：{costExecutionLabel(selectedCandidate.latest_execution as Row|undefined)}。</p>
+      <p>参考决策：{({COST_NO_TRADE:'保持真实股数，增量收益不足以覆盖成本',NECESSARY_RISK_OR_POOL_EXIT:'必要风险调整或退出候选池',POSITIVE_NET_UTILITY:'交易后的预期增量效用为正',INITIAL_CONFIGURATION:'初始配置，不代表预测优势已获证明'} as Record<string,string>)[text((selectedCandidate.order_preview as Row|undefined)?.cost_decision)]??'等待参考计划及开盘核验'}。未生成委托不等于服务失败；行情、求解失败仍单列告警。</p>
+    </Panel>:null}
     <PerformanceComparisonCharts comparison={globalView} observation={observation} showArchived={showArchived}/>
     <MaturePairSummary pair={challenger.mature_multifactor_pair} live={live} names={names} candidates={observation?.candidates??[]}/>
     {challenger.mature_multifactor_pair?<details className="mature-history-review"><summary>S系列历史研究评审（已结项）</summary><StyleResearchReview review={challenger.style_research_review}/></details>:<StyleResearchReview review={challenger.style_research_review}/>}

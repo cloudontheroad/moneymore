@@ -1,5 +1,21 @@
 type Candidate = Record<string, unknown>;
 
+export function costExecutionLabel(execution?: Candidate): string {
+  if (!execution?.status) return "尚未进入首次独立执行";
+  const plan = execution.plan as Candidate | undefined;
+  const orders = Array.isArray(plan?.orders) ? plan.orders.length : 0;
+  const labels: Record<string, string> = {
+    PLAN_BLOCKED: "执行受阻", QUOTE_QUALITY_BLOCKED: "行情质量阻断",
+    COST_EXECUTION_COMPENSATION_COOLDOWN: "等待有限补偿",
+    COST_EXECUTION_BUDGET_EXHAUSTED: "补偿预算用尽，未成交", PREPARED: "已准备，待成交对账",
+    EXECUTION_MISMATCH: "成交对账异常", ACCOUNT_RISK_BLOCKED: "账户风控阻断",
+  };
+  const status = execution.status === "COMPLETED" ? (orders ? `已模拟成交 ${orders} 笔` : "无需交易，已完成核验")
+    : labels[String(execution.status)] ?? String(execution.status);
+  const reason = plan?.reason ?? execution.reason;
+  return `${execution.trade_date ?? ""} · ${status}${reason ? ` · ${reason}` : ""}`;
+}
+
 export function visibleStrategyAccounts(
   active: Candidate[], archived: Candidate[], permanent: string[], showArchived: boolean,
 ): Set<string> {

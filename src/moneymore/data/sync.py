@@ -23,6 +23,36 @@ class SyncSummary:
     factor_rows: int
 
 
+def sync_daily_frontier(
+    provider: MarketDataProvider,
+    store: ParquetStore,
+    cutoff: str,
+    max_sessions: int = 20,
+) -> SyncSummary:
+    """Advance official market data independently of older strategy failures.
+
+    Caller supplies a completed-close cutoff, not today's intraday date. Existing
+    history is required; this bounded repair is not an implicit full backfill.
+    """
+    if max_sessions < 1:
+        raise ValueError("max_sessions must be positive")
+    frontiers = []
+    for table in ("daily", "adj_factor"):
+        dates = store.curated_values(table, "trade_date")
+        if not dates:
+            raise ValueError("official frontier requires existing history: " + table)
+        frontiers.append(max(dates))
+    calendar = store.read("trade_calendar", columns=["cal_date", "is_open"])
+    dates = sorted(set(calendar.loc[
+        (calendar.cal_date.astype(str) > min(frontiers))
+        & (calendar.cal_date.astype(str) <= cutoff)
+        & calendar.is_open.astype(str).eq("1"), "cal_date"
+    ].astype(str)))[:max_sessions]
+    if not dates:
+        return SyncSummary(0, 0, 0)
+    return sync_daily_history(provider, store, dates[0], dates[-1], batch_days=5)
+
+
 def sync_reference_data(
     provider: MarketDataProvider,
     store: ParquetStore,

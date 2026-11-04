@@ -51,6 +51,10 @@ class Allocation:
     ma250: float
     distance_from_ma250: float
     crash_guard_active: bool
+    momentum: float | None
+    relative_volatility: float | None
+    rsi: float | None
+    dip_buy: bool
 
 
 class YahooDailyClient:
@@ -90,9 +94,20 @@ class YahooDailyClient:
 class LeveragedEtfPaper:
     """Fully isolated TQQQ/cash paper account using a cycle-aware strategy."""
 
-    def __init__(self, database: str | Path, cache_dir: str | Path) -> None:
+    def __init__(
+        self,
+        database: str | Path,
+        cache_dir: str | Path,
+        *,
+        account_id: str = ACCOUNT_ID,
+        strategy_id: str = STRATEGY_ID,
+        initial_cash: float = INITIAL_CASH,
+    ) -> None:
         self.database = Path(database)
         self.cache_dir = Path(cache_dir)
+        self.account_id = account_id
+        self.strategy_id = strategy_id
+        self.initial_cash = initial_cash
         self.database.parent.mkdir(parents=True, exist_ok=True)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._initialize()
@@ -142,7 +157,7 @@ class LeveragedEtfPaper:
             now = datetime.now(UTC).isoformat()
             connection.execute(
                 "INSERT OR IGNORE INTO account VALUES (?, ?, ?, ?, ?)",
-                (ACCOUNT_ID, INITIAL_CASH, INITIAL_CASH, now, now),
+                (self.account_id, self.initial_cash, self.initial_cash, now, now),
             )
 
     def refresh_data(self, client: YahooDailyClient | None = None) -> dict[str, pd.DataFrame]:
@@ -243,6 +258,7 @@ class LeveragedEtfPaper:
             ma250=round(decision.ma250, 6),
             distance_from_ma250=round(decision.distance_from_ma250, 6),
             crash_guard_active=decision.crash_guard_active,
+            momentum=None, relative_volatility=None, rsi=None, dip_buy=False,
         )
 
     def run(self, client: YahooDailyClient | None = None) -> dict[str, object]:
@@ -269,7 +285,7 @@ class LeveragedEtfPaper:
             latest_indicators = {} if not recent else json.loads(str(recent[0]["indicators_json"]))
             previous_tqqq = (
                 float(recent[0]["tqqq"])
-                if recent and latest_indicators.get("model_version") == STRATEGY_ID
+                if recent and latest_indicators.get("model_version") == self.strategy_id
                 else None
             )
         indices = [
@@ -298,7 +314,7 @@ class LeveragedEtfPaper:
             )
             prior_tqqq = (
                 float(recent[1]["tqqq"])
-                if len(recent) > 1 and prior_indicators.get("model_version") == STRATEGY_ID
+                if len(recent) > 1 and prior_indicators.get("model_version") == self.strategy_id
                 else None
             )
             self._queue(self.allocation(data, -1, previous_tqqq=prior_tqqq), closes)
@@ -345,7 +361,9 @@ class LeveragedEtfPaper:
                 symbol, side, requested = str(order["symbol"]), str(order["side"]), int(order["quantity"])
                 raw_price = float(opens[symbol])
                 price = raw_price * (1.0005 if side == "BUY" else 0.9995)
-                account = connection.execute("SELECT cash FROM account WHERE account_id = ?", (ACCOUNT_ID,)).fetchone()
+                account = connection.execute(
+                    "SELECT cash FROM account WHERE account_id = ?", (self.account_id,)
+                ).fetchone()
                 position = connection.execute("SELECT quantity, avg_cost FROM positions WHERE symbol = ?", (symbol,)).fetchone()
                 held = int(position["quantity"]) if position else 0
                 quantity = min(requested, int(float(account["cash"]) // price)) if side == "BUY" else min(requested, held)
@@ -358,7 +376,10 @@ class LeveragedEtfPaper:
                 old_cost = float(position["avg_cost"]) if position else 0.0
                 avg_cost = ((held * old_cost + quantity * price) / new_quantity) if side == "BUY" and new_quantity else (old_cost if new_quantity else 0.0)
                 now = datetime.now(UTC).isoformat()
-                connection.execute("UPDATE account SET cash=cash+?, updated_at=? WHERE account_id=?", (cash_delta, now, ACCOUNT_ID))
+                connection.execute(
+                    "UPDATE account SET cash=cash+?, updated_at=? WHERE account_id=?",
+                    (cash_delta, now, self.account_id),
+                )
                 connection.execute(
                     "INSERT INTO positions VALUES (?, ?, ?, ?) ON CONFLICT(symbol) DO UPDATE SET quantity=excluded.quantity, avg_cost=excluded.avg_cost, updated_at=excluded.updated_at",
                     (symbol, new_quantity, avg_cost, now),
@@ -394,7 +415,9 @@ class LeveragedEtfPaper:
                     "DELETE FROM orders WHERE signal_date=? AND status='PENDING'",
                     (allocation.signal_date,),
                 )
-            account = connection.execute("SELECT cash FROM account WHERE account_id=?", (ACCOUNT_ID,)).fetchone()
+            account = connection.execute(
+                "SELECT cash FROM account WHERE account_id=?", (self.account_id,)
+            ).fetchone()
             positions = {row["symbol"]: int(row["quantity"]) for row in connection.execute("SELECT * FROM positions")}
             equity = float(account["cash"]) + sum(positions.get(symbol, 0) * closes[symbol] for symbol in TRADE_SYMBOLS)
             if not signal_exists:
@@ -417,7 +440,11 @@ class LeveragedEtfPaper:
 
     def _record_equity(self, trade_date: str, closes: dict[str, float]) -> None:
         with self._connect() as connection:
-            cash = float(connection.execute("SELECT cash FROM account WHERE account_id=?", (ACCOUNT_ID,)).fetchone()[0])
+            cash = float(
+                connection.execute(
+                    "SELECT cash FROM account WHERE account_id=?", (self.account_id,)
+                ).fetchone()[0]
+            )
             positions = {row["symbol"]: int(row["quantity"]) for row in connection.execute("SELECT * FROM positions")}
             market_value = sum(positions.get(symbol, 0) * closes[symbol] for symbol in TRADE_SYMBOLS)
             connection.execute(
@@ -429,7 +456,11 @@ class LeveragedEtfPaper:
     def snapshot(self, mark_prices: dict[str, float] | None = None) -> dict[str, object]:
         mark_prices = mark_prices or self._cached_marks()
         with self._connect() as connection:
-            account = dict(connection.execute("SELECT * FROM account WHERE account_id=?", (ACCOUNT_ID,)).fetchone())
+            account = dict(
+                connection.execute(
+                    "SELECT * FROM account WHERE account_id=?", (self.account_id,)
+                ).fetchone()
+            )
             positions = [dict(row) for row in connection.execute("SELECT * FROM positions WHERE quantity != 0 ORDER BY symbol")]
             signals = [dict(row) for row in connection.execute("SELECT * FROM signals ORDER BY signal_date DESC LIMIT 30")]
             orders = [dict(row) for row in connection.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 100")]
@@ -445,13 +476,13 @@ class LeveragedEtfPaper:
         latest_signal = signals[0] if signals else None
         if latest_signal:
             latest_signal["indicators"] = json.loads(str(latest_signal.pop("indicators_json")))
-        peak = max([INITIAL_CASH, *(float(row["equity"]) for row in history)])
+        peak = max([self.initial_cash, *(float(row["equity"]) for row in history)])
         benchmark_history = self._buy_hold_benchmark(history)
         return {
-            "account_id": ACCOUNT_ID, "strategy_id": STRATEGY_ID,
-            "initial_cash": INITIAL_CASH, "currency": "USD", "status": "PAPER_ONLY",
+            "account_id": self.account_id, "strategy_id": self.strategy_id,
+            "initial_cash": self.initial_cash, "currency": "USD", "status": "PAPER_ONLY",
             "cash": float(account["cash"]), "market_value": market_value, "equity": equity,
-            "total_return": equity / INITIAL_CASH - 1, "drawdown": equity / peak - 1,
+            "total_return": equity / self.initial_cash - 1, "drawdown": equity / peak - 1,
             "positions": positions, "latest_signal": latest_signal,
             "orders": orders, "fills": fills, "history": history,
             "benchmark_history": benchmark_history,
@@ -482,7 +513,7 @@ class LeveragedEtfPaper:
                 "trade_date": trade_date,
                 "close": close,
                 "normalized_nav": close / start_price,
-                "equity": INITIAL_CASH * close / start_price,
+                "equity": self.initial_cash * close / start_price,
             }
             for trade_date, close in aligned
         ]

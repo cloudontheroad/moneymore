@@ -141,6 +141,8 @@ def candidate_catalog(root: Path) -> list[dict[str, Any]]:
         used_tags.add(tag)
     from .mature_multifactor_runtime import mature_candidates
     rows.extend(mature_candidates(root))
+    from .cost_ab_runtime import cost_candidates
+    rows.extend(cost_candidates(root))
     return sorted(rows, key=lambda r: r["candidate_tag"], reverse=True)
 
 
@@ -165,6 +167,12 @@ def run_candidate_daily(
         broker.cancel_pending(candidate_account_id(tag), "CANDIDATE_LIFECYCLE_FROZEN")
         raise ValueError(f"candidate {tag} is frozen by lifecycle review")
     from .mature_multifactor_runtime import is_mature, prepare_mature_daily
+    if candidate.get('cost_policy_version'):
+        from .cost_ab_runtime import prepare_cost_daily
+        result=prepare_cost_daily(root=root,store=store,broker=broker,config=config,candidate=candidate,trade_date=trade_date)
+        from .cost_order_preview import build_preview
+        build_preview(root,candidate,trade_date)
+        return result
     if is_mature(candidate):
         result=prepare_mature_daily(root=root,store=store,broker=broker,config=config,candidate=candidate,trade_date=trade_date)
         # A reference preview cannot submit orders or replace the next-session replan.
