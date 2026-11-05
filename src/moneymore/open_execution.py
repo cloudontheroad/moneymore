@@ -171,8 +171,8 @@ def execute_accounts_at_qmt_open(
                 trade_date=trade_date,
                 open=open_price,
                 close=float(row.get("last", open_price) or open_price),
-                can_buy=not up_limit or open_price < up_limit,
-                can_sell=not down_limit or open_price > down_limit,
+                can_buy=bool(row.get("can_buy", True)) and (not up_limit or open_price < up_limit),
+                can_sell=bool(row.get("can_sell", True)) and (not down_limit or open_price > down_limit),
             )
     missing = sorted(set(symbols) - set(bars))
     return _execute_with_bars(

@@ -40,6 +40,23 @@ def test_units_and_ready():
     assert row["execution_ready"] is True
 
 
+def test_limit_up_one_sided_book_is_valid_but_cannot_buy():
+    quote, depth, instrument = sample()
+    instrument['ext']['limit_up'] = quote['last_price']
+    depth['bid_prices'] = [quote['last_price']]
+    depth['ask_prices'] = [0]
+    row = normalize_quote(quote, depth, instrument, NOW)
+    assert row['execution_ready'] and row['book_state'] == 'LIMIT_UP_ONE_SIDED'
+    assert not row['can_buy'] and row['can_sell']
+
+
+def test_one_sided_away_from_limit_is_still_invalid():
+    quote, depth, instrument = sample()
+    depth['ask_prices'] = [0]
+    row = normalize_quote(quote, depth, instrument, NOW)
+    assert not row['execution_ready'] and 'INVALID_BOOK' in row['quality_reasons']
+
+
 @pytest.mark.parametrize(
     "change,reason",
     [

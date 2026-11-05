@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import DesktopExecution from "./DesktopExecution";
 import StyleResearchReview, { type StyleResearchReviewData } from "./StyleResearchReview";
 import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts, costExecutionLabel } from "./candidate-view";
@@ -82,7 +82,7 @@ type LeveragedEtfPaper = {
   account_id:string; strategy_id:string; initial_cash:number; currency:string; status:string;
   cash:number; market_value:number; equity:number; total_return:number; drawdown:number;
   positions:Row[]; latest_signal:(Row & { indicators?:Row })|null;
-  orders:Row[]; fills:Row[]; history:Row[]; benchmark_history?:Row[]; data_source:string; execution_policy:string;
+  orders:Row[]; fills:Row[]; history:Row[]; backtest_history?:Row[]; benchmark_history?:Row[]; data_source:string; execution_policy:string;
   scheduler?:Row;
   research_gate?:string;
 };
@@ -194,9 +194,20 @@ const duration = (v: unknown) => {
   return `${Math.floor(seconds / 3600)}小时${Math.floor((seconds % 3600) / 60)}分`;
 };
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { cache: "no-store", signal:AbortSignal.timeout(45000), ...init });
+  const response = await fetch(url, { cache: "no-store", signal:AbortSignal.timeout(90000), ...init });
   if (!response.ok) throw new Error(`${response.status} ${await response.text()}`);
   return response.json() as Promise<T>;
+}
+
+async function runWithConcurrency(tasks: (() => Promise<void>)[], limit = 3) {
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < tasks.length) {
+      const task = tasks[cursor++];
+      await task();
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
 }
 
 export default function Dashboard() {
@@ -227,15 +238,27 @@ export default function Dashboard() {
   const refresh = useCallback(async () => {
     if(refreshing.current)return;
     refreshing.current=true;
+    const failures:string[]=[];
+    const load=<T,>(url:string,setter:(value:T)=>void)=>async()=>{
+      try { setter(await json<T>(url)); }
+      catch(reason) { failures.push(`${url}: ${reason instanceof Error ? reason.message : "服务暂不可用"}`); }
+    };
     try {
-      const [b, s, e, q, o, m, a, c, i, r, l, l3] = await Promise.all([
-        json<Bank>("/api/bank-dashboard"), json<Sectors>("/api/sector-portfolio"), json<Execution>("/api/multi-sector-execution"), json<DataQuality>("/api/data-quality"), json<OperationsCenter>("/api/operations-center"), json<ModelRegistry>("/api/model-registry"), json<MonthlyAcceptance>("/api/monthly-acceptance"), json<Challenger>("/api/qlib-challenger"),
-        json<IntradayExecution>("/api/intraday-execution"),
-        json<MarketRisk>("/api/market-risk"),
-        json<LeveragedEtfPaper>("/api/leveraged-etf-paper"),
-        json<LeveragedEtfPaper>("/api/leveraged-etf-v3-paper"),
+      await runWithConcurrency([
+        load<Bank>("/api/bank-dashboard",setBank),
+        load<Sectors>("/api/sector-portfolio",setSectors),
+        load<Execution>("/api/multi-sector-execution",setExecution),
+        load<DataQuality>("/api/data-quality",setQuality),
+        load<OperationsCenter>("/api/operations-center",setOperations),
+        load<ModelRegistry>("/api/model-registry",setModels),
+        load<MonthlyAcceptance>("/api/monthly-acceptance",setAcceptance),
+        load<Challenger>("/api/qlib-challenger",setChallenger),
+        load<IntradayExecution>("/api/intraday-execution",setIntraday),
+        load<MarketRisk>("/api/market-risk",setMarketRisk),
+        load<LeveragedEtfPaper>("/api/leveraged-etf-paper",setLeveragedEtf),
+        load<LeveragedEtfPaper>("/api/leveraged-etf-v3-paper",setLeveragedEtfV3),
       ]);
-      setBank(b); setSectors(s); setExecution(e); setQuality(q); setOperations(o); setModels(m); setAcceptance(a); setChallenger(c); setIntraday(i); setMarketRisk(r); setLeveragedEtf(l); setLeveragedEtfV3(l3); setError("");
+      setError(failures.length === 12 ? "服务暂不可用" : "");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "服务暂不可用"); }
     finally { refreshing.current=false; }
   }, []);
@@ -312,30 +335,48 @@ export default function Dashboard() {
   </div>{(securityDetailLoading||securityDetailError||securityDetail)&&<SecurityHistoryModal detail={securityDetail} initialAccountId={securityDetailAccount} loading={securityDetailLoading} error={securityDetailError} onClose={()=>{setSecurityDetail(null);setSecurityDetailError("");}}/>}</SecurityNavigationContext.Provider>;
 }
 
+type QuantMetrics={totalReturn:number;annualizedReturn:number;volatility:number;sharpe:number;maxDrawdown:number;calmar:number;winRate:number;averageExposure:number;rebalanceCount:number;upCapture:number;downCapture:number};
+const dailyReturns=(rows:Row[])=>rows.slice(1).map((row,index)=>Number(row.normalized_nav)/Number(rows[index].normalized_nav)-1).filter(Number.isFinite);
+function quantMetrics(rows:Row[],benchmark:Row[],fixedExposure?:number):QuantMetrics {
+  if(rows.length<2)return {totalReturn:0,annualizedReturn:0,volatility:0,sharpe:0,maxDrawdown:0,calmar:0,winRate:0,averageExposure:fixedExposure??0,rebalanceCount:0,upCapture:0,downCapture:0};
+  const returns=dailyReturns(rows),periods=Math.max(1,returns.length),first=Number(rows[0].normalized_nav),last=Number(rows.at(-1)?.normalized_nav);
+  const mean=returns.reduce((sum,value)=>sum+value,0)/periods;
+  const variance=returns.reduce((sum,value)=>sum+(value-mean)**2,0)/Math.max(1,periods-1);
+  const volatility=Math.sqrt(variance)*Math.sqrt(252),totalReturn=last/first-1,annualizedReturn=(last/first)**(252/periods)-1;
+  let peak=first,maxDrawdown=0;
+  for(const row of rows){const nav=Number(row.normalized_nav);peak=Math.max(peak,nav);maxDrawdown=Math.min(maxDrawdown,nav/peak-1);}
+  const exposures=fixedExposure==null?rows.map(row=>Number(row.target_tqqq)).filter(Number.isFinite):[fixedExposure];
+  let rebalanceCount=0;
+  for(let index=1;index<exposures.length;index++)if(Math.abs(exposures[index]-exposures[index-1])>1e-6)rebalanceCount++;
+  const benchmarkByDate=new Map(benchmark.map(row=>[text(row.trade_date),Number(row.normalized_nav)]));
+  let priorStrategy:number|undefined,priorBenchmark:number|undefined,upStrategy=0,upBenchmark=0,downStrategy=0,downBenchmark=0;
+  for(const row of rows){const strategy=Number(row.normalized_nav),market=benchmarkByDate.get(text(row.trade_date));if(market==null)continue;if(priorStrategy!=null&&priorBenchmark!=null){const sr=strategy/priorStrategy-1,br=market/priorBenchmark-1;if(br>0){upStrategy+=sr;upBenchmark+=br;}else if(br<0){downStrategy+=sr;downBenchmark+=br;}}priorStrategy=strategy;priorBenchmark=market;}
+  return {totalReturn,annualizedReturn,volatility,sharpe:volatility?mean/Math.sqrt(variance)*Math.sqrt(252):0,maxDrawdown,calmar:maxDrawdown?annualizedReturn/Math.abs(maxDrawdown):0,winRate:returns.filter(value=>value>0).length/periods,averageExposure:exposures.reduce((sum,value)=>sum+value,0)/Math.max(1,exposures.length),rebalanceCount,upCapture:upBenchmark?upStrategy/upBenchmark:0,downCapture:downBenchmark?downStrategy/downBenchmark:0};
+}
+function StrategyQuantCard({name,version,color,metrics,target,status}:{name:string;version:string;color:string;metrics:QuantMetrics;target:number;status:string}){
+  return <article className="quant-strategy-card" style={{"--strategy-color":color} as CSSProperties}><header><i/><div><small>{version}</small><h3>{name}</h3></div><b>{metrics.totalReturn>=0?"+":""}{pct(metrics.totalReturn)}</b></header><div className="quant-metric-grid"><span><small>夏普</small><b>{num(metrics.sharpe)}</b></span><span><small>最大回撤</small><b>{pct(metrics.maxDrawdown)}</b></span><span><small>年化波动</small><b>{pct(metrics.volatility)}</b></span><span><small>Calmar</small><b>{num(metrics.calmar)}</b></span><span><small>年化收益</small><b>{pct(metrics.annualizedReturn)}</b></span><span><small>日胜率</small><b>{pct(metrics.winRate)}</b></span></div><footer><span>平均仓位 <b>{pct(metrics.averageExposure)}</b></span><span>当前仓位 <b>{pct(target)}</b></span><span>{status}</span></footer></article>;
+}
 function LeveragedEtfPage({account,experiment}:{account:LeveragedEtfPaper;experiment:LeveragedEtfPaper}) {
-  const signal=account.latest_signal;
-  const indicators=signal?.indicators??{};
-  const allocationRows=signal?[{asset:"TQQQ",weight:signal.tqqq},{asset:"SQQQ",weight:signal.sqqq},{asset:"美元现金",weight:signal.cash}]:[];
-  const v3Signal=experiment.latest_signal;
-  const v3Indicators=v3Signal?.indicators??{};
-  const benchmark=experiment.benchmark_history??[];
-  const commonStart=text(benchmark[0]?.trade_date??experiment.history[0]?.trade_date);
-  const strategyAtStart=account.history.find((row)=>text(row.trade_date)===commonStart)??account.history[0];
-  const startEquity=Number(strategyAtStart?.equity??account.initial_cash);
-  const history=account.history.filter((row)=>text(row.trade_date)>=commonStart).map((row)=>({...row,normalized_nav:Number(row.equity)/startEquity}));
-  const v3AtStart=experiment.history.find((row)=>text(row.trade_date)===commonStart)??experiment.history[0];
-  const v3StartEquity=Number(v3AtStart?.equity??experiment.initial_cash);
-  const v3History=experiment.history.filter((row)=>text(row.trade_date)>=commonStart).map((row)=>({...row,normalized_nav:Number(row.equity)/v3StartEquity}));
+  const v2Signal=account.latest_signal,v3Signal=experiment.latest_signal;
+  const v2Indicators=v2Signal?.indicators??{},v3Indicators=v3Signal?.indicators??{};
+  const benchmark=experiment.benchmark_history??[],v2History=account.backtest_history??[],v3History=experiment.backtest_history??[];
+  const commonStart=text(benchmark[0]?.trade_date),commonEnd=text(benchmark.at(-1)?.trade_date);
+  const v2Metrics=quantMetrics(v2History,benchmark),v3Metrics=quantMetrics(v3History,benchmark),holdMetrics=quantMetrics(benchmark,benchmark,1);
+  const v3Gap=v3Metrics.totalReturn-holdMetrics.totalReturn;
+  const v3Diagnosis=v3Gap>=0?"v3目前已跑赢满仓基准，继续观察超额收益能否覆盖更长周期。":v3Metrics.upCapture<.9&&Math.abs(v3Metrics.downCapture)>=.9?"主要问题是上涨捕获不足，但下跌保护没有形成对等补偿；低仓位同时错过了反弹。":v3Metrics.averageExposure<.7?"主要拖累来自平均仓位偏低，现金保护在当前上涨占优的样本中形成明显机会成本。":"仓位并不低，落后更可能来自调仓时点与交易成本，而不是单纯现金拖累。";
+  const performanceRows=[
+    {strategy:"Cycle v2",...v2Metrics,target:v2Signal?.tqqq},
+    {strategy:"Momentum Dip v3",...v3Metrics,target:v3Signal?.tqqq},
+    {strategy:"满仓 TQQQ",...holdMetrics,target:1},
+  ];
   return <>
-    <section className="portfolio-hero leveraged-hero"><div><small>ISOLATED US ETF PAPER ACCOUNT</small><h2>TQQQ Cycle / Cash</h2><p>五年恐慌分位 · 10年期利率动量 · 深度崩盘保护 · 月度滞回再平衡</p></div><div className="exposure"><span>账户净值</span><b>{usd(account.equity)}</b><small>初始资金 {usd(account.initial_cash)} · {account.status}</small></div></section>
-    <section className="kpis"><Kpi label="累计收益" value={pct(account.total_return)} note="仅此独立美元账户" accent/><Kpi label="当前回撤" value={pct(account.drawdown)} note="相对账户历史峰值"/><Kpi label="美元现金" value={usd(account.cash)} note={`市值 ${usd(account.market_value)}`}/><Kpi label="最新信号" value={text(signal?.regime??"等待首次运行")} note={`${text(signal?.signal_date)} · 调度${account.scheduler?.running?"正常":"停止"}`}/></section>
-    <Panel title="v3独立实验账户" subtitle="独立$100,000 · 不替换v2 · 历史门槛未通过，仅作前瞻A/B"><section className="kpis"><Kpi label="v3净值" value={usd(experiment.equity)} note={experiment.strategy_id} accent/><Kpi label="v3累计收益" value={pct(experiment.total_return)} note={text(experiment.research_gate)}/><Kpi label="v3目标仓位" value={pct(v3Signal?.tqqq)} note={`${text(v3Signal?.regime)} · 现金 ${pct(v3Signal?.cash)}`}/><Kpi label="动量 / RSI" value={`${pct(v3Indicators.momentum)} / ${num(v3Indicators.rsi)}`} note={`相对波动 ${num(v3Indicators.relative_volatility)} · 调度${experiment.scheduler?.running?"正常":"停止"}`}/></section></Panel>
-    <Panel title="美股独立调度" subtitle="服务启动立即补齐缺失交易日；按 America/New_York 自动处理夏令时，不依赖 A 股流水线"><Table rows={account.scheduler?[account.scheduler]:[]} columns={[["running","运行中"],["last_startup_run","启动补跑"],["open_schedule","开盘执行"],["close_schedule","收盘计算"],["last_open_run","最近开盘任务"],["last_close_run","最近收盘任务"],["last_error","最近错误"]]} format={{running:(value)=>value?"是":"否"}}/></Panel>
-    <div className="two-col"><Panel title="最新目标配置" subtitle="收盘生成目标；下一交易日开盘成交，不使用未来数据"><Table rows={allocationRows} columns={[["asset","资产"],["weight","目标权重"]]} format={{weight:pct}}/></Panel><Panel title="周期与仓位诊断" subtitle="五年滚动分位；普通状态只在新月份首个交易日且目标变化达到12%才交易，结构性崩盘立即响应"><Table rows={signal?[{raw_target:indicators.base_tqqq,target_tqqq:signal.tqqq,fear_rank:indicators.fear_rank,rate_rank:indicators.rate_rank,term:indicators.term_structure,rate_change:indicators.rate_change_60d,qqq_close:indicators.qqq_close,ma250:indicators.ma250,distance:indicators.distance_from_ma250,score:signal.score}]:[]} columns={[["raw_target","周期原始仓位"],["target_tqqq","执行目标仓位"],["fear_rank","恐慌分位"],["rate_rank","利率友好分位"],["term","VIX期限比"],["rate_change","利率60日变化"],["qqq_close","QQQ"],["ma250","250日均线"],["distance","距长期均线"],["score","综合分位"]]} format={{raw_target:pct,target_tqqq:pct,fear_rank:num,rate_rank:num,term:num,rate_change:num,qqq_close:num,ma250:num,distance:pct,score:num}}/></Panel></div>
-    <div className="two-col"><Panel title="独立持仓" subtitle="不会进入 A 股账户、风控或策略 PK"><Table rows={account.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd,unrealized_pnl:usd}}/></Panel><Panel title="待执行与历史订单" subtitle={account.execution_policy}><Table rows={account.orders.slice(0,30)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"],["reason","原因"]]} format={{target_weight:pct}}/></Panel></div>
-    <Panel title="美元账户净值" subtitle={account.data_source}>{history.length?<LineComparisonChart title="v2、v3与满仓TQQQ A/B" subtitle={`共同起点 ${commonStart} = 100；三个账户资金与账本完全隔离`} series={[{accountId:account.account_id,label:"TQQQ Cycle v2",color:"#ef7655",rows:history},{accountId:experiment.account_id,label:"TQQQ Momentum Dip v3",color:"#31a48d",rows:v3History},{accountId:"tqqq_buy_hold",label:"TQQQ满仓持有",color:"#6478d3",rows:benchmark}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/>:<p className="empty">首次运行后开始记录每日净值</p>}</Panel>
-    <div className="two-col"><Panel title="v3独立持仓" subtitle="与v2数据库物理隔离"><Table rows={experiment.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"],["unrealized_pnl","浮盈亏"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd,unrealized_pnl:usd}}/></Panel><Panel title="v3待执行与历史订单" subtitle={experiment.execution_policy}><Table rows={experiment.orders.slice(0,30)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"],["reason","原因"]]} format={{target_weight:pct}}/></Panel></div>
-    <Panel title="模拟成交" subtitle="5 bps 滑点 + 1 bp 手续费"><Table rows={account.fills} columns={[["trade_date","成交日"],["signal_date","信号日"],["symbol","标的"],["side","方向"],["quantity","数量"],["price","成交价"],["fee","费用"]]} format={{price:usd,fee:usd}}/></Panel>
+    <section className="portfolio-hero leveraged-hero quant-hero"><div><small>LEVERAGED ETF STRATEGY LAB</small><h2>TQQQ 策略评审台</h2><p>同一起点、同一行情、同一交易成本口径；不按版本先后排座次，只看收益是否补偿风险。</p></div><div className="exposure"><span>统一评估区间</span><b>{commonStart.slice(5)}<em> → </em>{commonEnd.slice(5)}</b><small>起点净值 100 · {Math.max(0,benchmark.length-1)} 个交易日</small></div></section>
+    <section className="quant-strategy-grid"><StrategyQuantCard name="Cycle v2" version="STRATEGY V2" color="#ef7655" metrics={v2Metrics} target={Number(v2Signal?.tqqq??0)} status={text(v2Signal?.regime)}/><StrategyQuantCard name="Momentum Dip v3" version="STRATEGY V3" color="#31a48d" metrics={v3Metrics} target={Number(v3Signal?.tqqq??0)} status={text(v3Signal?.regime)}/><StrategyQuantCard name="满仓 TQQQ" version="PASSIVE BENCHMARK" color="#6478d3" metrics={holdMetrics} target={1} status="100% BUY & HOLD"/></section>
+    <Panel title="净值与风险调整收益" subtitle={`统一拟合 ${commonStart} = 100；夏普按日收益、零无风险利率年化；回测不改动模拟盘账本`}>{v2History.length?<LineComparisonChart title="三策略累计净值" subtitle="收益领先不等于策略更优：必须同时观察回撤、波动与夏普" series={[{accountId:account.account_id,label:"Cycle v2",color:"#ef7655",rows:v2History},{accountId:experiment.account_id,label:"Momentum Dip v3",color:"#31a48d",rows:v3History},{accountId:"tqqq_buy_hold",label:"满仓 TQQQ",color:"#6478d3",rows:benchmark}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/>:<p className="empty">正在生成当年回测曲线</p>}</Panel>
+    <Panel title="统一量化指标矩阵" subtitle="所有策略并列；收益率之外，长期优化优先看夏普、最大回撤和 Calmar"><Table rows={performanceRows} columns={[["strategy","策略"],["totalReturn","区间收益"],["annualizedReturn","年化收益"],["sharpe","夏普"],["volatility","年化波动"],["maxDrawdown","最大回撤"],["calmar","Calmar"],["winRate","日胜率"],["averageExposure","平均仓位"],["upCapture","上涨捕获"],["downCapture","下跌捕获"],["rebalanceCount","调仓次数"],["target","当前仓位"]]} format={{totalReturn:pct,annualizedReturn:pct,sharpe:num,volatility:pct,maxDrawdown:pct,calmar:num,winRate:pct,averageExposure:pct,upCapture:pct,downCapture:pct,target:pct}}/></Panel>
+    <section className="quant-diagnosis"><div><small>V3 VS 满仓 TQQQ</small><b className={v3Gap>=0?"positive":"negative"}>{v3Gap>=0?"+":""}{pct(v3Gap)}</b><span>区间超额收益</span></div><div><small>上涨捕获率</small><b>{pct(v3Metrics.upCapture)}</b><span>越低越容易踏空反弹</span></div><div><small>下跌捕获率</small><b>{pct(v3Metrics.downCapture)}</b><span>绝对值越低，保护越有效</span></div><div><small>平均 TQQQ 仓位</small><b>{pct(v3Metrics.averageExposure)}</b><span>满仓基准恒为 100%</span></div><p><strong>当前结论：</strong>{v3Diagnosis} 这不是为交易而交易；下一轮优化应要求“少承受的下跌”足以覆盖“错过的上涨”，否则降仓没有经济价值。</p></section>
+    <div className="three-col quant-live-grid"><Panel title="Cycle v2 当前状态" subtitle={account.strategy_id}><Table rows={v2Signal?[{signal_date:v2Signal.signal_date,regime:v2Signal.regime,target:v2Signal.tqqq,cash:v2Signal.cash,raw:v2Indicators.base_tqqq,equity:account.equity}]:[]} columns={[["signal_date","信号日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["raw","原始目标"],["equity","模拟盘净值"]]} format={{target:pct,cash:pct,raw:pct,equity:usd}}/></Panel><Panel title="Momentum Dip v3 当前状态" subtitle={experiment.strategy_id}><Table rows={v3Signal?[{signal_date:v3Signal.signal_date,regime:v3Signal.regime,target:v3Signal.tqqq,cash:v3Signal.cash,momentum:v3Indicators.momentum,rsi:v3Indicators.rsi,equity:experiment.equity}]:[]} columns={[["signal_date","信号日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["momentum","动量"],["rsi","RSI"],["equity","模拟盘净值"]]} format={{target:pct,cash:pct,momentum:pct,rsi:num,equity:usd}}/></Panel><Panel title="满仓 TQQQ 当前状态" subtitle="被动参照系，不择时"><Table rows={[{signal_date:commonEnd,regime:"BUY_AND_HOLD",target:1,cash:0,equity:100000*(1+holdMetrics.totalReturn)}]} columns={[["signal_date","估值日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["equity","拟合净值"]]} format={{target:pct,cash:pct,equity:usd}}/></Panel></div>
+    <details className="quant-details"><summary><span>模拟盘执行与策略诊断</span><small>持仓、订单、成交、调度与底层信号</small></summary><div><Panel title="美股独立调度" subtitle="America/New_York · 服务启动自动补跑"><Table rows={account.scheduler?[account.scheduler]:[]} columns={[["running","运行中"],["last_startup_run","启动补跑"],["open_schedule","开盘执行"],["close_schedule","收盘计算"],["last_open_run","最近开盘任务"],["last_close_run","最近收盘任务"],["last_error","最近错误"]]} format={{running:(value)=>value?"是":"否"}}/></Panel><div className="two-col"><Panel title="v2持仓与订单" subtitle={`${account.execution_policy} · 与v3物理隔离`}><Table rows={account.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd}}/><Table rows={account.orders.slice(0,15)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"]]} format={{target_weight:pct}}/></Panel><Panel title="v3持仓与订单" subtitle={`${experiment.execution_policy} · 与v2物理隔离`}><Table rows={experiment.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd}}/><Table rows={experiment.orders.slice(0,15)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"]]} format={{target_weight:pct}}/></Panel></div></div></details>
   </>;
 }
 

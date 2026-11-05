@@ -416,7 +416,7 @@ def execute_portfolio_candidate_open(
     if executable['status']=='PASS_REFERENCE_QUOTES_ONLY' and str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_'):
         from .mature_multifactor_runtime import reprice_reference_plan
         try:
-            fresh=provider.intraday_quotes(symbols)
+            fresh=getattr(provider, 'fresh_intraday_quotes', provider.intraday_quotes)(symbols)
             fresh_rows={} if fresh is None else {str(r['symbol']):r for r in fresh.to_dict('records')}
             now_ms=(now if now is not None else datetime.now(UTC)).timestamp()*1000
             if set(symbols)-set(fresh_rows) or any(r.get('execution_ready') is not True or not 0<=now_ms-float(r.get('timestamp',0))<=10000 for r in fresh_rows.values()):

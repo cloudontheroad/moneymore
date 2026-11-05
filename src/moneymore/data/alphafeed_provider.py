@@ -66,7 +66,13 @@ def normalize_quote(
             reasons.append("VWAP_OUTSIDE_RANGE")
     if depth.get("symbol") != symbol or instrument.get("symbol") != symbol:
         reasons.append("MISSING_OR_MISMATCHED_METADATA")
-    if bid is None or ask is None or bid <= 0 or ask <= 0 or bid > ask:
+    up, down = float(ext.get("limit_up") or 0), float(ext.get("limit_down") or 0)
+    limit_up_book = (0 < down < up and bid is not None and ask == 0
+        and abs(price-up) < 1e-6 and abs(bid-up) < 1e-6)
+    limit_down_book = (0 < down < up and ask is not None and bid == 0
+        and abs(price-down) < 1e-6 and abs(ask-down) < 1e-6)
+    ordinary_book = bid is not None and ask is not None and 0 < bid <= ask
+    if not (ordinary_book or limit_up_book or limit_down_book):
         reasons.append("INVALID_BOOK")
     if not (0 <= age <= 30):
         reasons.append("QUOTE_NOT_FRESH")
@@ -80,7 +86,6 @@ def normalize_quote(
         clock(9, 30) <= local.time() <= clock(11, 30) or clock(13) <= local.time() < clock(15)
     ):
         reasons.append("OUTSIDE_CONTINUOUS_SESSION")
-    up, down = float(ext.get("limit_up") or 0), float(ext.get("limit_down") or 0)
     if not (0 < down < up):
         reasons.append("MISSING_PRICE_LIMITS")
     return {
@@ -108,6 +113,9 @@ def normalize_quote(
         "quote_age_seconds": age,
         "depth_age_seconds": depth_age,
         "execution_ready": not reasons,
+        "book_state": "LIMIT_UP_ONE_SIDED" if limit_up_book else "LIMIT_DOWN_ONE_SIDED" if limit_down_book else "TWO_SIDED" if ordinary_book else "INVALID",
+        "can_buy": not reasons and not limit_up_book and price < up,
+        "can_sell": not reasons and not limit_down_book and price > down,
         "quality_reasons": ",".join(reasons),
     }
 

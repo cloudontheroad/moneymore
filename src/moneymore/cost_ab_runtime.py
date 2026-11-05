@@ -15,9 +15,12 @@ def reserve_execution_attempt(root,tag,day,timestamp):
     path.parent.mkdir(parents=True,exist_ok=True)
     with FileLock(str(path)+'.lock',timeout=1):
         state=json.loads(path.read_bytes()) if path.exists() else {'attempts':0,'last_attempt':None}
-        if state['attempts']>=3:return 'COST_EXECUTION_BUDGET_EXHAUSTED'
+        # A documented maintenance extension can add at most one further
+        # three-attempt tranche. Never reset consumed attempts or cooldown.
+        maximum=min(6,max(3,int(state.get('max_attempts',3))))
+        if state['attempts']>=maximum:return 'COST_EXECUTION_BUDGET_EXHAUSTED'
         if state['last_attempt'] is not None and timestamp-state['last_attempt']<300:return 'COST_EXECUTION_COMPENSATION_COOLDOWN'
-        write_diagnostic(path,{'attempts':state['attempts']+1,'last_attempt':timestamp,'max_attempts':3,'cooldown_seconds':300})
+        write_diagnostic(path,{**state,'attempts':state['attempts']+1,'last_attempt':timestamp,'max_attempts':maximum,'cooldown_seconds':300})
     return None
 
 def account_actions(store,broker,account):

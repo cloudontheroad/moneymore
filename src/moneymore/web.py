@@ -429,20 +429,23 @@ def _runtime_health_bus() -> dict[str, object]:
         not in_session or (quote_age is not None and quote_age <= 120)
     )
     if in_session and live.get("quote_source") == "ALPHAFEED_REALTIME":
-        qmt_ok = qmt_ok and bool(quotes) and all(row.get("execution_ready") for row in quotes)
+        qmt_ok = qmt_ok and bool(quotes) and any(row.get("execution_ready") for row in quotes)
+    blocked_quote_count = sum(not bool(row.get("execution_ready", True)) for row in quotes)
+    partial_quotes = in_session and qmt_ok and blocked_quote_count > 0
     add(
         "QMT_MARKET_DATA",
-        "PASS" if qmt_ok else "BLOCK" if in_session else "WARN",
+        "WARN" if partial_quotes else "PASS" if qmt_ok else "BLOCK" if in_session else "WARN",
         (
-            f"{live.get('quote_source')}行情可用，最新行情延迟 {quote_age:.0f} 秒"
+            f"{live.get('quote_source')}报价延迟 {quote_age:.0f} 秒；{blocked_quote_count}只质量异常，按账户单独拦截并重试"
             if quote_age is not None and qmt_ok
-            else "交易时段实时行情缺失或延迟超过120秒"
+            else "交易时段无合格实时行情（可能缺失、陈旧或盘口质量异常）"
             if in_session
             else "非交易时段未取得实时行情，使用正式收盘数据"
         ),
         quote_source=live.get("quote_source"),
         quote_age_seconds=quote_age,
         symbol_count=live.get("symbol_count", 0),
+        blocked_quote_count=blocked_quote_count,
     )
 
     reconciled = True
@@ -1161,6 +1164,8 @@ class TaskService:
                     portfolio_candidates = [row for row in candidate_catalog(ROOT)
                                             if row.get("portfolio_variant") in {"fixed_budget_v1", "factor_baseline_v2", "mature_alpha158_raw", "mature_alpha158_balanced"} and not row.get("archived") and not row.get("validation_hold")]
                     from .execution.isolation import isolated_execution_call
+                    from .data.quote_retry import RetryingQuotes
+                    execution_quotes = RetryingQuotes(create_realtime_provider(root=ROOT))
                     preparation_results = [
                         isolated_execution_call(INTRADAY_ACCOUNT,
                             lambda: prepare_intraday_branch_orders(broker, trade_date)),
@@ -1168,7 +1173,7 @@ class TaskService:
                             lambda: prepare_exposure_intraday_branch_orders(broker, trade_date)),
                     ]
                     result = isolated_execution_call("legacy_open_execution", lambda: execute_accounts_at_qmt_open(
-                        provider=create_realtime_provider(root=ROOT),
+                        provider=execution_quotes,
                         broker=broker,
                         config=BacktestConfig.from_yaml(ROOT / "configs" / "default.yaml"),
                         trade_date=trade_date,
@@ -1195,7 +1200,7 @@ class TaskService:
                             portfolio_results.append(execute_portfolio_candidate_open(
                                 root=ROOT, store=ParquetStore(DATA), broker=broker,
                                 config=BacktestConfig.from_yaml(ROOT / "configs/default.yaml"),
-                                candidate=row, provider=create_realtime_provider(root=ROOT), trade_date=trade_date))
+                                candidate=row, provider=execution_quotes, trade_date=trade_date))
                         except Exception as candidate_error:  # noqa: BLE001
                             portfolio_results.append({"status": "EXECUTION_ERROR", "account_id": row["account_id"],
                                                       "error": f"{type(candidate_error).__name__}: {candidate_error}"})

@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-from .tqqq_cycle import latest_cycle_decision
+from .tqqq_cycle import cycle_decisions, latest_cycle_decision
 
 ACCOUNT_ID = "tqqq_sqqq_v5a_paper"
 STRATEGY_ID = "cycle_rates_fear_v2"
@@ -110,6 +110,7 @@ class LeveragedEtfPaper:
         self.initial_cash = initial_cash
         self.database.parent.mkdir(parents=True, exist_ok=True)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self._display_backtest_cache: tuple[tuple[float, ...], list[dict[str, object]]] | None = None
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
@@ -478,6 +479,7 @@ class LeveragedEtfPaper:
             latest_signal["indicators"] = json.loads(str(latest_signal.pop("indicators_json")))
         peak = max([self.initial_cash, *(float(row["equity"]) for row in history)])
         benchmark_history = self._buy_hold_benchmark(history)
+        backtest_history = self._year_backtest_history()
         return {
             "account_id": self.account_id, "strategy_id": self.strategy_id,
             "initial_cash": self.initial_cash, "currency": "USD", "status": "PAPER_ONLY",
@@ -485,30 +487,34 @@ class LeveragedEtfPaper:
             "total_return": equity / self.initial_cash - 1, "drawdown": equity / peak - 1,
             "positions": positions, "latest_signal": latest_signal,
             "orders": orders, "fills": fills, "history": history,
+            "backtest_history": backtest_history,
             "benchmark_history": benchmark_history,
             "data_source": "Yahoo Finance daily chart; cached independently",
             "execution_policy": "close signal / next session open / 5 bps slippage / 1 bp fee",
         }
 
     def _buy_hold_benchmark(self, history: list[dict[str, object]]) -> list[dict[str, object]]:
-        """TQQQ buy-and-hold aligned to the paper account's first equity date."""
-        if not history:
-            return []
+        """TQQQ buy-and-hold from the first market session of the latest year."""
         path = self.cache_dir / "TQQQ.csv"
         if not path.exists():
             return []
         prices = pd.read_csv(path, usecols=["trade_date", "close"])
         prices["trade_date"] = prices["trade_date"].astype(str)
-        price_by_date = dict(zip(prices["trade_date"], prices["close"], strict=False))
+        prices = prices.sort_values("trade_date").drop_duplicates("trade_date", keep="last")
+        if prices.empty:
+            return []
+        latest_date = str(history[-1]["trade_date"]) if history else str(prices.iloc[-1]["trade_date"])
+        year_start = f"{latest_date[:4]}-01-01"
         aligned = [
-            (str(row["trade_date"]), float(price_by_date[str(row["trade_date"])]))
-            for row in history
-            if str(row["trade_date"]) in price_by_date
+            (str(row.trade_date), float(row.close))
+            for row in prices.loc[
+                prices["trade_date"].between(year_start, latest_date, inclusive="both")
+            ].itertuples(index=False)
         ]
         if not aligned:
             return []
         start_price = aligned[0][1]
-        return [
+        result = [
             {
                 "trade_date": trade_date,
                 "close": close,
@@ -517,6 +523,110 @@ class LeveragedEtfPaper:
             }
             for trade_date, close in aligned
         ]
+        if result[0]["trade_date"] != year_start:
+            result.insert(0, {
+                "trade_date": year_start,
+                "close": start_price,
+                "normalized_nav": 1.0,
+                "equity": self.initial_cash,
+                "is_baseline": True,
+            })
+        return result
+
+    def _year_backtest_history(self) -> list[dict[str, object]]:
+        """Display-only replay from Jan 1; it never writes to the paper ledger."""
+        paths = [self.cache_dir / f"{symbol.replace('^', '')}.csv" for symbol in DATA_SYMBOLS]
+        if any(not path.exists() for path in paths):
+            return []
+        fingerprint = tuple(path.stat().st_mtime for path in paths)
+        if self._display_backtest_cache and self._display_backtest_cache[0] == fingerprint:
+            return self._display_backtest_cache[1]
+        data = self._align({
+            symbol: pd.read_csv(path)
+            for symbol, path in zip(DATA_SYMBOLS, paths, strict=True)
+        })
+        latest_date = str(data["QQQ"].iloc[-1]["trade_date"])
+        year_start = f"{latest_date[:4]}-01-01"
+        indices = [
+            index for index, value in enumerate(data["QQQ"]["trade_date"].astype(str))
+            if year_start < value <= latest_date
+        ]
+        cash = self.initial_cash
+        quantities = {symbol: 0 for symbol in TRADE_SYMBOLS}
+        pending: list[tuple[str, str, int]] = []
+        rows: list[dict[str, object]] = []
+        targets = self._backtest_targets(data)
+        rows.append({
+            "trade_date": year_start,
+            "equity": self.initial_cash,
+            "normalized_nav": 1.0,
+            "target_tqqq": 0.0,
+            "regime": "BASELINE",
+            "is_baseline": True,
+        })
+        for index in indices:
+            for symbol, side, requested in sorted(pending, key=lambda item: item[1] != "SELL"):
+                raw_price = float(data[symbol].iloc[index]["open"])
+                price = raw_price * (1.0005 if side == "BUY" else 0.9995)
+                held = quantities[symbol]
+                quantity = min(requested, int(cash // (price * 1.0001))) if side == "BUY" else min(requested, held)
+                if quantity <= 0:
+                    continue
+                fee = quantity * price * 0.0001
+                if side == "BUY":
+                    cash -= quantity * price + fee
+                    quantities[symbol] += quantity
+                else:
+                    cash += quantity * price - fee
+                    quantities[symbol] -= quantity
+            closes = {symbol: float(data[symbol].iloc[index]["close"]) for symbol in TRADE_SYMBOLS}
+            equity = cash + sum(quantities[symbol] * closes[symbol] for symbol in TRADE_SYMBOLS)
+            target_row = targets.iloc[index]
+            if pd.isna(target_row["tqqq"]):
+                # Keep the year-to-date curve continuous when a short fixture or
+                # newly seeded cache does not yet contain enough macro warm-up.
+                rows.append({
+                    "trade_date": str(data["QQQ"].iloc[index]["trade_date"]),
+                    "equity": equity,
+                    "normalized_nav": equity / self.initial_cash,
+                    "target_tqqq": 0.0,
+                    "regime": "WARMUP",
+                })
+                pending = []
+                continue
+            target_tqqq = float(target_row["tqqq"])
+            target_sqqq = float(target_row.get("sqqq", 0.0))
+            regime = str(target_row["regime"])
+            rows.append({
+                "trade_date": str(data["QQQ"].iloc[index]["trade_date"]),
+                "equity": equity,
+                "normalized_nav": equity / self.initial_cash,
+                "target_tqqq": target_tqqq,
+                "regime": regime,
+            })
+            pending = []
+            for symbol, weight in (("TQQQ", target_tqqq), ("SQQQ", target_sqqq)):
+                target = int(equity * weight // closes[symbol])
+                difference = target - quantities[symbol]
+                if difference:
+                    pending.append((symbol, "BUY" if difference > 0 else "SELL", abs(difference)))
+        self._display_backtest_cache = (fingerprint, rows)
+        return rows
+
+    def _backtest_targets(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
+        dates = pd.to_datetime(data["QQQ"]["trade_date"])
+
+        def series(symbol: str) -> pd.Series:
+            return pd.Series(data[symbol]["close"].astype(float).to_numpy(), index=dates)
+
+        decisions = cycle_decisions(
+            series("QQQ"), series("^VIX"), series("^TNX"), series("^VIX3M")
+        )
+        return pd.DataFrame({
+            "tqqq": decisions["target_tqqq"].to_numpy(),
+            "sqqq": 0.0,
+            "regime": decisions["regime"].to_numpy(),
+        })
 
     def _cached_marks(self) -> dict[str, float]:
         result: dict[str, float] = {}

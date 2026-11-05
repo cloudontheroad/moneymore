@@ -93,8 +93,15 @@ def test_outage_replays_every_missing_us_session(tmp_path: Path) -> None:
     assert caught_up["fills"]
     assert caught_up["positions"]
     assert caught_up["benchmark_history"][0]["normalized_nav"] == pytest.approx(1.0)
-    expected = float(full["TQQQ"].iloc[-1]["close"]) / float(full["TQQQ"].iloc[-6]["close"])
+    latest_date = str(full["TQQQ"].iloc[-1]["trade_date"])
+    year_start = f"{latest_date[:4]}-01-01"
+    first_year_price = float(
+        full["TQQQ"].loc[full["TQQQ"]["trade_date"] >= year_start].iloc[0]["close"]
+    )
+    expected = float(full["TQQQ"].iloc[-1]["close"]) / first_year_price
     assert caught_up["benchmark_history"][-1]["normalized_nav"] == pytest.approx(expected)
+    assert caught_up["backtest_history"][0]["trade_date"] == year_start
+    assert caught_up["backtest_history"][0]["normalized_nav"] == pytest.approx(1.0)
 
 
 def test_storage_is_not_the_moneymore_paper_broker_schema(tmp_path: Path) -> None:

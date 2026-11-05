@@ -69,3 +69,16 @@ def test_full_cost_hold_quote_refresh_reconcile_and_restart(tmp_path,monkeypatch
     assert [(p['symbol'],p['quantity'],p['avg_cost']) for p in result['portfolio']['positions']]==[(p['symbol'],p['quantity'],p['avg_cost']) for p in before['positions']]
     assert all(p['available_quantity']==900 for p in result['portfolio']['positions'])
     assert execute_portfolio_candidate_open(**args)['status']=='COMPLETED' and provider.calls==2
+def test_maintenance_extension_does_not_reset_attempts_or_cooldown(tmp_path):
+    import json
+    from moneymore.cost_ab_runtime import reserve_execution_attempt
+    folder=tmp_path/'state/cost-aware-ab-v2/execution-attempts/test'
+    folder.mkdir(parents=True)
+    file=folder/'20261105.json'
+    file.write_text(json.dumps({'attempts':3,'last_attempt':1000.,'max_attempts':6,'maintenance_extension':{'reason':'bounded authorized recovery'}}))
+    assert reserve_execution_attempt(tmp_path,'test','20261105',1100.)=='COST_EXECUTION_COMPENSATION_COOLDOWN'
+    for stamp in [1300.,1600.,1900.]:
+        assert reserve_execution_attempt(tmp_path,'test','20261105',stamp) is None
+    assert reserve_execution_attempt(tmp_path,'test','20261105',2200.)=='COST_EXECUTION_BUDGET_EXHAUSTED'
+    assert json.loads(file.read_text())['attempts']==6
+

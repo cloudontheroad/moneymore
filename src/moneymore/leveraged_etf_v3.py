@@ -96,3 +96,26 @@ class LeveragedEtfV3Paper(LeveragedEtfPaper):
             rsi=float(decision.rsi),
             dip_buy=bool(decision.dip_buy),
         )
+
+    def _backtest_targets(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
+        dates = pd.to_datetime(data["QQQ"]["trade_date"])
+
+        def series(symbol: str) -> pd.Series:
+            return pd.Series(data[symbol]["close"].astype(float).to_numpy(), index=dates)
+
+        params = V3Parameters()
+        decisions = raw_targets(
+            series("QQQ"), series("TQQQ"), series("^VIX"), series("^VIX3M"), params
+        )
+        implemented: list[float] = []
+        current = math.nan
+        for desired in decisions["raw_target"].astype(float):
+            if not math.isfinite(desired):
+                implemented.append(math.nan)
+                continue
+            if not math.isfinite(current) or abs(desired - current) > params.rebalance_band:
+                current = desired
+            implemented.append(current)
+        regimes = decisions["regime"].astype(str).mask(decisions["regime"].eq("BEAR"), "BEAR_DEFENSIVE")
+        regimes = regimes.mask(decisions["dip_buy"].astype(bool), "BEAR_DIP_BUY")
+        return pd.DataFrame({"tqqq": implemented, "sqqq": 0.0, "regime": regimes.to_numpy()})
