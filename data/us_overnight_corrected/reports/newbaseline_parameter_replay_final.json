@@ -1,0 +1,55 @@
+{
+  "generated_at_utc": "2026-11-08T01:58:18.584724+00:00",
+  "objective": "Top1 and aggregate Top10 mean net return and Sharpe; no rank monotonicity requirement",
+  "feature_baseline": "right_side+market+options+calendar",
+  "single_parameter_experiments": 80,
+  "single_parameter_joint_improvements": 0,
+  "simultaneous_parameter_bundles_tested": 6,
+  "rank_ensemble_candidates_tested": 380,
+  "rank_ensemble_joint_improvements": 31,
+  "accepted": true,
+  "accepted_type": "rank_ensemble_parameter_package",
+  "accepted_members": {
+    "champion": 0.3,
+    "mcw1": 0.2,
+    "half63": 0.3,
+    "top1w5": 0.2
+  },
+  "previous_baseline": {
+    "top1_mean_bps": 39.25277601236869,
+    "top1_sharpe": 1.1322192720470832,
+    "top10_mean_bps": -5.513086138365887,
+    "top10_sharpe": -0.3414994407893151
+  },
+  "new_research_baseline": {
+    "top1_mean_bps": 56.45588517531986,
+    "top1_sharpe": 1.5493681649832058,
+    "top1_win_rate": 0.5238095238095238,
+    "top1_max_drawdown": -0.33006570917816647,
+    "top10_mean_bps": 0.2898778895914035,
+    "top10_sharpe": 0.017940236379049113,
+    "top10_win_rate": 0.5,
+    "top10_max_drawdown": -0.2344779926000362
+  },
+  "fold_metrics": [
+    {
+      "fold": 1,
+      "sessions": 63,
+      "top1_mean_bps": 140.34315529627796,
+      "top1_sharpe": 2.91828011819899,
+      "top10_mean_bps": 30.890179710931466,
+      "top10_sharpe": 1.6724285484163695
+    },
+    {
+      "fold": 2,
+      "sessions": 63,
+      "top1_mean_bps": -27.431384945638257,
+      "top1_sharpe": -1.564644883867012,
+      "top10_mean_bps": -30.310423931748648,
+      "top10_sharpe": -2.273973987956909
+    }
+  ],
+  "stability_status": "FAILED_BOTH_FOLDS_POSITIVE; research Pareto accepted, deployment blocked",
+  "deployment": "BLOCKED",
+  "real_orders_enabled": false
+}

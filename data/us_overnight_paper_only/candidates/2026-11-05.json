@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-11-05T11:36:39.173365-05:00",
+  "feature_session": "2026-11-04 05:00:00+00:00",
+  "status": "LATE_PRIOR_CLOSE_PAPER_ONLY",
+  "risk_gate": "BLOCK_LATE_SIGNAL_AND_UNSTABLE_EDGE",
+  "real_orders_enabled": false,
+  "top10": [
+    {
+      "rank": 1,
+      "symbol": "US.SMCI",
+      "name": "超微电脑",
+      "score": 0.009151637806384156
+    },
+    {
+      "rank": 2,
+      "symbol": "US.STRL",
+      "name": "Sterling Infrastructure",
+      "score": 0.008852883116098708
+    },
+    {
+      "rank": 3,
+      "symbol": "US.NBIS",
+      "name": "NEBIUS",
+      "score": 0.008552843201542292
+    },
+    {
+      "rank": 4,
+      "symbol": "US.SMTC",
+      "name": "先科电子",
+      "score": 0.008246612093175185
+    },
+    {
+      "rank": 5,
+      "symbol": "US.SITM",
+      "name": "SiTime",
+      "score": 0.008077654693814829
+    },
+    {
+      "rank": 6,
+      "symbol": "US.ASTS",
+      "name": "AST SpaceMobile",
+      "score": 0.006193892762009922
+    },
+    {
+      "rank": 7,
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.005895816950539627
+    },
+    {
+      "rank": 8,
+      "symbol": "US.MU",
+      "name": "美光科技",
+      "score": 0.0058884612777820354
+    },
+    {
+      "rank": 9,
+      "symbol": "US.CIEN",
+      "name": "Ciena",
+      "score": 0.005703172254051517
+    },
+    {
+      "rank": 10,
+      "symbol": "US.CRWV",
+      "name": "CoreWeave",
+      "score": 0.005644048925747763
+    }
+  ]
+}

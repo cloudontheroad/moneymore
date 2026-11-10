@@ -1,0 +1,263 @@
+{
+  "trained_at_utc": "2026-11-05T17:32:22.663527+00:00",
+  "model": "LightGBM Huber rolling cross-sectional ranker",
+  "target_transform": "raw",
+  "num_leaves": 23,
+  "min_child_samples": 300,
+  "colsample_bytree": 0.75,
+  "reg_lambda": 3.0,
+  "reg_alpha": 1.0,
+  "min_split_gain": 0.0,
+  "max_depth": -1,
+  "learning_rate": 0.025,
+  "n_estimators": 350,
+  "huber_alpha": 0.9,
+  "subsample": 0.8,
+  "subsample_freq": 0,
+  "weight_half_life": 126,
+  "feature_library_size": 180,
+  "trained_feature_count": 61,
+  "rolling_train_sessions": 504,
+  "validation_sessions": 126,
+  "walk_forward_retrain_every_sessions": 5,
+  "production_retrain_every_sessions": 1,
+  "validation_top_n_mean_net": 0.0006945168520661709,
+  "validation_top_n_win_rate": 0.5555555555555556,
+  "validation_top_n_sharpe": 0.4289427903217751,
+  "validation_top_n_sortino": 0.6405072440707372,
+  "validation_top_n_max_drawdown": -0.17687686149880255,
+  "validation_positive_21d_windows": 0.6132075471698113,
+  "validation_worst_21d_mean_net": -0.008908289719433323,
+  "validation_5pct_trimmed_mean_net": 0.0006125394816629644,
+  "validation_mean_without_best_5_nights": -0.001849513226712161,
+  "validation_all_mean_net": -0.001291089688163053,
+  "validation_relative_edge_bps": 19.85606540229224,
+  "validation_rank_slot_metrics": [
+    {
+      "rank": 1,
+      "sessions": 126,
+      "mean_net_bps": 38.342447187838474,
+      "win_rate": 0.47619047619047616,
+      "sharpe": 1.372148904860886,
+      "sortino": 2.812101208154175,
+      "max_drawdown": -0.2754011552801052,
+      "cumulative_return": 0.4429205498984008
+    },
+    {
+      "rank": 2,
+      "sessions": 126,
+      "mean_net_bps": 49.147455297881194,
+      "win_rate": 0.5238095238095238,
+      "sharpe": 2.0828260706405017,
+      "sortino": 3.866813544860963,
+      "max_drawdown": -0.22150620743779315,
+      "cumulative_return": 0.703943094388148
+    },
+    {
+      "rank": 3,
+      "sessions": 126,
+      "mean_net_bps": 4.781418664505178,
+      "win_rate": 0.4603174603174603,
+      "sharpe": 0.25630043474209274,
+      "sortino": 0.36914938973712424,
+      "max_drawdown": -0.24253877255771206,
+      "cumulative_return": 0.005464244949309416
+    },
+    {
+      "rank": 4,
+      "sessions": 126,
+      "mean_net_bps": 23.92248398006977,
+      "win_rate": 0.5158730158730159,
+      "sharpe": 0.980993467107442,
+      "sortino": 1.683700207644168,
+      "max_drawdown": -0.2787961968717525,
+      "cumulative_return": 0.2331516062361405
+    },
+    {
+      "rank": 5,
+      "sessions": 126,
+      "mean_net_bps": 34.37338381991159,
+      "win_rate": 0.5158730158730159,
+      "sharpe": 1.4832849993834516,
+      "sortino": 2.8471046577804784,
+      "max_drawdown": -0.20163265039344003,
+      "cumulative_return": 0.42182530988234834
+    },
+    {
+      "rank": 6,
+      "sessions": 126,
+      "mean_net_bps": -4.891999994733534,
+      "win_rate": 0.46825396825396826,
+      "sharpe": -0.186447890138878,
+      "sortino": -0.21092355545359293,
+      "max_drawdown": -0.2917727061626736,
+      "cumulative_return": -0.16236138891187146
+    },
+    {
+      "rank": 7,
+      "sessions": 126,
+      "mean_net_bps": -19.35682087629961,
+      "win_rate": 0.4444444444444444,
+      "sharpe": -0.6391281600069222,
+      "sortino": -0.7767586250928709,
+      "max_drawdown": -0.44134847563525725,
+      "cumulative_return": -0.32504816639856204
+    },
+    {
+      "rank": 8,
+      "sessions": 126,
+      "mean_net_bps": 21.54257045087664,
+      "win_rate": 0.5079365079365079,
+      "sharpe": 0.8428616373829978,
+      "sortino": 1.7736463298908616,
+      "max_drawdown": -0.28198282932749863,
+      "cumulative_return": 0.19146540605255646
+    },
+    {
+      "rank": 9,
+      "sessions": 126,
+      "mean_net_bps": -110.42865238727393,
+      "win_rate": 0.47619047619047616,
+      "sharpe": -2.027696872430839,
+      "sortino": -1.57940267957826,
+      "max_drawdown": -0.94722067227358,
+      "cumulative_return": -0.9446514479776957
+    },
+    {
+      "rank": 10,
+      "sessions": 126,
+      "mean_net_bps": 32.01939906384125,
+      "win_rate": 0.5,
+      "sharpe": 1.5014451852828936,
+      "sortino": 2.75984639564613,
+      "max_drawdown": -0.24855489296144528,
+      "cumulative_return": 0.3952251334457113
+    }
+  ],
+  "validation_adjacent_rank_spreads_bps": [
+    -10.80500811004272,
+    44.36603663337601,
+    -19.141065315564592,
+    -10.450899839841817,
+    39.26538381464512,
+    14.464820881566077,
+    -40.89939132717625,
+    131.97122283815057,
+    -142.4480514511152
+  ],
+  "validation_monotonic_violations": 5,
+  "validation_strictly_monotonic_rank_returns": false,
+  "top_features": [
+    {
+      "feature": "falling_deceleration",
+      "gain": 9.044364367844537,
+      "gain_share": 0.3052265628353019
+    },
+    {
+      "feature": "atr_14",
+      "gain": 1.8894623469677754,
+      "gain_share": 0.06376502253957067
+    },
+    {
+      "feature": "CNTD5",
+      "gain": 1.1315901555935852,
+      "gain_share": 0.038188573534041356
+    },
+    {
+      "feature": "realized_vol_20",
+      "gain": 1.0230763100553304,
+      "gain_share": 0.03452648001960504
+    },
+    {
+      "feature": "VWAP0",
+      "gain": 1.009290429588873,
+      "gain_share": 0.03406123815856335
+    },
+    {
+      "feature": "RANK20",
+      "gain": 0.9600267435307615,
+      "gain_share": 0.03239870169314026
+    },
+    {
+      "feature": "distance_ma_200",
+      "gain": 0.6563470542896539,
+      "gain_share": 0.022150208379502774
+    },
+    {
+      "feature": "IMXD20",
+      "gain": 0.6409789014142007,
+      "gain_share": 0.021631568452082427
+    },
+    {
+      "feature": "drawdown_60",
+      "gain": 0.6391901457100175,
+      "gain_share": 0.021571202047862694
+    },
+    {
+      "feature": "previous_overnight",
+      "gain": 0.5958953239023685,
+      "gain_share": 0.020110101067024513
+    },
+    {
+      "feature": "STD5",
+      "gain": 0.5869261106126942,
+      "gain_share": 0.019807410680790498
+    },
+    {
+      "feature": "log_dollar_volume",
+      "gain": 0.5252797742141411,
+      "gain_share": 0.017726988154115646
+    },
+    {
+      "feature": "RESI5",
+      "gain": 0.48046275170054287,
+      "gain_share": 0.01621451638915976
+    },
+    {
+      "feature": "WVMA20",
+      "gain": 0.47997582523385063,
+      "gain_share": 0.016198083737207967
+    },
+    {
+      "feature": "ret_3d",
+      "gain": 0.4699585101916455,
+      "gain_share": 0.015860022319642664
+    },
+    {
+      "feature": "STD20",
+      "gain": 0.4561280429479666,
+      "gain_share": 0.015393275757086782
+    },
+    {
+      "feature": "intraday_return",
+      "gain": 0.4308818039135076,
+      "gain_share": 0.014541273067721138
+    },
+    {
+      "feature": "range_pct",
+      "gain": 0.4179275955539197,
+      "gain_share": 0.014104098233643586
+    },
+    {
+      "feature": "FINRL_ADX30",
+      "gain": 0.3944336530403234,
+      "gain_share": 0.013311231534644797
+    },
+    {
+      "feature": "RESI20",
+      "gain": 0.36124459508573636,
+      "gain_share": 0.012191176915965775
+    }
+  ],
+  "cost_bps": 20.0,
+  "risk_gate_thresholds": {
+    "minimum_net_bps": 10.0,
+    "minimum_win_rate": 0.55,
+    "minimum_sharpe": 1.0,
+    "require_positive_5pct_trimmed_mean": true,
+    "require_positive_without_best_5_nights": true,
+    "require_strict_top1_through_top10_monotonicity": true
+  },
+  "risk_gate": "BLOCK_WEAK_OR_UNSTABLE_EDGE",
+  "real_orders_enabled": false
+}

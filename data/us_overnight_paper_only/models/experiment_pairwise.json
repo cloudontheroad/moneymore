@@ -1,0 +1,102 @@
+{
+  "trained_at_utc": "2026-11-06T03:33:30.463361+00:00",
+  "experiment": "continuous_return_pairwise_ranknet",
+  "device": "cuda",
+  "minimum_pair_gap_bps": 20.0,
+  "validation_sessions": 520,
+  "rank_slots": [
+    {
+      "rank": 1,
+      "sessions": 520,
+      "mean_net_bps": 31.49393037989201,
+      "cumulative_return": 1.7958116146620933,
+      "win_rate": 0.5,
+      "sharpe": 1.0156411104645138,
+      "max_drawdown": -0.6939623843110607
+    },
+    {
+      "rank": 2,
+      "sessions": 520,
+      "mean_net_bps": 21.81049586640092,
+      "cumulative_return": 0.9148303200544963,
+      "win_rate": 0.5288461538461539,
+      "sharpe": 0.7973285874582962,
+      "max_drawdown": -0.5750068734991408
+    },
+    {
+      "rank": 3,
+      "sessions": 520,
+      "mean_net_bps": 47.148259304349175,
+      "cumulative_return": 4.444133373055623,
+      "win_rate": 0.5173076923076924,
+      "sharpe": 1.3214109146112711,
+      "max_drawdown": -0.569093858512752
+    },
+    {
+      "rank": 4,
+      "sessions": 520,
+      "mean_net_bps": -4.252805916190255,
+      "cumulative_return": -0.5100628020844638,
+      "win_rate": 0.45384615384615384,
+      "sharpe": -0.15254084445790891,
+      "max_drawdown": -0.7151901424005388
+    },
+    {
+      "rank": 5,
+      "sessions": 520,
+      "mean_net_bps": 45.87007357850347,
+      "cumulative_return": 1.2621276746796948,
+      "win_rate": 0.4673076923076923,
+      "sharpe": 0.6299361484103309,
+      "max_drawdown": -0.4713304460657173
+    },
+    {
+      "rank": 6,
+      "sessions": 520,
+      "mean_net_bps": 2.469683061280801,
+      "cumulative_return": -0.2201559487984055,
+      "win_rate": 0.46153846153846156,
+      "sharpe": 0.10132999111903472,
+      "max_drawdown": -0.5299943097717312
+    },
+    {
+      "rank": 7,
+      "sessions": 520,
+      "mean_net_bps": 310.37109639637214,
+      "cumulative_return": 8.964414357397763,
+      "win_rate": 0.46923076923076923,
+      "sharpe": 0.6882755041669743,
+      "max_drawdown": -0.731733983070615
+    },
+    {
+      "rank": 8,
+      "sessions": 520,
+      "mean_net_bps": 37.905417134117805,
+      "cumulative_return": 1.8032995253589243,
+      "win_rate": 0.45576923076923076,
+      "sharpe": 0.7814213293827637,
+      "max_drawdown": -0.40721376640100726
+    },
+    {
+      "rank": 9,
+      "sessions": 520,
+      "mean_net_bps": 4.387373784069551,
+      "cumulative_return": -0.07024336226377503,
+      "win_rate": 0.49230769230769234,
+      "sharpe": 0.20299805257193534,
+      "max_drawdown": -0.6566290928275539
+    },
+    {
+      "rank": 10,
+      "sessions": 520,
+      "mean_net_bps": 1.1396277549180585,
+      "cumulative_return": -0.2552650453710418,
+      "win_rate": 0.46153846153846156,
+      "sharpe": 0.04794019093212053,
+      "max_drawdown": -0.49435298462048693
+    }
+  ],
+  "monotonic_violations": 3,
+  "strictly_monotonic": false,
+  "real_orders_enabled": false
+}

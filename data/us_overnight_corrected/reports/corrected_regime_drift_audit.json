@@ -1,0 +1,134 @@
+{
+  "halves": [
+    {
+      "period": "first_126",
+      "top1": {
+        "mean_bps": 152.3341615591817,
+        "win_rate": 0.6031746031746031,
+        "sharpe": 3.8588573240961646,
+        "max_drawdown": -0.2287347189473209
+      },
+      "top10": {
+        "mean_bps": 40.41950332138956,
+        "win_rate": 0.5079365079365079,
+        "sharpe": 1.9935784186742218,
+        "max_drawdown": -0.17780586181285474
+      },
+      "universe": {
+        "mean_bps": -7.810269787133728,
+        "win_rate": 0.4444444444444444,
+        "sharpe": -1.2581146644142833,
+        "max_drawdown": -0.15720950834054848
+      },
+      "top1_excess_bps": 160.14443134631537,
+      "top10_excess_bps": 48.2297731085233
+    },
+    {
+      "period": "last_126",
+      "top1": {
+        "mean_bps": -2.3907510863895802,
+        "win_rate": 0.5158730158730159,
+        "sharpe": -0.06466353173145371,
+        "max_drawdown": -0.5762098563277714
+      },
+      "top10": {
+        "mean_bps": -3.5415403363792053,
+        "win_rate": 0.4603174603174603,
+        "sharpe": -0.16246113183838834,
+        "max_drawdown": -0.3227456419403373
+      },
+      "universe": {
+        "mean_bps": -12.159808169508004,
+        "win_rate": 0.38095238095238093,
+        "sharpe": -2.980850896058745,
+        "max_drawdown": -0.14740052837352313
+      },
+      "top1_excess_bps": 9.769057083118433,
+      "top10_excess_bps": 8.61826783312881
+    }
+  ],
+  "market_state_gate_reference": [
+    {
+      "threshold_bps": -15,
+      "coverage": 0.6150793650793651,
+      "top1": {
+        "mean_bps": 38.8619548987514,
+        "win_rate": 0.32936507936507936,
+        "sharpe": 1.2671039202708736,
+        "max_drawdown": -0.5256273723333753
+      },
+      "top10": {
+        "mean_bps": 9.12904646941447,
+        "win_rate": 0.28174603174603174,
+        "sharpe": 0.5483162655750199,
+        "max_drawdown": -0.3031643421497423
+      }
+    },
+    {
+      "threshold_bps": -10,
+      "coverage": 0.5277777777777778,
+      "top1": {
+        "mean_bps": 15.354272644188217,
+        "win_rate": 0.2698412698412698,
+        "sharpe": 0.573146799162899,
+        "max_drawdown": -0.6410032033912645
+      },
+      "top10": {
+        "mean_bps": -5.488279341935986,
+        "win_rate": 0.23015873015873015,
+        "sharpe": -0.40012510338703156,
+        "max_drawdown": -0.35738960758159843
+      }
+    },
+    {
+      "threshold_bps": -5,
+      "coverage": 0.3492063492063492,
+      "top1": {
+        "mean_bps": 38.03052139955727,
+        "win_rate": 0.1984126984126984,
+        "sharpe": 1.9466051561110886,
+        "max_drawdown": -0.24366384122603968
+      },
+      "top10": {
+        "mean_bps": 7.102260540526492,
+        "win_rate": 0.1626984126984127,
+        "sharpe": 0.7322155492041846,
+        "max_drawdown": -0.17864062505974776
+      }
+    },
+    {
+      "threshold_bps": 0,
+      "coverage": 0.21825396825396826,
+      "top1": {
+        "mean_bps": 26.84123942834333,
+        "win_rate": 0.12698412698412698,
+        "sharpe": 1.760102537035582,
+        "max_drawdown": -0.17033271016764617
+      },
+      "top10": {
+        "mean_bps": 12.194712929420012,
+        "win_rate": 0.10714285714285714,
+        "sharpe": 1.6222674626876379,
+        "max_drawdown": -0.1206952628038952
+      }
+    },
+    {
+      "threshold_bps": 5,
+      "coverage": 0.0992063492063492,
+      "top1": {
+        "mean_bps": 18.052750472970036,
+        "win_rate": 0.05952380952380952,
+        "sharpe": 1.9734625365287115,
+        "max_drawdown": -0.09148807110563228
+      },
+      "top10": {
+        "mean_bps": 1.9643638045243543,
+        "win_rate": 0.047619047619047616,
+        "sharpe": 0.4814156197507307,
+        "max_drawdown": -0.1291303044538673
+      }
+    }
+  ],
+  "decision": "no market-state gate adopted",
+  "reason": "The last half retains positive cross-sectional excess but fails to cover costs. Tested past-only gates improve drawdown at the expense of primary mean return."
+}

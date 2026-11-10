@@ -1,0 +1,35 @@
+{
+  "built_at_utc": "2026-11-08T14:56:13.357066+00:00",
+  "source_panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\features\\historical_panel_bundle_modules.parquet",
+  "output_panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\features\\historical_panel_bundle_investable_120d_20m_5.parquet",
+  "rules": {
+    "minimum_listing_days": 120,
+    "minimum_median_dollar_volume_20d": 20000000.0,
+    "minimum_prior_close": 5.0,
+    "valid_prior_bar_required": true,
+    "all_inputs_lagged_before_signal_open": true
+  },
+  "rows_before": 766980,
+  "rows_after": 600201,
+  "retained_pct": 0.782551044355785,
+  "symbols_before": 995,
+  "symbols_after": 957,
+  "sessions": 673,
+  "median_symbols_per_session_before": 964.0,
+  "median_symbols_per_session_after": 894.0,
+  "minimum_symbols_per_session_after": 829,
+  "exclusion_counts_not_mutually_exclusive": {
+    "missing_eligibility": 0,
+    "listing": 118838,
+    "liquidity": 73964,
+    "price": 11254,
+    "invalid_prior_bar": 3825
+  },
+  "extreme_open_to_next_open_abs30pct": 123,
+  "extreme_gaps_investable": 71,
+  "hona_2026_06_15_investable": false,
+  "legacy_label_definition_detected": "close(t) to open(t+1), replaced",
+  "legacy_label_mismatch_rows": 756933,
+  "legacy_label_max_absolute_error": 2.3518700929272334,
+  "correct_label_definition": "open(t) to open(t+1), dividend included, net 20 bps"
+}

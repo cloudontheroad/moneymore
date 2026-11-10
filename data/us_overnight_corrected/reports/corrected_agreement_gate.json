@@ -1,0 +1,85 @@
+{
+  "tested": 5,
+  "reference_gate": {
+    "agreement_top_k": 5.0,
+    "active_sessions": 213.0,
+    "coverage": 0.8452380952380952,
+    "top1_mean_bps": 73.75831054500284,
+    "top1_sharpe": 1.996747423498225,
+    "top1_cumulative_return": 3.1616277422177754,
+    "top1_max_drawdown": -0.5308494279208136,
+    "top10_mean_bps": 18.71467607628238,
+    "top10_sharpe": 0.9463799380914015,
+    "top10_cumulative_return": 0.4156534419367741,
+    "top10_max_drawdown": -0.28732396490192413
+  },
+  "decision": "record as optional risk overlay; do not replace alpha baseline",
+  "reason": "K=5 improves drawdown and Top10 Sharpe but reduces Top1 and Top10 mean return.",
+  "results": [
+    {
+      "agreement_top_k": 1,
+      "active_sessions": 119,
+      "coverage": 0.4722222222,
+      "top1_mean_bps": 52.0376365852,
+      "top1_sharpe": 1.8105981001,
+      "top1_cumulative_return": 1.8650106235,
+      "top1_max_drawdown": -0.4417298716,
+      "top10_mean_bps": 18.1620015299,
+      "top10_sharpe": 1.2454833245,
+      "top10_cumulative_return": 0.4781915424,
+      "top10_max_drawdown": -0.2385446521
+    },
+    {
+      "agreement_top_k": 2,
+      "active_sessions": 170,
+      "coverage": 0.6746031746,
+      "top1_mean_bps": 39.4643713471,
+      "top1_sharpe": 1.1743633005,
+      "top1_cumulative_return": 0.8920867909,
+      "top1_max_drawdown": -0.5854679827,
+      "top10_mean_bps": 15.5619189637,
+      "top10_sharpe": 0.8887695301,
+      "top10_cumulative_return": 0.3428209548,
+      "top10_max_drawdown": -0.3191303827
+    },
+    {
+      "agreement_top_k": 3,
+      "active_sessions": 188,
+      "coverage": 0.746031746,
+      "top1_mean_bps": 58.3286736974,
+      "top1_sharpe": 1.665437702,
+      "top1_cumulative_return": 1.9512439659,
+      "top1_max_drawdown": -0.5922401192,
+      "top10_mean_bps": 17.442730719,
+      "top10_sharpe": 0.9425403082,
+      "top10_cumulative_return": 0.3921033979,
+      "top10_max_drawdown": -0.3096553872
+    },
+    {
+      "agreement_top_k": 5,
+      "active_sessions": 213,
+      "coverage": 0.8452380952,
+      "top1_mean_bps": 73.758310545,
+      "top1_sharpe": 1.9967474235,
+      "top1_cumulative_return": 3.1616277422,
+      "top1_max_drawdown": -0.5308494279,
+      "top10_mean_bps": 18.7146760763,
+      "top10_sharpe": 0.9463799381,
+      "top10_cumulative_return": 0.4156534419,
+      "top10_max_drawdown": -0.2873239649
+    },
+    {
+      "agreement_top_k": 10,
+      "active_sessions": 233,
+      "coverage": 0.9246031746,
+      "top1_mean_bps": 72.5613603164,
+      "top1_sharpe": 1.9264790994,
+      "top1_cumulative_return": 2.9707774806,
+      "top1_max_drawdown": -0.5092637846,
+      "top10_mean_bps": 16.6215306414,
+      "top10_sharpe": 0.8145624983,
+      "top10_cumulative_return": 0.3321665915,
+      "top10_max_drawdown": -0.2873239649
+    }
+  ]
+}

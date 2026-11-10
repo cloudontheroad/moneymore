@@ -1,0 +1,17 @@
+{
+  "status": "invalidated",
+  "invalidated_at": "2026-11-08",
+  "reason": "The bundle panel inherited label_next_open_net as close(t) to open(t+1), while the declared strategy buys at open(t) and sells at open(t+1).",
+  "affected_source_panel": "data/us_overnight_corrected/features/historical_panel_bundle_modules.parquet",
+  "affected_rows_detected": 756933,
+  "invalidated_research_families": [
+    "bundle Pareto experiments trained on historical_panel_bundle_modules.parquet",
+    "newbaseline single-parameter replay",
+    "anchored parameter ensembles before the open-to-open repair",
+    "investable_phase1_checkpoint before the open-to-open repair"
+  ],
+  "replacement_panel": "data/us_overnight_corrected/features/historical_panel_bundle_investable_120d_20m_5.parquet",
+  "replacement_integrity_report": "data/us_overnight_corrected/reports/investable_panel_integrity_audit.json",
+  "replacement_label_definition": "open(t) to open(t+1), next-session cash dividend included, net 20 bps",
+  "real_orders_enabled": false
+}

@@ -2,11 +2,11 @@
 
 生产形态：一台 Linux ECS、Nginx、一个 Uvicorn worker、一个 Dashboard 进程。每日调度由 API 进程内的单实例调度器执行，禁止启动多个 API worker。GPU 训练留在本地，模型产物通过 `sync-models.ps1` 同步。
 
-首次迁移必须包含：代码、`.env`、`data/processed`、整个 `state`。无需迁移历史 `data/raw`；云端会从上线日继续追加原始快照。
+部署包包含代码、配置和获准的运行数据。首次迁移时在服务器单独配置 `.env`，并通过独立授权流程迁移需要保留的账本和模型。历史 `data/raw` 可按实际用途单独迁移。
 
 服务器建议：Ubuntu 24.04，至少 4 核 8GB、80GB SSD。安全组仅开放 TCP 22、80；配置域名和证书后再开放 443。8788 和 3000 只监听回环地址，不对公网开放。
 
-本地打包并上传（归档包含 `.env`，只能通过 SSH 私密传输）：
+本地打包并通过 SSH 上传：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\deploy\package-cloud.ps1

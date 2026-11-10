@@ -1,0 +1,16 @@
+mode: US_PAPER_ONLY
+opend_host: 127.0.0.1
+opend_port: 11111
+timezone: America/New_York
+signal_cutoff: "15:50"
+entry_window: ["15:55", "16:00"]
+exit_window: ["09:30", "09:35"]
+top_n: 10
+universe_top_n: 1000
+universe_ranking: total_market_val_desc
+round_trip_cost_bps: 20.0
+output_root: data/us_overnight_paper_only
+minimum_price: 5.0
+minimum_median_dollar_volume_20d: 20000000.0
+minimum_listing_days: 120
+

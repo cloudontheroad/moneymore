@@ -1,0 +1,173 @@
+{
+  "protocol": "first 63 sessions calibrate; next 189 sessions are untouched test",
+  "frozen_selected_main_weight": 1.0,
+  "frozen_selected": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": 60.939293023660554,
+      "win_rate": 0.5555555555555556,
+      "sharpe": 1.5942843652013599,
+      "cumulative_return": 1.2399548374931233,
+      "max_drawdown": -0.5762098563277713,
+      "without_best5_mean_bps": 15.15767233465282
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": 21.017260600592458,
+      "win_rate": 0.48677248677248675,
+      "sharpe": 1.0238323596750745,
+      "cumulative_return": 0.3466035631663791,
+      "max_drawdown": -0.3227456419403373,
+      "without_best5_mean_bps": -2.781559610299824
+    }
+  },
+  "rolling_63_21": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": 61.86471789177382,
+      "win_rate": 0.544973544973545,
+      "sharpe": 1.6224109638841098,
+      "cumulative_return": 1.2833299673633145,
+      "max_drawdown": -0.5997107593682103,
+      "without_best5_mean_bps": 16.108244617660418
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": 6.744657791110417,
+      "win_rate": 0.5026455026455027,
+      "sharpe": 0.3156245773869646,
+      "cumulative_return": 0.019649222586661352,
+      "max_drawdown": -0.40336657872760373,
+      "without_best5_mean_bps": -18.11955475003906
+    }
+  },
+  "fixed_main_only": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": 60.939293023660554,
+      "win_rate": 0.5555555555555556,
+      "sharpe": 1.5942843652013599,
+      "cumulative_return": 1.2399548374931233,
+      "max_drawdown": -0.5762098563277713,
+      "without_best5_mean_bps": 15.15767233465282
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": 21.017260600592458,
+      "win_rate": 0.48677248677248675,
+      "sharpe": 1.0238323596750745,
+      "cumulative_return": 0.3466035631663791,
+      "max_drawdown": -0.3227456419403373,
+      "without_best5_mean_bps": -2.781559610299824
+    }
+  },
+  "fixed_retrospective_90_10_reference": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": 67.07377569493063,
+      "win_rate": 0.5661375661375662,
+      "sharpe": 1.7542962313543433,
+      "cumulative_return": 1.5134591918070428,
+      "max_drawdown": -0.5762098563277712,
+      "without_best5_mean_bps": 21.458852904598682
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": 21.591013275949066,
+      "win_rate": 0.5026455026455027,
+      "sharpe": 1.0476016661485343,
+      "cumulative_return": 0.3601470012570145,
+      "max_drawdown": -0.3166320148231089,
+      "without_best5_mean_bps": -2.1922158296346144
+    }
+  },
+  "frozen_126_selected_main_weight": 0.9,
+  "frozen_126_test": {
+    "top1": {
+      "sessions": 126,
+      "mean_bps": -1.2575267103904193,
+      "win_rate": 0.5238095238095238,
+      "sharpe": -0.03416244057374507,
+      "cumulative_return": -0.20438373725172,
+      "max_drawdown": -0.5762098563277714,
+      "without_best5_mean_bps": -60.12748968986647
+    },
+    "top10": {
+      "sessions": 126,
+      "mean_bps": -4.763158331494864,
+      "win_rate": 0.46825396825396826,
+      "sharpe": -0.21738908274580304,
+      "cumulative_return": -0.1267196090544831,
+      "max_drawdown": -0.3166320148231089,
+      "without_best5_mean_bps": -41.86223340243721
+    }
+  },
+  "rolling_blocks": [
+    {
+      "hold_start": "2026-02-05",
+      "hold_end": "2026-03-06",
+      "selected_main_weight": 1.0,
+      "top1_mean_bps": 81.17906068158268,
+      "top10_mean_bps": 65.48068397079639
+    },
+    {
+      "hold_start": "2026-03-09",
+      "hold_end": "2026-04-07",
+      "selected_main_weight": 0.9,
+      "top1_mean_bps": 209.1403836502235,
+      "top10_mean_bps": 72.01361044488989
+    },
+    {
+      "hold_start": "2026-04-08",
+      "hold_end": "2026-05-06",
+      "selected_main_weight": 0.9,
+      "top1_mean_bps": 320.88969718491205,
+      "top10_mean_bps": 76.77122380381871
+    },
+    {
+      "hold_start": "2026-05-07",
+      "hold_end": "2026-06-05",
+      "selected_main_weight": 0.8,
+      "top1_mean_bps": -112.64700985273996,
+      "top10_mean_bps": 13.013625126816052
+    },
+    {
+      "hold_start": "2026-06-08",
+      "hold_end": "2026-07-08",
+      "selected_main_weight": 0.9,
+      "top1_mean_bps": -70.67981353464077,
+      "top10_mean_bps": -42.51633188656905
+    },
+    {
+      "hold_start": "2026-07-09",
+      "hold_end": "2026-08-06",
+      "selected_main_weight": 0.8,
+      "top1_mean_bps": -66.44242059599057,
+      "top10_mean_bps": 6.084122932341722
+    },
+    {
+      "hold_start": "2026-08-07",
+      "hold_end": "2026-09-04",
+      "selected_main_weight": 0.3,
+      "top1_mean_bps": 271.7857418507855,
+      "top10_mean_bps": 62.83481499243255
+    },
+    {
+      "hold_start": "2026-09-08",
+      "hold_end": "2026-10-06",
+      "selected_main_weight": 0.3,
+      "top1_mean_bps": -13.18308178858125,
+      "top10_mean_bps": -2.75221806779816
+    },
+    {
+      "hold_start": "2026-10-07",
+      "hold_end": "2026-11-04",
+      "selected_main_weight": 0.3,
+      "top1_mean_bps": -63.26009656958668,
+      "top10_mean_bps": -190.22761119673436
+    }
+  ],
+  "decision_rule": "retain blend only if past-only selection improves both Top1 and Top10 versus main-only",
+  "decision": "reject 90/10 as validated baseline; keep main-only",
+  "reason": "The 63-session calibration selects main-only; rolling selection damages Top10. The 126-session calibration selects 90/10 but the following 126 sessions are negative."
+}

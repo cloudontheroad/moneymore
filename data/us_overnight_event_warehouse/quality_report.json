@@ -1,0 +1,140 @@
+{
+  "earnings": {
+    "rows": 14328,
+    "columns": [
+      "security",
+      "name",
+      "earnings_date",
+      "earnings_timestamp",
+      "pub_type",
+      "period_text",
+      "eps_actual",
+      "eps_predict",
+      "revenue_actual",
+      "revenue_predict",
+      "ebit_actual",
+      "ebit_predict",
+      "option_volume",
+      "iv",
+      "iv_rank",
+      "iv_percentile",
+      "market_cap",
+      "price",
+      "event_at_utc",
+      "eps_surprise_pct",
+      "revenue_surprise_pct",
+      "source",
+      "first_observed_at_utc"
+    ],
+    "duplicate_rows": 0,
+    "universe_symbols_covered": 984,
+    "coverage_pct": 0.984,
+    "null_time_pct": 0.0,
+    "min_time": "2023-01-05 14:30:00+00:00",
+    "max_time": "2026-11-07 05:00:00+00:00",
+    "first_observed_null_pct": 0.0
+  },
+  "economic": {
+    "rows": 5312,
+    "columns": [
+      "title",
+      "timestamp",
+      "country",
+      "star",
+      "previous",
+      "consensus",
+      "actual",
+      "event_at_utc",
+      "source",
+      "first_observed_at_utc"
+    ],
+    "duplicate_rows": 0,
+    "null_time_pct": 0.0,
+    "min_time": "2023-01-03 14:45:00+00:00",
+    "max_time": "2026-11-06 20:00:00+00:00",
+    "first_observed_null_pct": 0.0
+  },
+  "macro": {
+    "rows": 15234,
+    "columns": [
+      "data_time",
+      "release_time",
+      "value",
+      "predict_value",
+      "previous_value",
+      "unit_type",
+      "indicator_id",
+      "indicator_name",
+      "category_name",
+      "predict_value_numeric",
+      "previous_value_numeric",
+      "source",
+      "first_observed_at_utc"
+    ],
+    "duplicate_rows": 0,
+    "null_time_pct": 0.815806748063542,
+    "min_time": "2024-08-28 11:06:01+00:00",
+    "max_time": "2026-11-07 06:07:01+00:00",
+    "first_observed_null_pct": 0.0
+  },
+  "ratings": {
+    "rows": 2625,
+    "columns": [
+      "security",
+      "name",
+      "rating",
+      "last_rating",
+      "target_price",
+      "last_target_price",
+      "change_type",
+      "institution_name",
+      "recommendation_date",
+      "last_recommendation_date",
+      "event_date",
+      "availability_policy",
+      "source",
+      "first_observed_at_utc"
+    ],
+    "duplicate_rows": 0,
+    "universe_symbols_covered": 709,
+    "coverage_pct": 0.709,
+    "null_time_pct": 0.0,
+    "min_time": "2024-02-09 00:00:00+00:00",
+    "max_time": "2026-11-06 00:00:00+00:00",
+    "first_observed_null_pct": 0.0
+  },
+  "plates": {
+    "rows": 5540,
+    "columns": [
+      "code",
+      "name",
+      "plate_code",
+      "plate_name",
+      "plate_type",
+      "source",
+      "first_observed_at_utc"
+    ],
+    "duplicate_rows": 0,
+    "universe_symbols_covered": 904,
+    "coverage_pct": 0.904,
+    "first_observed_null_pct": 0.0
+  },
+  "news": {
+    "rows": 100,
+    "columns": [
+      "title",
+      "news_sub_type",
+      "source",
+      "publish_time",
+      "view_count",
+      "related_securities",
+      "url",
+      "query_symbol",
+      "first_observed_at_utc"
+    ],
+    "duplicate_rows": 0,
+    "universe_symbols_covered": 10,
+    "coverage_pct": 0.01,
+    "first_observed_null_pct": 0.0
+  }
+}

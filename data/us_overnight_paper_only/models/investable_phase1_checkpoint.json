@@ -1,0 +1,41 @@
+{
+  "status": "phase_1_checkpoint_not_deployment_ready",
+  "as_of": "2026-11-08",
+  "panel": "data/us_overnight_corrected/features/historical_panel_bundle_investable_120d_20m_5.parquet",
+  "investability_rules": {
+    "minimum_listing_days": 120,
+    "minimum_trailing_20d_median_dollar_volume": 20000000,
+    "minimum_prior_close": 5,
+    "valid_prior_bar_required": true
+  },
+  "model_weights": {
+    "clean_top1w5": 0.2,
+    "clean_daily_centered": 0.8
+  },
+  "top1": {
+    "mean_bps": 16.34651252179779,
+    "win_rate": 0.4801587301587302,
+    "sharpe": 0.6860693519769328,
+    "annualized_volatility": 0.6004234329405731,
+    "cumulative_return": 0.2633952094151961,
+    "max_drawdown": -0.38388828260363117,
+    "mean_without_best_5_bps": -9.568805400759073
+  },
+  "top10": {
+    "mean_bps": -1.9156152550743941,
+    "win_rate": 0.5,
+    "sharpe": -0.132564757156518,
+    "annualized_volatility": 0.36415036291190617,
+    "cumulative_return": -0.10815518767464438,
+    "max_drawdown": -0.32606030771693506,
+    "mean_without_best_5_bps": -14.932089960967094
+  },
+  "reference_only": {
+    "top1_excess_mean_bps": 29.551653768854752,
+    "top1_excess_sharpe": 1.2842677185726281,
+    "top10_excess_mean_bps": 11.289525991982565,
+    "top10_excess_sharpe": 0.8722756138848756
+  },
+  "decision": "retain_as_clean_research_baseline_continue_phase_1",
+  "real_orders_enabled": false
+}

@@ -1,0 +1,109 @@
+{
+  "panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\features\\historical_panel_bundle_modules.parquet",
+  "rows": 766980,
+  "modules": {
+    "day_night": 23,
+    "right_side": 26,
+    "market": 23,
+    "sector": 22,
+    "calendar": 6,
+    "options": 12,
+    "ratings": 4
+  },
+  "bundles": {
+    "right_market": [
+      "right_side",
+      "market"
+    ],
+    "right_ratings": [
+      "right_side",
+      "ratings"
+    ],
+    "market_ratings": [
+      "market",
+      "ratings"
+    ],
+    "right_market_ratings": [
+      "right_side",
+      "market",
+      "ratings"
+    ],
+    "daynight_right": [
+      "day_night",
+      "right_side"
+    ],
+    "right_market_options": [
+      "right_side",
+      "market",
+      "options"
+    ],
+    "right_market_ratings_calendar": [
+      "right_side",
+      "market",
+      "ratings",
+      "calendar"
+    ],
+    "right_market_daynight": [
+      "right_side",
+      "market",
+      "day_night"
+    ],
+    "right_market_sector": [
+      "right_side",
+      "market",
+      "sector"
+    ],
+    "right_market_calendar": [
+      "right_side",
+      "market",
+      "calendar"
+    ],
+    "right_market_ratings_options": [
+      "right_side",
+      "market",
+      "ratings",
+      "options"
+    ],
+    "right_market_sector_ratings": [
+      "right_side",
+      "market",
+      "sector",
+      "ratings"
+    ],
+    "right_market_options_calendar": [
+      "right_side",
+      "market",
+      "options",
+      "calendar"
+    ],
+    "right_market_options_calendar_ratings": [
+      "right_side",
+      "market",
+      "options",
+      "calendar",
+      "ratings"
+    ],
+    "right_market_options_calendar_sector": [
+      "right_side",
+      "market",
+      "options",
+      "calendar",
+      "sector"
+    ],
+    "right_market_options_calendar_sector_ratings": [
+      "right_side",
+      "market",
+      "options",
+      "calendar",
+      "sector",
+      "ratings"
+    ]
+  },
+  "acceptance_targets": [
+    "top1_mean_net_bps",
+    "top1_sharpe",
+    "top10_mean_net_bps",
+    "top10_sharpe"
+  ],
+  "monotonic_ranking_required": false
+}

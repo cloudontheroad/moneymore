@@ -1,0 +1,18 @@
+{
+  "built_at_utc": "2026-11-06T14:16:15.608665+00:00",
+  "source": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_paper_only\\daily_yahoo_adjusted",
+  "panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_open_to_open\\features\\base\\historical_panel_61_open2open_lag1.parquet",
+  "symbols": 995,
+  "rows": 766980,
+  "sessions": 794,
+  "start": "2023-09-08 04:00:00+00:00",
+  "end": "2026-11-05 05:00:00+00:00",
+  "feature_count": 61,
+  "feature_timing": "all predictors shifted one completed symbol session",
+  "decision": "before open(t), using completed daily bars through t-1",
+  "label": "open(t) to open(t+1), cash dividend included, net of configured cost",
+  "label_min": -0.8604415633957108,
+  "label_max": 2.464666666666667,
+  "label_abs_gt_50pct": 24,
+  "known_limitation": "current Top1000 membership, not historical point-in-time universe"
+}

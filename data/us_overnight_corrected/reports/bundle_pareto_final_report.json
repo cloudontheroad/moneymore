@@ -1,0 +1,45 @@
+{
+  "generated_at_utc": "2026-11-07T17:41:40.303734+00:00",
+  "objective": "joint improvement of Top1 and aggregate Top10; rank monotonicity retired",
+  "acceptance": "modules may be accepted as a package when the package improves Top1 and Top10 mean net return and Sharpe",
+  "bundle_experiments": 15,
+  "accepted_packages": 2,
+  "accepted_chain": [
+    "right_market",
+    "right_market_options_calendar"
+  ],
+  "baseline": {
+    "top10_mean_net_bps": -20.17776085870306,
+    "top10_win_rate": 0.5,
+    "top10_sharpe": -1.2299594013318929,
+    "top10_max_drawdown": -0.33672054274820795,
+    "top1_mean_net_bps": 17.633507692051857,
+    "top1_win_rate": 0.47619047619047616,
+    "top1_sharpe": 0.4915806128789631,
+    "top1_max_drawdown": -0.3125834799371485
+  },
+  "research_champion": {
+    "bundle": "right_market_options_calendar",
+    "top10_mean_net_bps": -5.513086138365887,
+    "top10_win_rate": 0.5634920634920635,
+    "top10_sharpe": -0.3414994407893151,
+    "top10_max_drawdown": -0.2646879320464216,
+    "top1_mean_net_bps": 39.25277601236869,
+    "top1_win_rate": 0.5158730158730159,
+    "top1_sharpe": 1.1322192720470832,
+    "top1_max_drawdown": -0.26043188249399085
+  },
+  "improvement": {
+    "top10_mean_net_bps": 14.664674720337173,
+    "top10_win_rate": 0.06349206349206349,
+    "top10_sharpe": 0.8884599605425778,
+    "top10_max_drawdown": 0.07203261070178635,
+    "top1_mean_net_bps": 21.619268320316834,
+    "top1_win_rate": 0.039682539682539764,
+    "top1_sharpe": 0.6406386591681201,
+    "top1_max_drawdown": 0.05215159744315767
+  },
+  "trade_status": "BLOCKED_TOP10_NET_RETURN_STILL_NEGATIVE",
+  "model_json": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_paper_only\\models\\bundle_right_market_options_calendar_ranker.json",
+  "model_joblib": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_paper_only\\models\\bundle_right_market_options_calendar_ranker.joblib"
+}

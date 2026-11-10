@@ -1,0 +1,114 @@
+{
+  "protocol": "trailing 126 sessions calibrate; frozen 21 sessions",
+  "calibrator": "sklearn IsotonicRegression on within-day Top10 score z-score",
+  "trade_rule": "expected net return > 0 (equivalent to expected gross return > 20 bps)",
+  "baseline": {
+    "top1": {
+      "sessions": 126,
+      "active_sessions": 126,
+      "mean_bps": -2.3907510863895802,
+      "win_rate_all_sessions": 0.5158730158730159,
+      "sharpe": -0.06466353173145371,
+      "cumulative_return": -0.21716866807627,
+      "max_drawdown": -0.5762098563277714,
+      "without_best5_mean_bps": -61.30754151941932
+    },
+    "top10": {
+      "sessions": 126,
+      "active_sessions": 126,
+      "mean_bps": -3.5415403363792053,
+      "win_rate_all_sessions": 0.4603174603174603,
+      "sharpe": -0.16246113183838834,
+      "cumulative_return": -0.11247115994966628,
+      "max_drawdown": -0.3227456419403373,
+      "without_best5_mean_bps": -40.59013532487875
+    }
+  },
+  "calibrated": {
+    "top1": {
+      "sessions": 126,
+      "active_sessions": 126,
+      "mean_bps": -2.3907510863895802,
+      "win_rate_all_sessions": 0.5158730158730159,
+      "sharpe": -0.06466353173145371,
+      "cumulative_return": -0.21716866807627,
+      "max_drawdown": -0.5762098563277714,
+      "without_best5_mean_bps": -61.30754151941932
+    },
+    "top10": {
+      "sessions": 126,
+      "active_sessions": 126,
+      "mean_bps": -3.3192448107999635,
+      "win_rate_all_sessions": 0.46825396825396826,
+      "sharpe": -0.14185587874290337,
+      "cumulative_return": -0.11986781643132327,
+      "max_drawdown": -0.35455980070830817,
+      "without_best5_mean_bps": -45.89978842008722
+    }
+  },
+  "average_positions_when_active": 8.222222222222221,
+  "zero_position_sessions": 0,
+  "blocks": [
+    {
+      "block": 1,
+      "history_start": "2025-11-04",
+      "history_end": "2026-05-06",
+      "hold_start": "2026-05-07",
+      "hold_end": "2026-06-05",
+      "predicted_positive_rate": 0.7619047619047619,
+      "expected_return_min_bps": -48.40218439013769,
+      "expected_return_max_bps": 167.380666957488
+    },
+    {
+      "block": 2,
+      "history_start": "2025-12-04",
+      "history_end": "2026-06-05",
+      "hold_start": "2026-06-08",
+      "hold_end": "2026-07-08",
+      "predicted_positive_rate": 0.719047619047619,
+      "expected_return_min_bps": -111.53363439123615,
+      "expected_return_max_bps": 151.97572208519767
+    },
+    {
+      "block": 3,
+      "history_start": "2026-01-06",
+      "history_end": "2026-07-08",
+      "hold_start": "2026-07-09",
+      "hold_end": "2026-08-06",
+      "predicted_positive_rate": 0.7571428571428571,
+      "expected_return_min_bps": -140.77541866042273,
+      "expected_return_max_bps": 176.97690006952902
+    },
+    {
+      "block": 4,
+      "history_start": "2026-02-05",
+      "history_end": "2026-08-06",
+      "hold_start": "2026-08-07",
+      "hold_end": "2026-09-04",
+      "predicted_positive_rate": 0.7476190476190476,
+      "expected_return_min_bps": -99.60777442108804,
+      "expected_return_max_bps": 172.54841619748265
+    },
+    {
+      "block": 5,
+      "history_start": "2026-03-09",
+      "history_end": "2026-09-04",
+      "hold_start": "2026-09-08",
+      "hold_end": "2026-10-06",
+      "predicted_positive_rate": 0.9523809523809523,
+      "expected_return_min_bps": -367.6485437238647,
+      "expected_return_max_bps": 310.3973024192901
+    },
+    {
+      "block": 6,
+      "history_start": "2026-04-08",
+      "history_end": "2026-10-06",
+      "hold_start": "2026-10-07",
+      "hold_end": "2026-11-04",
+      "predicted_positive_rate": 0.9952380952380953,
+      "expected_return_min_bps": -70.02330625037457,
+      "expected_return_max_bps": 282.60546285237507
+    }
+  ],
+  "decision": "reject"
+}

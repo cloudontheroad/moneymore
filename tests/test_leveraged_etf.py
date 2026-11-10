@@ -115,3 +115,23 @@ def test_storage_is_not_the_moneymore_paper_broker_schema(tmp_path: Path) -> Non
     assert "account" in tables
     assert "accounts" not in tables
     assert "rejections" not in tables
+
+
+def test_display_replay_matches_next_open_ledger(tmp_path: Path) -> None:
+    paper = LeveragedEtfPaper(tmp_path / "us-etf.sqlite3", tmp_path / "cache")
+    market = _market()
+    first = len(market["QQQ"]) - 8
+    initial_market = {symbol: frame.iloc[:first + 1] for symbol, frame in market.items()}
+    paper.run(StaticClient(initial_market))
+    snapshot = paper.run(StaticClient(market))
+
+    targets = paper._backtest_targets(market, start_index=first)
+    replay = paper.replay(market, targets, list(range(first, first + 8)), "BASELINE")
+    assert [row["equity"] for row in replay[1:]] == pytest.approx(
+        [row["equity"] for row in snapshot["history"]]
+    )
+    assert sum(row["fill_count"] for row in replay[1:]) == len(snapshot["fills"])
+    assert snapshot["version_segments"][0]["version"] == paper.strategy_id
+    benchmark = snapshot["comparison_benchmark"]
+    assert benchmark[0]["normalized_nav"] == 1.0
+    assert sum(row.get("fill_count", 0) for row in benchmark) == 1

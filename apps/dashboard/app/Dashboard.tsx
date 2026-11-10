@@ -1,12 +1,13 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import Link from "next/link";
 import DesktopExecution from "./DesktopExecution";
 import StyleResearchReview, { type StyleResearchReviewData } from "./StyleResearchReview";
 import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts, costExecutionLabel } from "./candidate-view";
 
 type Row = Record<string, unknown>;
-type Page = "overview" | "sectors" | "research" | "risk" | "leveraged" | "challenger" | "data" | "operations" | "desktop";
+type Page = "overview" | "sectors" | "research" | "risk" | "challenger" | "data" | "operations" | "desktop";
 type Bank = {
   latest_date: string; latest_scores: Row[]; latest_holdings: Row[];
   scheduler: { enabled: boolean; time: string; timezone: string; next_run?: string };
@@ -78,12 +79,14 @@ type MarketRisk = {
   exposure_league:Row & { contestants:Row[]; audit_contestants:Row[]; history:Row[] };
   paper_accounts?:Row;
 };
-type LeveragedEtfPaper = {
+export type LeveragedEtfPaper = {
   account_id:string; strategy_id:string; initial_cash:number; currency:string; status:string;
   cash:number; market_value:number; equity:number; total_return:number; drawdown:number;
   positions:Row[]; latest_signal:(Row & { indicators?:Row })|null;
   orders:Row[]; fills:Row[]; history:Row[]; backtest_history?:Row[]; benchmark_history?:Row[]; data_source:string; execution_policy:string;
   scheduler?:Row;
+  comparison_benchmark?:Row[];
+  version_segments?:Row[];
   research_gate?:string;
 };
 type SecurityHistory = {
@@ -135,7 +138,6 @@ const nav: { id: Page; label: string; note: string }[] = [
   { id: "sectors", label: "行业与个股", note: "SLEEVES" },
   { id: "research", label: "策略研究", note: "MODELS" },
   { id: "risk", label: "市场与仓位", note: "RISK" },
-  { id: "leveraged", label: "TQQQ / SQQQ", note: "US ETF PAPER" },
   { id: "challenger", label: "Qlib挑战者", note: "AI LAB" },
   { id: "data", label: "数据健康", note: "QUALITY" },
   { id: "operations", label: "运行与对账", note: "PAPER" },
@@ -215,6 +217,7 @@ export default function Dashboard() {
   const [showArchivedCandidates,setShowArchivedCandidates]=useState(false);
   const [bank, setBank] = useState<Bank | null>(null);
   const [sectors, setSectors] = useState<Sectors | null>(null);
+  const [sectorsComplete,setSectorsComplete]=useState(false);
   const [execution, setExecution] = useState<Execution | null>(null);
   const [quality, setQuality] = useState<DataQuality | null>(null);
   const [operations, setOperations] = useState<OperationsCenter | null>(null);
@@ -225,13 +228,12 @@ export default function Dashboard() {
   const [live, setLive] = useState<LiveAccounts | null>(null);
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [marketRisk, setMarketRisk] = useState<MarketRisk | null>(null);
-  const [leveragedEtf,setLeveragedEtf]=useState<LeveragedEtfPaper|null>(null);
-  const [leveragedEtfV3,setLeveragedEtfV3]=useState<LeveragedEtfPaper|null>(null);
   const [securityDetail,setSecurityDetail]=useState<SecurityHistory|null>(null);
   const [securityDetailAccount,setSecurityDetailAccount]=useState("");
   const [securityDetailLoading,setSecurityDetailLoading]=useState(false);
   const [securityDetailError,setSecurityDetailError]=useState("");
   const [error, setError] = useState("");
+  const [pageLoading,setPageLoading]=useState(false);
   const [busy, setBusy] = useState(false);
   const refreshing = useRef(false);
   const refreshingLive = useRef(false);
@@ -243,25 +245,26 @@ export default function Dashboard() {
       try { setter(await json<T>(url)); }
       catch(reason) { failures.push(`${url}: ${reason instanceof Error ? reason.message : "服务暂不可用"}`); }
     };
+    const common=[
+      ...(!sectors?[load<Sectors>("/api/a-share-overview",setSectors)]:[]),
+    ];
+    const pageTasks:Record<Page,(()=>Promise<void>)[]>={
+      overview:[], sectors:sectorsComplete?[]:[load<Sectors>("/api/sector-portfolio",value=>{setSectors(value);setSectorsComplete(true)})],
+      research:[...(sectorsComplete?[]:[load<Sectors>("/api/sector-portfolio",value=>{setSectors(value);setSectorsComplete(true)})]),load<ModelRegistry>("/api/model-registry",setModels)],
+      risk:[load<MarketRisk>("/api/market-risk",setMarketRisk)],
+      challenger:[load<Challenger>("/api/qlib-challenger",setChallenger)],
+      data:[load<DataQuality>("/api/data-quality",setQuality)],
+      operations:[...(!bank?[load<Bank>("/api/bank-dashboard",setBank)]:[]),...(!execution?[load<Execution>("/api/multi-sector-execution",setExecution)]:[]),load<OperationsCenter>("/api/operations-center",setOperations),load<MonthlyAcceptance>("/api/monthly-acceptance",setAcceptance),load<IntradayExecution>("/api/intraday-execution",setIntraday)],
+      desktop:[],
+    };
+    const tasks=[...common,...pageTasks[page]];
+    setPageLoading(tasks.length>0);
     try {
-      await runWithConcurrency([
-        load<Bank>("/api/bank-dashboard",setBank),
-        load<Sectors>("/api/sector-portfolio",setSectors),
-        load<Execution>("/api/multi-sector-execution",setExecution),
-        load<DataQuality>("/api/data-quality",setQuality),
-        load<OperationsCenter>("/api/operations-center",setOperations),
-        load<ModelRegistry>("/api/model-registry",setModels),
-        load<MonthlyAcceptance>("/api/monthly-acceptance",setAcceptance),
-        load<Challenger>("/api/qlib-challenger",setChallenger),
-        load<IntradayExecution>("/api/intraday-execution",setIntraday),
-        load<MarketRisk>("/api/market-risk",setMarketRisk),
-        load<LeveragedEtfPaper>("/api/leveraged-etf-paper",setLeveragedEtf),
-        load<LeveragedEtfPaper>("/api/leveraged-etf-v3-paper",setLeveragedEtfV3),
-      ]);
-      setError(failures.length === 12 ? "服务暂不可用" : "");
+      await runWithConcurrency(tasks);
+      setError(failures.length === tasks.length && tasks.length ? "服务暂不可用" : "");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "服务暂不可用"); }
-    finally { refreshing.current=false; }
-  }, []);
+    finally { refreshing.current=false;setPageLoading(false); }
+  }, [bank,sectors,sectorsComplete,execution,page]);
   const refreshLive = useCallback(async () => {
     if(refreshingLive.current)return;
     refreshingLive.current=true;
@@ -281,7 +284,7 @@ export default function Dashboard() {
     return () => { clearTimeout(initial); clearInterval(id); };
   }, [refresh]);
   useEffect(() => {
-    const initial = window.setTimeout(refreshLive, 250);
+    const initial = window.setTimeout(refreshLive, 2500);
     const id = window.setInterval(refreshLive, 5_000);
     return () => { clearTimeout(initial); clearInterval(id); };
   }, [refreshLive]);
@@ -307,74 +310,85 @@ export default function Dashboard() {
     },10_000);
     return ()=>clearInterval(id);
   },[securityDetail?.symbol]);
-  if (!bank || !sectors || !execution || !quality || !operations || !models || !acceptance || !challenger || !intraday || !marketRisk || !leveragedEtf || !leveragedEtfV3) return <main className="loading"><span>M</span><b>MoneyMore</b><p>{error || "正在装载综合组合…"}</p><button onClick={() => void refresh()}>重新连接</button><a href="/desktop-execution">独立打开桌面执行（不等待报表）</a></main>;
+  if (!sectors) return <main className="loading"><span>M</span><b>MoneyMore · A股</b><p>{error || "正在装载轻量组合快照…"}</p><button onClick={() => void refresh()}>重新连接</button><Link href="/">返回总览</Link></main>;
   const current = nav.find((item) => item.id === page)!;
-  const liveBaseline=live?.accounts[execution.account_id];
-  const displayedExecution=liveBaseline?{...execution,portfolio:liveBaseline.portfolio,positions:liveBaseline.positions,orders:liveBaseline.orders,fills:liveBaseline.fills}:execution;
+  const liveBaseline=execution?live?.accounts[execution.account_id]:undefined;
+  const displayedExecution=execution?(liveBaseline?{...execution,portfolio:liveBaseline.portfolio,positions:liveBaseline.positions,orders:liveBaseline.orders,fills:liveBaseline.fills}:execution):null;
   return <SecurityNavigationContext.Provider value={(symbol,accountId)=>void openSecurity(symbol,accountId)}><div className="app-shell">
     <aside>
-      <div className="brand"><span>M</span><div><b>MoneyMore</b><small>MULTI-SECTOR QUANT</small></div></div>
+      <Link className="brand" href="/"><span>M</span><div><b>MoneyMore</b><small>返回项目总览</small></div></Link>
       <div className="system-card"><i/><small>ACTIVE SYSTEM</small><b>全局横截面组合</b><span>统一候选池 · 行业仅作归因</span></div>
       <nav>{nav.map((item, index) => <button key={item.id} className={page === item.id ? "active" : ""} onClick={() => setPage(item.id)}><em>0{index + 1}</em><span>{item.label}<small>{item.note}</small></span></button>)}</nav>
-      <div className="aside-foot"><i/> PAPER ONLY<br/><small>{bank.scheduler.time} · {bank.scheduler.timezone}</small></div>
+      <div className="aside-foot"><i/> PAPER ONLY<br/><small>{bank?`${bank.scheduler.time} · ${bank.scheduler.timezone}`:"按栏目加载运行数据"}</small></div>
     </aside>
     <main className="workspace">
       <header><div><small>MONEYMORE / {current.note}</small><h1>{current.label}</h1></div><div className="header-actions"><span><i/> {live&&["QMT_REALTIME","ALPHAFEED_REALTIME"].includes(live.quote_source)?(live.quote_source==="ALPHAFEED_REALTIME"?"AlphaFeed":"QMT")+" · "+live.observed_at.slice(11,19):"数据日 "+sectors.latest_date}</span><button onClick={() => { void refresh(); void refreshLive(); }}>刷新</button><button className="primary" disabled={busy} onClick={() => void run()}>{busy ? "恢复中…" : "恢复并重算"}</button></div></header>
       {systemHealth&&<SystemHealthBar health={systemHealth}/>}
       {error && <div className="error">{error}</div>}
-      {page === "overview" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Overview sectors={sectors} execution={displayedExecution}/></SecurityAccountContext.Provider>}
-      {page === "sectors" && <SecurityAccountContext.Provider value="multi_sector_shadow"><SectorPage sectors={sectors}/></SecurityAccountContext.Provider>}
-      {page === "research" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Research sectors={sectors} models={models}/></SecurityAccountContext.Provider>}
-      {page === "risk" && <MarketRiskPage risk={marketRisk} live={live??undefined} names={sectors.symbol_names}/>}
-      {page === "leveraged" && <LeveragedEtfPage account={leveragedEtf} experiment={leveragedEtfV3}/>}
-      {page === "challenger" && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/></SecurityAccountContext.Provider>}
-      {page === "data" && <DataHealth quality={quality}/>}
+      {pageLoading&&page!=="overview"&&<div className="section-loading"><i/><b>正在加载当前栏目…</b><span>只请求这个栏目需要的数据</span></div>}
+      {page === "overview" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Overview sectors={sectors}/></SecurityAccountContext.Provider>}
+      {page === "sectors" && sectorsComplete && <SecurityAccountContext.Provider value="multi_sector_shadow"><SectorPage sectors={sectors}/></SecurityAccountContext.Provider>}
+      {page === "research" && sectorsComplete && models && <SecurityAccountContext.Provider value="multi_sector_shadow"><Research sectors={sectors} models={models}/></SecurityAccountContext.Provider>}
+      {page === "risk" && marketRisk && <MarketRiskPage risk={marketRisk} live={live??undefined} names={sectors.symbol_names}/>}
+      {page === "challenger" && challenger && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/></SecurityAccountContext.Provider>}
+      {page === "data" && quality && <DataHealth quality={quality}/>}
       {page === "desktop" && <DesktopExecution names={sectors.symbol_names}/>}
-      {page === "operations" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Operations bank={bank} execution={displayedExecution} operations={operations} acceptance={acceptance} intraday={intraday} live={live} names={sectors.symbol_names} onRefresh={refresh}/></SecurityAccountContext.Provider>}
+      {page === "operations" && bank && displayedExecution && operations && acceptance && intraday && <SecurityAccountContext.Provider value="multi_sector_shadow"><Operations bank={bank} execution={displayedExecution} operations={operations} acceptance={acceptance} intraday={intraday} live={live} names={sectors.symbol_names} onRefresh={refresh}/></SecurityAccountContext.Provider>}
     </main>
   </div>{(securityDetailLoading||securityDetailError||securityDetail)&&<SecurityHistoryModal detail={securityDetail} initialAccountId={securityDetailAccount} loading={securityDetailLoading} error={securityDetailError} onClose={()=>{setSecurityDetail(null);setSecurityDetailError("");}}/>}</SecurityNavigationContext.Provider>;
 }
 
-type QuantMetrics={totalReturn:number;annualizedReturn:number;volatility:number;sharpe:number;maxDrawdown:number;calmar:number;winRate:number;averageExposure:number;rebalanceCount:number;upCapture:number;downCapture:number};
+type QuantMetrics={totalReturn:number;annualizedReturn:number;volatility:number;sharpe:number;maxDrawdown:number;calmar:number;winRate:number;averageExposure:number|null;fillCount:number|null;turnover:number|null;upCapture:number;downCapture:number};
+const optionalPct=(value:unknown)=>value==null?"—":pct(value);
 const dailyReturns=(rows:Row[])=>rows.slice(1).map((row,index)=>Number(row.normalized_nav)/Number(rows[index].normalized_nav)-1).filter(Number.isFinite);
-function quantMetrics(rows:Row[],benchmark:Row[],fixedExposure?:number):QuantMetrics {
-  if(rows.length<2)return {totalReturn:0,annualizedReturn:0,volatility:0,sharpe:0,maxDrawdown:0,calmar:0,winRate:0,averageExposure:fixedExposure??0,rebalanceCount:0,upCapture:0,downCapture:0};
+function quantMetrics(rows:Row[],benchmark:Row[]):QuantMetrics {
+  if(rows.length<2)return {totalReturn:0,annualizedReturn:0,volatility:0,sharpe:0,maxDrawdown:0,calmar:0,winRate:0,averageExposure:null,fillCount:null,turnover:null,upCapture:0,downCapture:0};
   const returns=dailyReturns(rows),periods=Math.max(1,returns.length),first=Number(rows[0].normalized_nav),last=Number(rows.at(-1)?.normalized_nav);
   const mean=returns.reduce((sum,value)=>sum+value,0)/periods;
   const variance=returns.reduce((sum,value)=>sum+(value-mean)**2,0)/Math.max(1,periods-1);
   const volatility=Math.sqrt(variance)*Math.sqrt(252),totalReturn=last/first-1,annualizedReturn=(last/first)**(252/periods)-1;
   let peak=first,maxDrawdown=0;
   for(const row of rows){const nav=Number(row.normalized_nav);peak=Math.max(peak,nav);maxDrawdown=Math.min(maxDrawdown,nav/peak-1);}
-  const exposures=fixedExposure==null?rows.map(row=>Number(row.target_tqqq)).filter(Number.isFinite):[fixedExposure];
-  let rebalanceCount=0;
-  for(let index=1;index<exposures.length;index++)if(Math.abs(exposures[index]-exposures[index-1])>1e-6)rebalanceCount++;
+  const exposures=rows.slice(1).map(row=>Number(row.actual_tqqq??NaN)).filter(Number.isFinite);
+  const sumField=(field:string)=>rows[1][field]==null?null:rows.slice(1).reduce((sum,row)=>sum+Number(row[field]??0),0);
   const benchmarkByDate=new Map(benchmark.map(row=>[text(row.trade_date),Number(row.normalized_nav)]));
   let priorStrategy:number|undefined,priorBenchmark:number|undefined,upStrategy=0,upBenchmark=0,downStrategy=0,downBenchmark=0;
   for(const row of rows){const strategy=Number(row.normalized_nav),market=benchmarkByDate.get(text(row.trade_date));if(market==null)continue;if(priorStrategy!=null&&priorBenchmark!=null){const sr=strategy/priorStrategy-1,br=market/priorBenchmark-1;if(br>0){upStrategy+=sr;upBenchmark+=br;}else if(br<0){downStrategy+=sr;downBenchmark+=br;}}priorStrategy=strategy;priorBenchmark=market;}
-  return {totalReturn,annualizedReturn,volatility,sharpe:volatility?mean/Math.sqrt(variance)*Math.sqrt(252):0,maxDrawdown,calmar:maxDrawdown?annualizedReturn/Math.abs(maxDrawdown):0,winRate:returns.filter(value=>value>0).length/periods,averageExposure:exposures.reduce((sum,value)=>sum+value,0)/Math.max(1,exposures.length),rebalanceCount,upCapture:upBenchmark?upStrategy/upBenchmark:0,downCapture:downBenchmark?downStrategy/downBenchmark:0};
+  return {totalReturn,annualizedReturn,volatility,sharpe:volatility?mean/Math.sqrt(variance)*Math.sqrt(252):0,maxDrawdown,calmar:maxDrawdown?annualizedReturn/Math.abs(maxDrawdown):0,winRate:returns.filter(value=>value>0).length/periods,averageExposure:exposures.length?exposures.reduce((sum,value)=>sum+value,0)/exposures.length:null,fillCount:sumField("fill_count"),turnover:sumField("turnover"),upCapture:upBenchmark?upStrategy/upBenchmark:0,downCapture:downBenchmark?downStrategy/downBenchmark:0};
 }
 function StrategyQuantCard({name,version,color,metrics,target,status}:{name:string;version:string;color:string;metrics:QuantMetrics;target:number;status:string}){
-  return <article className="quant-strategy-card" style={{"--strategy-color":color} as CSSProperties}><header><i/><div><small>{version}</small><h3>{name}</h3></div><b>{metrics.totalReturn>=0?"+":""}{pct(metrics.totalReturn)}</b></header><div className="quant-metric-grid"><span><small>夏普</small><b>{num(metrics.sharpe)}</b></span><span><small>最大回撤</small><b>{pct(metrics.maxDrawdown)}</b></span><span><small>年化波动</small><b>{pct(metrics.volatility)}</b></span><span><small>Calmar</small><b>{num(metrics.calmar)}</b></span><span><small>年化收益</small><b>{pct(metrics.annualizedReturn)}</b></span><span><small>日胜率</small><b>{pct(metrics.winRate)}</b></span></div><footer><span>平均仓位 <b>{pct(metrics.averageExposure)}</b></span><span>当前仓位 <b>{pct(target)}</b></span><span>{status}</span></footer></article>;
+  return <article className="quant-strategy-card" style={{"--strategy-color":color} as CSSProperties}><header><i/><div><small>{version}</small><h3>{name}</h3></div><b>{metrics.totalReturn>=0?"+":""}{pct(metrics.totalReturn)}</b></header><div className="quant-metric-grid"><span><small>夏普</small><b>{num(metrics.sharpe)}</b></span><span><small>最大回撤</small><b>{pct(metrics.maxDrawdown)}</b></span><span><small>年化波动</small><b>{pct(metrics.volatility)}</b></span><span><small>Calmar</small><b>{num(metrics.calmar)}</b></span><span><small>年化收益</small><b>{pct(metrics.annualizedReturn)}</b></span><span><small>日胜率</small><b>{pct(metrics.winRate)}</b></span></div><footer><span>平均仓位 <b>{optionalPct(metrics.averageExposure)}</b></span><span>当前仓位 <b>{pct(target)}</b></span><span>{status}</span></footer></article>;
 }
-function LeveragedEtfPage({account,experiment}:{account:LeveragedEtfPaper;experiment:LeveragedEtfPaper}) {
+export function LeveragedEtfPage({account,experiment}:{account:LeveragedEtfPaper;experiment:LeveragedEtfPaper}) {
   const v2Signal=account.latest_signal,v3Signal=experiment.latest_signal;
   const v2Indicators=v2Signal?.indicators??{},v3Indicators=v3Signal?.indicators??{};
-  const benchmark=experiment.benchmark_history??[],v2History=account.backtest_history??[],v3History=experiment.backtest_history??[];
+  const allV2=account.backtest_history??[],allV3=experiment.backtest_history??[];
+  const allBenchmark=experiment.comparison_benchmark??experiment.benchmark_history??[];
+  const v2Dates=new Set(allV2.map(row=>row.trade_date)),v3Dates=new Set(allV3.map(row=>row.trade_date));
+  const benchmark=allBenchmark.filter(row=>v2Dates.has(row.trade_date)&&v3Dates.has(row.trade_date));
+  const commonDates=new Set(benchmark.map(row=>row.trade_date));
+  const v2History=allV2.filter(row=>commonDates.has(row.trade_date));
+  const v3History=allV3.filter(row=>commonDates.has(row.trade_date));
   const commonStart=text(benchmark[0]?.trade_date),commonEnd=text(benchmark.at(-1)?.trade_date);
-  const v2Metrics=quantMetrics(v2History,benchmark),v3Metrics=quantMetrics(v3History,benchmark),holdMetrics=quantMetrics(benchmark,benchmark,1);
+  const v2Metrics=quantMetrics(v2History,benchmark),v3Metrics=quantMetrics(v3History,benchmark),holdMetrics=quantMetrics(benchmark,benchmark);
   const v3Gap=v3Metrics.totalReturn-holdMetrics.totalReturn;
-  const v3Diagnosis=v3Gap>=0?"v3目前已跑赢满仓基准，继续观察超额收益能否覆盖更长周期。":v3Metrics.upCapture<.9&&Math.abs(v3Metrics.downCapture)>=.9?"主要问题是上涨捕获不足，但下跌保护没有形成对等补偿；低仓位同时错过了反弹。":v3Metrics.averageExposure<.7?"主要拖累来自平均仓位偏低，现金保护在当前上涨占优的样本中形成明显机会成本。":"仓位并不低，落后更可能来自调仓时点与交易成本，而不是单纯现金拖累。";
+  const v3Diagnosis="捕获率按满仓基准的上涨日和下跌日分组计算。仓位、择时与交易成本的贡献需分别用对照回放核验。";
+  const versionRows=[account,experiment].flatMap(paper=>(paper.version_segments??[]).map(segment=>({
+    ...segment, account:paper.strategy_id, version:segment.version??"旧信号（未标记）",
+  })));
   const performanceRows=[
     {strategy:"Cycle v2",...v2Metrics,target:v2Signal?.tqqq},
     {strategy:"Momentum Dip v3",...v3Metrics,target:v3Signal?.tqqq},
     {strategy:"满仓 TQQQ",...holdMetrics,target:1},
   ];
+  if(benchmark.length<2)return <Panel title="年初策略比较" subtitle="等待至少一个共同的已完成交易日"><p className="empty">暂无可比较数据</p></Panel>;
   return <>
     <section className="portfolio-hero leveraged-hero quant-hero"><div><small>LEVERAGED ETF STRATEGY LAB</small><h2>TQQQ 策略评审台</h2><p>同一起点、同一行情、同一交易成本口径；不按版本先后排座次，只看收益是否补偿风险。</p></div><div className="exposure"><span>统一评估区间</span><b>{commonStart.slice(5)}<em> → </em>{commonEnd.slice(5)}</b><small>起点净值 100 · {Math.max(0,benchmark.length-1)} 个交易日</small></div></section>
     <section className="quant-strategy-grid"><StrategyQuantCard name="Cycle v2" version="STRATEGY V2" color="#ef7655" metrics={v2Metrics} target={Number(v2Signal?.tqqq??0)} status={text(v2Signal?.regime)}/><StrategyQuantCard name="Momentum Dip v3" version="STRATEGY V3" color="#31a48d" metrics={v3Metrics} target={Number(v3Signal?.tqqq??0)} status={text(v3Signal?.regime)}/><StrategyQuantCard name="满仓 TQQQ" version="PASSIVE BENCHMARK" color="#6478d3" metrics={holdMetrics} target={1} status="100% BUY & HOLD"/></section>
     <Panel title="净值与风险调整收益" subtitle={`统一拟合 ${commonStart} = 100；夏普按日收益、零无风险利率年化；回测不改动模拟盘账本`}>{v2History.length?<LineComparisonChart title="三策略累计净值" subtitle="收益领先不等于策略更优：必须同时观察回撤、波动与夏普" series={[{accountId:account.account_id,label:"Cycle v2",color:"#ef7655",rows:v2History},{accountId:experiment.account_id,label:"Momentum Dip v3",color:"#31a48d",rows:v3History},{accountId:"tqqq_buy_hold",label:"满仓 TQQQ",color:"#6478d3",rows:benchmark}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/>:<p className="empty">正在生成当年回测曲线</p>}</Panel>
-    <Panel title="统一量化指标矩阵" subtitle="所有策略并列；收益率之外，长期优化优先看夏普、最大回撤和 Calmar"><Table rows={performanceRows} columns={[["strategy","策略"],["totalReturn","区间收益"],["annualizedReturn","年化收益"],["sharpe","夏普"],["volatility","年化波动"],["maxDrawdown","最大回撤"],["calmar","Calmar"],["winRate","日胜率"],["averageExposure","平均仓位"],["upCapture","上涨捕获"],["downCapture","下跌捕获"],["rebalanceCount","调仓次数"],["target","当前仓位"]]} format={{totalReturn:pct,annualizedReturn:pct,sharpe:num,volatility:pct,maxDrawdown:pct,calmar:num,winRate:pct,averageExposure:pct,upCapture:pct,downCapture:pct,target:pct}}/></Panel>
-    <section className="quant-diagnosis"><div><small>V3 VS 满仓 TQQQ</small><b className={v3Gap>=0?"positive":"negative"}>{v3Gap>=0?"+":""}{pct(v3Gap)}</b><span>区间超额收益</span></div><div><small>上涨捕获率</small><b>{pct(v3Metrics.upCapture)}</b><span>越低越容易踏空反弹</span></div><div><small>下跌捕获率</small><b>{pct(v3Metrics.downCapture)}</b><span>绝对值越低，保护越有效</span></div><div><small>平均 TQQQ 仓位</small><b>{pct(v3Metrics.averageExposure)}</b><span>满仓基准恒为 100%</span></div><p><strong>当前结论：</strong>{v3Diagnosis} 这不是为交易而交易；下一轮优化应要求“少承受的下跌”足以覆盖“错过的上涨”，否则降仓没有经济价值。</p></section>
+    <Panel title="统一量化指标矩阵" subtitle="所有策略并列；收益率之外，长期优化优先看夏普、最大回撤和 Calmar"><Table rows={performanceRows} columns={[["strategy","策略"],["totalReturn","区间收益"],["annualizedReturn","年化收益"],["sharpe","夏普"],["volatility","年化波动"],["maxDrawdown","最大回撤"],["calmar","Calmar"],["winRate","日胜率"],["averageExposure","平均仓位"],["upCapture","上涨捕获"],["downCapture","下跌捕获"],["fillCount","成交笔数"],["turnover","累计单边换手"],["target","当前仓位"]]} format={{totalReturn:pct,annualizedReturn:pct,sharpe:num,volatility:pct,maxDrawdown:pct,calmar:num,winRate:pct,averageExposure:optionalPct,turnover:optionalPct,upCapture:pct,downCapture:pct,target:pct}}/></Panel>
+    <Panel title="模拟盘版本分段" subtitle="各段收益由段首至段末收盘权益计算，继承持仓会影响后续表现"><Table rows={versionRows} columns={[["account","账户策略"],["version","信号版本"],["start","起始信号日"],["end","末次信号日"],["return","分段收益"]]} format={{return:optionalPct}}/></Panel>
+    <section className="quant-diagnosis"><div><small>V3 VS 满仓 TQQQ</small><b className={v3Gap>=0?"positive":"negative"}>{v3Gap>=0?"+":""}{pct(v3Gap)}</b><span>区间超额收益</span></div><div><small>上涨捕获率</small><b>{pct(v3Metrics.upCapture)}</b><span>越低越容易踏空反弹</span></div><div><small>下跌捕获率</small><b>{pct(v3Metrics.downCapture)}</b><span>越低代表下跌日表现越强</span></div><div><small>平均 TQQQ 仓位</small><b>{optionalPct(v3Metrics.averageExposure)}</b><span>满仓基准恒为 100%</span></div><p><strong>当前结论：</strong>{v3Diagnosis}</p></section>
     <div className="three-col quant-live-grid"><Panel title="Cycle v2 当前状态" subtitle={account.strategy_id}><Table rows={v2Signal?[{signal_date:v2Signal.signal_date,regime:v2Signal.regime,target:v2Signal.tqqq,cash:v2Signal.cash,raw:v2Indicators.base_tqqq,equity:account.equity}]:[]} columns={[["signal_date","信号日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["raw","原始目标"],["equity","模拟盘净值"]]} format={{target:pct,cash:pct,raw:pct,equity:usd}}/></Panel><Panel title="Momentum Dip v3 当前状态" subtitle={experiment.strategy_id}><Table rows={v3Signal?[{signal_date:v3Signal.signal_date,regime:v3Signal.regime,target:v3Signal.tqqq,cash:v3Signal.cash,momentum:v3Indicators.momentum,rsi:v3Indicators.rsi,equity:experiment.equity}]:[]} columns={[["signal_date","信号日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["momentum","动量"],["rsi","RSI"],["equity","模拟盘净值"]]} format={{target:pct,cash:pct,momentum:pct,rsi:num,equity:usd}}/></Panel><Panel title="满仓 TQQQ 当前状态" subtitle="被动参照系，不择时"><Table rows={[{signal_date:commonEnd,regime:"BUY_AND_HOLD",target:1,cash:0,equity:100000*(1+holdMetrics.totalReturn)}]} columns={[["signal_date","估值日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["equity","拟合净值"]]} format={{target:pct,cash:pct,equity:usd}}/></Panel></div>
     <details className="quant-details"><summary><span>模拟盘执行与策略诊断</span><small>持仓、订单、成交、调度与底层信号</small></summary><div><Panel title="美股独立调度" subtitle="America/New_York · 服务启动自动补跑"><Table rows={account.scheduler?[account.scheduler]:[]} columns={[["running","运行中"],["last_startup_run","启动补跑"],["open_schedule","开盘执行"],["close_schedule","收盘计算"],["last_open_run","最近开盘任务"],["last_close_run","最近收盘任务"],["last_error","最近错误"]]} format={{running:(value)=>value?"是":"否"}}/></Panel><div className="two-col"><Panel title="v2持仓与订单" subtitle={`${account.execution_policy} · 与v3物理隔离`}><Table rows={account.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd}}/><Table rows={account.orders.slice(0,15)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"]]} format={{target_weight:pct}}/></Panel><Panel title="v3持仓与订单" subtitle={`${experiment.execution_policy} · 与v2物理隔离`}><Table rows={experiment.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd}}/><Table rows={experiment.orders.slice(0,15)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"]]} format={{target_weight:pct}}/></Panel></div></div></details>
   </>;
@@ -448,7 +462,7 @@ function MarketRiskPage({ risk, live, names }: { risk:MarketRisk; live?:LiveAcco
   </>;
 }
 
-function Overview({ sectors, execution }: { sectors: Sectors; execution: Execution }) {
+function Overview({ sectors }: { sectors: Sectors }) {
   const invested = sectors.allocation.reduce((sum, row) => sum + Number(row.target_weight), 0);
   const selected = sectors.allocation.reduce((sum, row) => sum + text(row.selected).split(",").filter(Boolean).length, 0);
   return <>

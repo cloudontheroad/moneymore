@@ -17,16 +17,15 @@ if (Test-Path -LiteralPath $ResolvedOutput) {
 }
 
 $RequiredPaths = @(
-    ".env",
     "apps",
+    "configs",
     "deploy",
     "docs",
     "pyproject.toml",
     "README.md",
     "scripts",
     "src",
-    "data\processed",
-    "state"
+    "data\processed"
 )
 foreach ($RelativePath in $RequiredPaths) {
     $FullPath = Join-Path $ProjectRoot $RelativePath
@@ -41,23 +40,31 @@ $TarArguments = @(
     "--exclude=*/.git",
     "--exclude=apps/dashboard/node_modules",
     "--exclude=apps/dashboard/.vinext",
+    "--exclude=apps/dashboard/.next",
     "--exclude=apps/dashboard/.wrangler",
     "--exclude=apps/dashboard/build",
     "--exclude=apps/dashboard/dist",
     "--exclude=__pycache__",
     "--exclude=*.pyc",
     "--exclude=.pytest_cache",
-    ".env",
+    "--exclude=.env",
+    "--exclude=.env.*",
     "apps",
+    "configs",
     "deploy",
     "docs",
     "pyproject.toml",
     "README.md",
     "scripts",
     "src",
-    "data/processed",
-    "state"
+    "data/processed"
 )
+
+foreach ($PaperPath in @("data/us_overnight_paper_only/open2open_v1/plans", "data/us_overnight_paper_only/universe")) {
+    if (Test-Path -LiteralPath (Join-Path $ProjectRoot $PaperPath)) {
+        $TarArguments += $PaperPath
+    }
+}
 
 Push-Location $ProjectRoot
 try {
@@ -69,4 +76,4 @@ try {
 
 $Archive = Get-Item -LiteralPath $ResolvedOutput
 Write-Host ("Created {0} ({1:N1} MB)" -f $Archive.FullName, ($Archive.Length / 1MB))
-Write-Warning "The archive contains .env and trading state. Keep it private and delete it after migration."
+Write-Host "Provision server secrets and migrate authorized runtime data separately."

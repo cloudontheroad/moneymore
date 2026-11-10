@@ -1,0 +1,14 @@
+{
+  "captured_at_utc": "2026-11-05T11:37:46.991746+00:00",
+  "start": "2023-10-07",
+  "end": "2026-11-05",
+  "universe": "top1000-2026-11-05T100515Z.parquet",
+  "saved": 999,
+  "failures": [
+    {
+      "symbol": "US.RZA",
+      "error": "RuntimeError: Futu OpenD quote request failed: 历史K线额度不足，请求失败（已用正股额度：1000/1000，期权额度：0/200）。额度会在7天后全部释放。"
+    }
+  ],
+  "real_orders_enabled": false
+}

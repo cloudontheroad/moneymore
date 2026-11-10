@@ -15,6 +15,10 @@ V3_STRATEGY_ID = "cycle_momentum_dip_v3_experimental"
 V3_INITIAL_CASH = 100_000.0
 
 
+def v3_target(desired: float, previous: float | None, band: float) -> float:
+    return round(desired if previous is None or abs(desired - previous) > band else previous, 6)
+
+
 class LeveragedEtfV3Paper(LeveragedEtfPaper):
     """WildWest-inspired TQQQ/cash experiment; never touches the v2 ledger."""
 
@@ -49,11 +53,7 @@ class LeveragedEtfV3Paper(LeveragedEtfPaper):
             params,
         ).iloc[-1]
         desired = float(decision.raw_target)
-        target = (
-            desired
-            if previous_tqqq is None or abs(desired - previous_tqqq) > params.rebalance_band
-            else previous_tqqq
-        )
+        target = v3_target(desired, previous_tqqq, params.rebalance_band)
         regime = str(decision.regime)
         if bool(decision.dip_buy):
             regime = "BEAR_DIP_BUY"
@@ -97,7 +97,8 @@ class LeveragedEtfV3Paper(LeveragedEtfPaper):
             dip_buy=bool(decision.dip_buy),
         )
 
-    def _backtest_targets(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    @staticmethod
+    def _backtest_targets(data: dict[str, pd.DataFrame], start_index: int = 0) -> pd.DataFrame:
         dates = pd.to_datetime(data["QQQ"]["trade_date"])
 
         def series(symbol: str) -> pd.Series:
@@ -108,13 +109,12 @@ class LeveragedEtfV3Paper(LeveragedEtfPaper):
             series("QQQ"), series("TQQQ"), series("^VIX"), series("^VIX3M"), params
         )
         implemented: list[float] = []
-        current = math.nan
-        for desired in decisions["raw_target"].astype(float):
-            if not math.isfinite(desired):
+        current = None
+        for index, desired in enumerate(decisions["raw_target"].astype(float)):
+            if index < start_index or not math.isfinite(desired):
                 implemented.append(math.nan)
                 continue
-            if not math.isfinite(current) or abs(desired - current) > params.rebalance_band:
-                current = desired
+            current = v3_target(desired, current, params.rebalance_band)
             implemented.append(current)
         regimes = decisions["regime"].astype(str).mask(decisions["regime"].eq("BEAR"), "BEAR_DEFENSIVE")
         regimes = regimes.mask(decisions["dip_buy"].astype(bool), "BEAR_DIP_BUY")

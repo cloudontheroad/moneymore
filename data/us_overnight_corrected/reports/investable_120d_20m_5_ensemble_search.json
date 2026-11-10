@@ -1,0 +1,45 @@
+{
+  "tested": 282,
+  "primary_improvements": 81,
+  "baseline": {
+    "top1_mean_bps": -20.289948416152903,
+    "top1_sharpe": -0.912477910637908,
+    "top1_max_drawdown": -0.5286378316517084,
+    "top1_cumulative_return": -0.48886610263474795,
+    "top10_mean_bps": -8.106725473757935,
+    "top10_sharpe": -0.5584528128243259,
+    "top10_max_drawdown": -0.3492433000487597,
+    "top10_cumulative_return": -0.23768664550011376
+  },
+  "winner": {
+    "weights": "{\"top1w5\": 0.2, \"daily_centered\": 0.8}",
+    "top1_mean_bps": 16.34651252179779,
+    "top1_sharpe": 0.6860693519769328,
+    "top1_max_drawdown": -0.38388828260363117,
+    "top1_cumulative_return": 0.2633952094151961,
+    "top10_mean_bps": -1.9156152550743941,
+    "top10_sharpe": -0.132564757156518,
+    "top10_max_drawdown": -0.32606030771693506,
+    "top10_cumulative_return": -0.10815518767464438,
+    "primary_improvement": true,
+    "balanced_delta": 4.10900477766903
+  },
+  "decision": "accept",
+  "reference_metrics_are_not_adoption_gates": true,
+  "previous_champion_fixed_weights": {
+    "champion": 0.3,
+    "half63": 0.2,
+    "top1w5": 0.2,
+    "daily_centered": 0.3
+  },
+  "previous_champion_on_investable_panel": {
+    "top1_mean_bps": -20.289948416152903,
+    "top1_sharpe": -0.912477910637908,
+    "top1_max_drawdown": -0.5286378316517084,
+    "top1_cumulative_return": -0.48886610263474795,
+    "top10_mean_bps": -8.106725473757935,
+    "top10_sharpe": -0.5584528128243259,
+    "top10_max_drawdown": -0.3492433000487597,
+    "top10_cumulative_return": -0.23768664550011376
+  }
+}

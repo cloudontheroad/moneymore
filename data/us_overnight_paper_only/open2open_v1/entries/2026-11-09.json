@@ -1,0 +1,95 @@
+{
+  "positions": [
+    {
+      "symbol": "US.STRL",
+      "name": "Sterling Infrastructure",
+      "score": 0.0219377484,
+      "rank": 1,
+      "entry_open": 263.8500061035156,
+      "allocation_usd": 10000,
+      "shares": 37.90032127600833
+    },
+    {
+      "symbol": "US.CIEN",
+      "name": "Ciena",
+      "score": 0.0191742617,
+      "rank": 2,
+      "entry_open": 252.8350067138672,
+      "allocation_usd": 10000,
+      "shares": 39.551485096828294
+    },
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0184614408,
+      "rank": 3,
+      "entry_open": 856.9550170898438,
+      "allocation_usd": 10000,
+      "shares": 11.669223938917197
+    },
+    {
+      "symbol": "US.MRVL",
+      "name": "迈威尔科技",
+      "score": 0.0167419211,
+      "rank": 4,
+      "entry_open": 143.75,
+      "allocation_usd": 10000,
+      "shares": 69.56521739130434
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.0166080242,
+      "rank": 5,
+      "entry_open": 547.4500122070312,
+      "allocation_usd": 10000,
+      "shares": 18.266507949621275
+    },
+    {
+      "symbol": "US.CRDO",
+      "name": "Credo Technology",
+      "score": 0.0165116177,
+      "rank": 6,
+      "entry_open": 124.0999984741211,
+      "allocation_usd": 10000,
+      "shares": 80.58017826716836
+    },
+    {
+      "symbol": "US.TER",
+      "name": "泰瑞达",
+      "score": 0.0143172718,
+      "rank": 7,
+      "entry_open": 223.3249969482422,
+      "allocation_usd": 10000,
+      "shares": 44.7777908279457
+    },
+    {
+      "symbol": "US.ALAB",
+      "name": "Astera Labs",
+      "score": 0.0138049928,
+      "rank": 8,
+      "entry_open": 199.0,
+      "allocation_usd": 10000,
+      "shares": 50.25125628140704
+    },
+    {
+      "symbol": "US.VRT",
+      "name": "Vertiv Holdings",
+      "score": 0.0132270359,
+      "rank": 9,
+      "entry_open": 190.47000122070312,
+      "allocation_usd": 10000,
+      "shares": 52.50170596897676
+    },
+    {
+      "symbol": "US.DELL",
+      "name": "戴尔科技",
+      "score": 0.0131688896,
+      "rank": 10,
+      "entry_open": 346.04998779296875,
+      "allocation_usd": 10000,
+      "shares": 28.897559175707002
+    }
+  ],
+  "recorded_at": "2026-11-09T14:33:13.901135+00:00"
+}

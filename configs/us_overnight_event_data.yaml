@@ -1,0 +1,42 @@
+contract:
+  decision_time: before_us_regular_open
+  timestamped_event_rule: event_at_utc_must_be_before_decision_timestamp
+  date_only_event_rule: usable_from_next_us_regular_session
+  current_snapshot_rule: never_backfill_before_first_observed_at_utc
+sources:
+  futu_opend:
+    required: true
+    host: 127.0.0.1
+    port: 11111
+    datasets: [earnings, economic, macro, ratings, plates]
+    excluded_datasets: [per_symbol_news_search]
+  sec_edgar:
+    required_env: SEC_USER_AGENT
+    datasets: [submissions, companyfacts]
+    status: ready_but_identity_not_configured
+  fred:
+    required_env: FRED_API_KEY
+    datasets: [vintaged_macro_observations]
+    status: planned_key_not_configured
+  premium_news_and_estimates:
+    candidates: [Polygon, Benzinga, Intrinio, AlphaSense]
+    status: license_required
+schedule:
+  after_us_close:
+    local_time: "06:30 Asia/Shanghai"
+    jobs: [earnings, ratings, economic, macro, plates]
+  web_event_discovery:
+    cadence: after_us_close_and_before_us_open
+    mode: sparse_market_wide_search_then_entity_mapping
+    query_plan: configs/us_event_websearch_queries.yaml
+    output_dataset: web_events
+    forbidden_mode: polling_every_symbol_for_news
+  sec:
+    cadence: every_10_minutes_during_us_extended_hours
+quality_gates:
+  - duplicate_natural_keys_equal_zero
+  - timestamped_events_have_non_null_event_time
+  - date_only_events_are_shifted_to_next_session
+  - current_plate_snapshots_are_never_historically_backfilled
+  - raw_snapshot_is_preserved_before_canonical_merge
+  - source_failures_are_retained_in_manifest

@@ -1,0 +1,52 @@
+{
+  "panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\features\\historical_panel_61_plus_event_v1.parquet",
+  "rows": 766980,
+  "sessions": 794,
+  "symbols": 995,
+  "base_features": 61,
+  "event_features": [
+    "event_earnings_eps_surprise",
+    "event_earnings_revenue_surprise",
+    "event_earnings_agreement",
+    "event_earnings_age_days",
+    "event_earnings_decay_5d",
+    "event_earnings_decay_20d",
+    "event_rating_direction",
+    "event_rating_target_change",
+    "event_rating_age_days",
+    "event_rating_decay_20d",
+    "event_macro_surprise",
+    "event_macro_abs_surprise",
+    "event_macro_age_days",
+    "event_macro_high_importance"
+  ],
+  "forward_earnings_features": [
+    "forward_earnings_days_to_event",
+    "forward_earnings_within_3d",
+    "forward_earnings_within_10d",
+    "forward_earnings_eps_expected_change",
+    "forward_earnings_revenue_expected_change",
+    "forward_earnings_iv",
+    "forward_earnings_iv_rank",
+    "forward_earnings_iv_percentile",
+    "forward_earnings_option_attention"
+  ],
+  "nonzero_rate": {
+    "event_earnings_eps_surprise": 0.889830243291872,
+    "event_earnings_revenue_surprise": 0.9411484002190409,
+    "event_earnings_agreement": 0.8831690526480482,
+    "event_earnings_decay_5d": 0.889830243291872,
+    "event_earnings_decay_20d": 0.9411484002190409,
+    "event_rating_direction": 0.04459829461002895,
+    "event_rating_target_change": 0.042892904638973633,
+    "event_rating_decay_20d": 0.04459829461002895,
+    "event_macro_surprise": 0.9901601084774049,
+    "event_macro_abs_surprise": 0.9901601084774049,
+    "event_macro_high_importance": 0.9137304753709353
+  },
+  "causal_policy": "exact events strictly before open(t); date-only ratings from next session",
+  "excluded": [
+    "web_events_not_yet_available",
+    "historical_industry_diffusion_not_point_in_time"
+  ]
+}

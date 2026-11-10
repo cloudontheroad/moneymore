@@ -19,3 +19,21 @@ test-tmp-*/
 state/
 mlruns/
 external_research/easyths-upstream/
+external_research/us_overnight/
+
+# Locally generated US Overnight research panels
+/data/us_overnight_corrected/features/historical_panel_61_lag1.parquet
+/data/us_overnight_corrected/features/historical_panel_61_plus_event_v1.parquet
+/data/us_overnight_corrected/features/historical_panel_61_plus_options.parquet
+/data/us_overnight_corrected/features/historical_panel_61_residual_targets.parquet
+/data/us_overnight_corrected/features/historical_panel_bundle_investable_120d_20m_5.parquet
+/data/us_overnight_corrected/features/historical_panel_bundle_modules.parquet
+/data/us_overnight_corrected/features/historical_panel_factor_groups_lag1.parquet
+/data/us_overnight_corrected/features/standard_daily_clean/panel.parquet
+/data/us_overnight_corrected/features/standard_daily_regime/panel.parquet
+/data/us_overnight_corrected/features/standard_daily/panel.parquet
+/data/us_overnight_open_to_open/features/alpha360/panel.parquet
+/data/us_overnight_open_to_open/features/base/historical_panel_61_open2open_lag1.parquet
+/data/us_overnight_open_to_open/features/standard_daily_clean/panel.parquet
+/data/us_overnight_open_to_open/features/standard_daily/panel.parquet
+/data/us_overnight_paper_only/features/historical_panel_61.parquet

@@ -1,0 +1,29 @@
+lookback_hours: 24
+principle: search_events_globally_then_map_entities_to_top1000
+queries:
+  earnings:
+    - 'US earnings results "revenue" "EPS" after market close'
+    - 'US earnings results "raises guidance" OR "cuts guidance"'
+    - 'site:sec.gov/Archives/edgar/data 8-K "2.02" results operations'
+  corporate_material:
+    - 'US listed company announces acquisition OR merger OR strategic review'
+    - 'US listed company FDA approval OR clinical trial results'
+    - 'US listed company investigation OR lawsuit OR settlement OR recall'
+    - 'US listed company CEO resigns OR appoints new CEO'
+    - 'US listed company offering OR buyback OR dividend suspension'
+  ratings:
+    - 'Wall Street analyst upgrade OR downgrade price target US stocks'
+  industry:
+    - 'semiconductor OR AI OR energy OR bank industry news stocks market impact'
+    - 'tariff OR export control OR antitrust OR sanctions US companies'
+  macro:
+    - 'site:federalreserve.gov/newsevents press release'
+    - 'site:bls.gov/news.release CPI OR employment OR PPI'
+    - 'site:bea.gov/news GDP OR personal income'
+source_priority:
+  tier_1: [SEC, company_investor_relations, Federal_Reserve, BLS, BEA, FDA, DOJ, FTC]
+  tier_2: [Reuters, AP, exchange_press_release]
+  tier_3: [major_financial_media]
+verification:
+  material_event_requires: one_tier_1_or_two_independent_sources
+  retain_fields: [source_url, published_at_utc, discovered_at_utc, title, summary, symbols, event_type]

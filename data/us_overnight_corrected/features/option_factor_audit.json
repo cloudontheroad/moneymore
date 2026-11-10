@@ -1,0 +1,20 @@
+{
+  "panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\features\\historical_panel_61_plus_options.parquet",
+  "raw_symbols": 975,
+  "panel_symbols_covered": 974,
+  "coverage_rows": 0.9641398732691856,
+  "features": [
+    "option_volume_log",
+    "option_volume_z20",
+    "option_call_put_imbalance",
+    "option_put_call_volume_ratio",
+    "option_open_interest_log",
+    "option_open_interest_change_1d",
+    "option_put_call_open_interest_ratio",
+    "option_iv",
+    "option_hv",
+    "option_iv_minus_hv",
+    "option_iv_change_1d"
+  ],
+  "causal_policy": "option close snapshot at feature_asof, used no earlier than next regular open"
+}

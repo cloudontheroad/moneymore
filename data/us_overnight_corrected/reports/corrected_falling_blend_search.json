@@ -1,0 +1,62 @@
+{
+  "tested": 11,
+  "baseline_main_weight": 1.0,
+  "winner_main_weight": 0.9,
+  "winner_ablation_weight": 0.09999999999999998,
+  "baseline": {
+    "main_weight": 1.0,
+    "top1_mean_bps": 74.97170523639605,
+    "top1_win_rate": 0.5595238095238095,
+    "top1_sharpe": 1.9483461370614872,
+    "top1_cumulative_return": 3.136165746954358,
+    "top1_max_drawdown": -0.5762098563277713,
+    "top1_without_best5_mean_bps": 38.20256375562225,
+    "top10_mean_bps": 18.438981492505178,
+    "top10_win_rate": 0.48412698412698413,
+    "top10_sharpe": 0.8757668792984667,
+    "top10_cumulative_return": 0.3826358820167097,
+    "top10_max_drawdown": -0.3227456419403373,
+    "top10_without_best5_mean_bps": -0.011222417896744765,
+    "primary_improvement": false
+  },
+  "winner": {
+    "main_weight": 0.9,
+    "top1_mean_bps": 78.66078164740648,
+    "top1_win_rate": 0.5674603174603174,
+    "top1_sharpe": 2.039320817708375,
+    "top1_cumulative_return": 3.5256562564768297,
+    "top1_max_drawdown": -0.5762098563277711,
+    "top1_without_best5_mean_bps": 41.96631782677457,
+    "top10_mean_bps": 18.885181702225964,
+    "top10_win_rate": 0.49603174603174605,
+    "top10_sharpe": 0.8944068095864164,
+    "top10_cumulative_return": 0.397099511188723,
+    "top10_max_drawdown": -0.31663201482310954,
+    "top10_without_best5_mean_bps": 0.4440101847333558,
+    "primary_improvement": true
+  },
+  "winner_folds": [
+    {
+      "fold": 1,
+      "top1_mean_bps": 113.42179950483407,
+      "top10_mean_bps": 10.767686981056615
+    },
+    {
+      "fold": 2,
+      "top1_mean_bps": 203.73638050557273,
+      "top10_mean_bps": 74.29935649083694
+    },
+    {
+      "fold": 3,
+      "top1_mean_bps": -76.7609889956417,
+      "top10_mean_bps": -4.8501696841578
+    },
+    {
+      "fold": 4,
+      "top1_mean_bps": 74.24593557486087,
+      "top10_mean_bps": -4.676146978831933
+    }
+  ],
+  "decision": "accept as research baseline",
+  "live_deployment": false
+}

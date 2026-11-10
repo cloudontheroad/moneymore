@@ -1,0 +1,15 @@
+{
+  "captured_at_utc": "2026-11-07T16:18:04.624904+00:00",
+  "range": [
+    "2023-01-01",
+    "2026-11-07"
+  ],
+  "requested": 1000,
+  "saved": 975,
+  "failures": [
+    {
+      "symbol": "US.WBD",
+      "error": "\u672a\u77e5\u80a1\u7968 WBD"
+    }
+  ]
+}

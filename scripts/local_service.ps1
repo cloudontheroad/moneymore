@@ -253,6 +253,7 @@ switch ($Action) {
                     $NextWebLaunch = $Now.AddSeconds(45)
                     if (-not (Test-Endpoint "http://127.0.0.1:$WebPort") -and
                         -not (Test-PortListening $WebPort)) {
+                        Repair-VinextWindowsStaticPaths
                         $Web = Start-ChildProcess "web" $Node @(
                             $Vinext, "start", "--hostname", "127.0.0.1", "--port", "$WebPort"
                         ) (Join-Path $ProjectRoot "apps\dashboard")

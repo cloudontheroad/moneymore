@@ -73,7 +73,7 @@ export default function DesktopExecution({names}:{names:Record<string,string>}) 
       const response=await fetch(stopId?`/api/desktop-execution/capture/${stopId}/stop`:"/api/desktop-execution/capture",{
         method:"POST",signal:AbortSignal.timeout(15000),headers:{"Content-Type":"application/json","X-MoneyMore-Desktop":"prepare-v1"},
         body:stopId?undefined:JSON.stringify({allow_foreground_once:captureAcknowledged,read_only_only:true})});
-      const result=await response.json();
+      const result=await response.json() as {detail?:unknown};
       if(!response.ok)throw new Error(typeof result.detail==="string"?result.detail:"采集授权或启动失败");
       setCaptureAcknowledged(false);setShowConsent(false);await refresh();
     }catch(e){if(!stopId)setUncertain(true);setError(e instanceof Error&&e.name==="TimeoutError"?"请求超时，启动结果未知；请先刷新状态，勿重复启动采集。":e instanceof Error?e.message:"采集失败");}
@@ -85,8 +85,8 @@ export default function DesktopExecution({names}:{names:Record<string,string>}) 
       const response=await fetch(`/api/desktop-execution/${action}`,{
         method:"POST",headers:{"Content-Type":"application/json","X-MoneyMore-Desktop":"prepare-v1"},
         body:action==="prepare"?JSON.stringify({source_account:account}):action==="client"?JSON.stringify({executable:path}):undefined});
-      const result=await response.json();
-      if(!response.ok)throw new Error(result.detail??"操作失败");
+      const result=await response.json() as {detail?:unknown};
+      if(!response.ok)throw new Error(typeof result.detail==="string"?result.detail:"操作失败");
       await refresh();
     }catch(e){setError(e instanceof Error?e.message:"操作失败");}
     finally{setBusy(false);}
@@ -98,7 +98,7 @@ export default function DesktopExecution({names}:{names:Record<string,string>}) 
       const response=await fetch("/api/desktop-execution/exports/import",{
         method:"POST",headers:{"Content-Type":"application/json","X-MoneyMore-Desktop":"prepare-v1"},
         body:JSON.stringify({filename:exportFile,kind:exportKind,trade_date:exportDate,account_ref:accountRef})});
-      const result=await response.json();
+      const result=await response.json() as {detail?:unknown;row_count?:number};
       if(!response.ok)throw new Error(typeof result.detail==="string"?result.detail:"导出文件校验未通过");
       setMessage(`已读取 ${result.row_count} 条；仅保存券商观察快照，未修改模拟或真实交易账本。`);
       await refresh();
@@ -122,7 +122,7 @@ export default function DesktopExecution({names}:{names:Record<string,string>}) 
         method:"POST",headers:{"Content-Type":"application/json","X-MoneyMore-Desktop":"prepare-v1"},
         body:JSON.stringify({intent_id:linkIntent,snapshot_id:linkSnapshot,broker_order_id:linkOrder,
           note:linkNote,acknowledge_observation_only:linkAcknowledged})});
-      const result=await response.json();
+      const result=await response.json() as {detail?:unknown};
       if(!response.ok)throw new Error(typeof result.detail==="string"?result.detail:"关联校验未通过");
       setMessage("已保存观察关联，不下单、不确认实盘成交、不修改模拟账本。");
       setLinkAcknowledged(false);await refresh();

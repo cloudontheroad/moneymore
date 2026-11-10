@@ -1,0 +1,36 @@
+{
+  "status": "research_champion",
+  "adopted_at": "2026-11-08",
+  "single_changed_variable": "target_transform",
+  "retrain_anchor": "full_history_trading_calendar",
+  "validation_sessions": 252,
+  "weights": {
+    "anchored_champion_252": 0.3,
+    "anchored_half63_252": 0.2,
+    "anchored_top1w5_252": 0.2,
+    "anchored_target_daily_centered_252": 0.3
+  },
+  "primary_metrics": {
+    "top1_mean_bps": 31.31123837585803,
+    "top1_cumulative_return": 0.6483978335627207,
+    "top1_win_rate": 0.5079365079365079,
+    "top1_sharpe": 0.9840277931703986,
+    "top1_annualized_volatility": 0.8018505295764428,
+    "top1_max_drawdown": -0.3250835058584751,
+    "top10_mean_bps": 1.6712900259029944,
+    "top10_cumulative_return": -0.02476322414364651,
+    "top10_win_rate": 0.5198412698412699,
+    "top10_sharpe": 0.11473782791007459,
+    "top10_annualized_volatility": 0.3670673344606466,
+    "top10_max_drawdown": -0.25298004553684184
+  },
+  "reference_only": {
+    "top1_excess_mean_bps": 44.622738393537006,
+    "top1_excess_sharpe": 1.4429178954513149,
+    "top10_excess_mean_bps": 14.98279004358196,
+    "top10_excess_sharpe": 1.136304150903783
+  },
+  "search_report": "data/us_overnight_corrected/reports/anchored_target_transform_ensemble_search.json",
+  "predictions": "data/us_overnight_corrected/reports/anchored_target_transform_ensemble_search_winner.parquet",
+  "real_orders_enabled": false
+}

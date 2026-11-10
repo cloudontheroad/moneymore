@@ -1,0 +1,29 @@
+contract:
+  decision_time: before_us_regular_open
+  immutable_snapshot_required: true
+  historical_backfill_without_original_timestamp: forbidden
+discovery:
+  cadence: after_us_close_and_before_us_open
+  mode: market_wide_queries_then_ticker_mapping
+  queries:
+    - 'site:reddit.com/r/wallstreetbets stocks earnings tomorrow OR earnings this week'
+    - 'site:reddit.com/r/stocks earnings expectations guidance ticker'
+    - 'site:stocktwits.com/symbol trending bullish bearish earnings'
+    - 'US stocks analyst estimate revision earnings expectations this week'
+features:
+  - mention_count
+  - mention_acceleration_24h_vs_7d
+  - unique_author_count
+  - bullish_share
+  - bearish_share
+  - net_sentiment
+  - sentiment_change_24h
+  - disagreement
+  - source_diversity
+  - event_proximity_days
+rules:
+  retain_zero_mention_snapshots: true
+  store_source_url_and_published_at: true
+  separate_attention_from_sentiment: true
+  minimum_independent_sources_for_directional_signal: 2
+  never_treat_search_result_count_as_platform_mention_count: true

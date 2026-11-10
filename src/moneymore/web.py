@@ -103,6 +103,7 @@ from .strategy_universe import (
     universe_summary,
 )
 from .trade_cycles import analyze_trade_cycles
+from .us_overnight.dashboard import dashboard_snapshot as us_overnight_dashboard_snapshot
 from .weekly_training import WeeklyTrainingService
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -2005,6 +2006,11 @@ deepdow_training_service = WeeklyTrainingService(
 )
 
 
+from .us_overnight.scheduler import OpenToOpenScheduler
+
+us_open2open_scheduler = OpenToOpenScheduler(ROOT)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     task_service.start()
@@ -2012,6 +2018,7 @@ async def lifespan(_: FastAPI):
     finrl_training_service.start()
     leveraged_etf_scheduler.start()
     leveraged_etf_v3_scheduler.start()
+    us_open2open_scheduler.start()
     if task_service.config().get("enabled"):
         try:
             _refresh_research_financial_pool(ParquetStore(DATA), datetime.now(SHANGHAI).strftime("%Y%m%d"))
@@ -2019,6 +2026,7 @@ async def lifespan(_: FastAPI):
             # Research repair is optional; failure must not take the trading API down.
             pass
     yield
+    us_open2open_scheduler.stop()
     leveraged_etf_v3_scheduler.stop()
     leveraged_etf_scheduler.stop()
     finrl_training_service.stop()
@@ -2061,6 +2069,12 @@ def leveraged_etf_paper() -> dict[str, object]:
     payload = leveraged_etf_paper_service.snapshot()
     payload["scheduler"] = leveraged_etf_scheduler.status()
     return payload
+
+
+@app.get("/api/us-overnight-dashboard")
+def us_overnight_dashboard(session: str | None = None) -> dict[str, object]:
+    """Read-only visualization for the isolated US overnight research domain."""
+    return us_overnight_dashboard_snapshot(ROOT, session)
 
 
 @app.post("/api/leveraged-etf-paper/run")
@@ -2731,6 +2745,62 @@ def sector_portfolio() -> dict[str, object]:
         "report": _records(report),
         "universes": universes,
         "symbol_names": _instrument_names(store),
+    }
+
+
+@app.get("/api/a-share-overview")
+def a_share_overview() -> dict[str, object]:
+    """Small A-share landing payload; omit research diagnostics and 1000-row detail."""
+    store = ParquetStore(DATA)
+    try:
+        recommendation = store.read("global_factor_recommendation")
+        universe = active_strategy_universe(store)
+    except (FileNotFoundError, ValueError) as error:
+        raise HTTPException(status_code=404, detail=str(error)) from error
+    config = yaml.safe_load((ROOT / "configs" / "sector_models.yaml").read_text(encoding="utf-8"))
+    selected = recommendation.loc[recommendation["selected"].astype(bool)].copy()
+    allocation = (
+        selected.groupby("sector", as_index=False)
+        .agg(
+            target_weight=("target_weight", "sum"),
+            selected=("symbol", lambda values: ",".join(map(str, values))),
+        )
+        .sort_values("target_weight", ascending=False)
+    )
+    catalog_source = universe.merge(
+        recommendation[["symbol", "selected"]], on="symbol", how="left"
+    )
+    catalog_source["selected"] = catalog_source["selected"].fillna(False).astype(bool)
+    industry_catalog = _records(
+        catalog_source.groupby("industry", as_index=False)
+        .agg(stock_count=("symbol", "count"), selected_count=("selected", "sum"), market_value=("total_mv", "sum"))
+        .sort_values("market_value", ascending=False)
+    )
+    board_catalog = _records(
+        universe.groupby("board", as_index=False)
+        .agg(stock_count=("symbol", "count"), market_value=("total_mv", "sum"))
+        .sort_values("market_value", ascending=False)
+    )
+    all_names = _instrument_names(store)
+    selected_names = {symbol: all_names.get(symbol, "") for symbol in selected["symbol"].astype(str)}
+    return {
+        "status": "PAPER_RESEARCH_ONLY",
+        "latest_date": str(recommendation["date"].max())[:10],
+        "disclosure_date": str(config["disclosure_date"]),
+        "evidence_status": "FORWARD_MARKET_CAP_SNAPSHOT",
+        "warning": "首页为轻量快照；行业明细与研究诊断进入对应栏目后加载。",
+        "allocation_method": "global_cross_section_topk",
+        "strategy_universe": universe_summary(universe),
+        "industry_catalog": industry_catalog,
+        "board_catalog": board_catalog,
+        "strategy_constituents": [],
+        "portfolio_policy": config["global_selection"],
+        "factor_data_quality": {},
+        "risk_metrics": {"selected_count": int(len(selected))},
+        "allocation": _records(allocation),
+        "report": [],
+        "universes": [],
+        "symbol_names": selected_names,
     }
 
 

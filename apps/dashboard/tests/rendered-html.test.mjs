@@ -35,6 +35,21 @@ test("metadata describes the multi-sector console", async () => {
   assert.match(layout, /银行、红利、工业有色、芯片与创业板成长/);
 });
 
+test("US overnight research is isolated on its own route", async () => {
+  const dashboard = await readFile(new URL("Dashboard.tsx", app), "utf8");
+  const page = await readFile(new URL("UsOvernight.tsx", app), "utf8");
+  const route = await readFile(new URL("UsOvernightDashboard.tsx", app), "utf8");
+  assert.doesNotMatch(dashboard, /\/api\/us-overnight-dashboard/);
+  assert.match(route, /\/api\/us-overnight-dashboard/);
+  assert.match(route, /active="\/us-overnight"/);
+  for (const label of ["每日候选与模拟交易", "盘前分数", "买入开盘价", "卖出开盘价", "下一交易日开盘退出", "策略空仓", "候选已过期", "等待日线或股票池"]) assert.match(page, new RegExp(label));
+  assert.equal((page.match(/<table>/g)??[]).length, 1);
+  assert.match(route, /AbortSignal\.timeout/);
+  assert.doesNotMatch(page, /今日 Top-|尾盘回收|VWAP/);
+  assert.doesNotMatch(page, /GitHub|开源项目|复刻队列|下一阶段/);
+  assert.doesNotMatch(page, /method:\s*["']POST/);
+});
+
 test("V2 release panel is read-only and does not present partial evidence as approval", async () => {
   const source = await readFile(new URL("BaselineV2Release.tsx", app), "utf8");
   for (const label of ["基线 V2 · 发布验收", "最终版未启用", "可信新前瞻日", "不是因果归因", "/api/baseline-v2-release"]) {

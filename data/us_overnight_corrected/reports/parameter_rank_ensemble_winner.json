@@ -1,0 +1,35 @@
+{
+  "members": "champion+mcw1+half63+top1w5",
+  "weights": "{\"champion\": 0.3, \"mcw1\": 0.2, \"half63\": 0.3, \"top1w5\": 0.2}",
+  "top1_mean_bps": 56.45588517531986,
+  "top1_sharpe": 1.5493681649832058,
+  "top1_win_rate": 0.5238095238095238,
+  "top1_max_drawdown": -0.33006570917816647,
+  "top10_mean_bps": 0.2898778895914035,
+  "top10_sharpe": 0.017940236379049113,
+  "top10_win_rate": 0.5,
+  "top10_max_drawdown": -0.2344779926000362,
+  "joint_improvement": true,
+  "balanced_delta": 1.4968145005761304,
+  "both_folds_positive": false,
+  "worst_fold_top1_bps": -27.431384945638257,
+  "worst_fold_top10_bps": -30.310423931748648,
+  "fold_metrics": [
+    {
+      "fold": 1,
+      "sessions": 63,
+      "top1_mean_bps": 140.34315529627796,
+      "top1_sharpe": 2.91828011819899,
+      "top10_mean_bps": 30.890179710931466,
+      "top10_sharpe": 1.6724285484163695
+    },
+    {
+      "fold": 2,
+      "sessions": 63,
+      "top1_mean_bps": -27.431384945638257,
+      "top1_sharpe": -1.564644883867012,
+      "top10_mean_bps": -30.310423931748648,
+      "top10_sharpe": -2.273973987956909
+    }
+  ]
+}

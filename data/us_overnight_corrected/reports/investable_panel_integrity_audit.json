@@ -1,0 +1,17 @@
+{
+  "audited_at_utc": "2026-11-08T14:56:23.005200+00:00",
+  "panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\features\\historical_panel_bundle_investable_120d_20m_5.parquet",
+  "rows": 600201,
+  "sessions": 673,
+  "symbols": 957,
+  "duplicate_timestamp_symbol_rows": 0,
+  "unmatched_source_labels": 0,
+  "feature_asof_not_before_signal": 0,
+  "label_end_not_after_signal": 0,
+  "invalid_open_or_next_open": 0,
+  "label_mismatch_over_1e_10": 0,
+  "maximum_absolute_label_error": 0.0,
+  "cash_dividend_rows": 6211,
+  "cost_bps_recomputed": 20.0,
+  "decision": "PASS"
+}

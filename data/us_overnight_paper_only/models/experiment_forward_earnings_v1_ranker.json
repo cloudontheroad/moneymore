@@ -1,0 +1,378 @@
+{
+  "trained_at_utc": "2026-11-07T15:34:56.579429+00:00",
+  "model": "LightGBM huber rolling cross-sectional scorer",
+  "objective": "huber",
+  "target_transform": "raw",
+  "num_leaves": 23,
+  "min_child_samples": 300,
+  "colsample_bytree": 0.75,
+  "reg_lambda": 3.0,
+  "reg_alpha": 0.25,
+  "min_split_gain": 0.0,
+  "max_depth": -1,
+  "learning_rate": 0.025,
+  "n_estimators": 350,
+  "huber_alpha": 0.9,
+  "subsample": 0.8,
+  "subsample_freq": 0,
+  "weight_half_life": 126,
+  "min_child_weight": 50.0,
+  "path_smooth": 0.0,
+  "feature_fraction_bynode": 1.0,
+  "extra_trees": false,
+  "max_bin": 255,
+  "min_data_in_bin": 3,
+  "boosting_type": "gbdt",
+  "data_sample_strategy": "bagging",
+  "drop_rate": 0.1,
+  "skip_drop": 0.5,
+  "max_drop": 50,
+  "top_rate": 0.2,
+  "other_rate": 0.1,
+  "top1_weight": 1.0,
+  "profit_early_stopping_rounds": 0,
+  "feature_library_size": 180,
+  "trained_feature_count": 70,
+  "trained_features": [
+    "ret_1d",
+    "ret_3d",
+    "ret_5d",
+    "ret_20d",
+    "falling_deceleration",
+    "previous_overnight",
+    "intraday_return",
+    "close_position",
+    "range_pct",
+    "atr_14",
+    "realized_vol_20",
+    "relative_volume_20",
+    "log_dollar_volume",
+    "distance_ma_20",
+    "distance_ma_50",
+    "distance_ma_200",
+    "drawdown_20",
+    "drawdown_60",
+    "KMID",
+    "KLEN",
+    "KUP2",
+    "KLOW2",
+    "KSFT2",
+    "VWAP0",
+    "ROC5",
+    "ROC10",
+    "ROC20",
+    "ROC60",
+    "MA5",
+    "MA20",
+    "MA60",
+    "STD5",
+    "STD20",
+    "BETA20",
+    "RSQR20",
+    "RESI5",
+    "RESI20",
+    "QTLU20",
+    "QTLD20",
+    "RANK20",
+    "RSV5",
+    "RSV20",
+    "IMXD20",
+    "CORR5",
+    "CORR20",
+    "CORD5",
+    "CORD20",
+    "CNTD5",
+    "CNTD20",
+    "SUMD5",
+    "SUMD20",
+    "VMA5",
+    "VMA20",
+    "WVMA5",
+    "WVMA20",
+    "VSUMD5",
+    "VSUMD20",
+    "FINRL_MACD",
+    "FINRL_RSI30",
+    "FINRL_CCI30",
+    "FINRL_ADX30",
+    "forward_earnings_days_to_event",
+    "forward_earnings_within_3d",
+    "forward_earnings_within_10d",
+    "forward_earnings_eps_expected_change",
+    "forward_earnings_revenue_expected_change",
+    "forward_earnings_iv",
+    "forward_earnings_iv_rank",
+    "forward_earnings_iv_percentile",
+    "forward_earnings_option_attention"
+  ],
+  "rolling_train_sessions": 504,
+  "validation_sessions": 126,
+  "walk_forward_retrain_every_sessions": 5,
+  "production_retrain_every_sessions": 1,
+  "validation_top_n_mean_net": -0.00030154078475332487,
+  "validation_top_n_win_rate": 0.5079365079365079,
+  "validation_top_n_sharpe": -0.16378912601198123,
+  "validation_top_n_sortino": -0.2530894517036328,
+  "validation_top_n_max_drawdown": -0.2907905644762694,
+  "validation_positive_21d_windows": 0.5849056603773585,
+  "validation_worst_21d_mean_net": -0.013405594073639119,
+  "validation_5pct_trimmed_mean_net": -0.0002489548578633316,
+  "validation_mean_without_best_5_nights": -0.0029200638152928142,
+  "validation_all_mean_net": -0.001214562144205858,
+  "validation_relative_edge_bps": 9.130213594525319,
+  "validation_rank_slot_metrics": [
+    {
+      "rank": 1,
+      "sessions": 126,
+      "mean_net_bps": -137.93776526541893,
+      "win_rate": 0.40476190476190477,
+      "sharpe": -3.6374074721842025,
+      "sortino": -4.2756504255002845,
+      "max_drawdown": -0.8704500524369948,
+      "cumulative_return": -0.8636666935782324
+    },
+    {
+      "rank": 2,
+      "sessions": 126,
+      "mean_net_bps": 49.178993178566586,
+      "win_rate": 0.5,
+      "sharpe": 1.2184970752626798,
+      "sortino": 1.9065760695580871,
+      "max_drawdown": -0.25376554138038854,
+      "cumulative_return": 0.45053448898797877
+    },
+    {
+      "rank": 3,
+      "sessions": 126,
+      "mean_net_bps": -1.4868807309461942,
+      "win_rate": 0.5238095238095238,
+      "sharpe": -0.04663440675641341,
+      "sortino": -0.06879029356022402,
+      "max_drawdown": -0.5431324329244868,
+      "cumulative_return": -0.16188448505884212
+    },
+    {
+      "rank": 4,
+      "sessions": 126,
+      "mean_net_bps": 61.06957250150913,
+      "win_rate": 0.5555555555555556,
+      "sharpe": 1.8241655955472,
+      "sortino": 2.9945438696234348,
+      "max_drawdown": -0.4130812921216023,
+      "cumulative_return": 0.8147688769487049
+    },
+    {
+      "rank": 5,
+      "sessions": 126,
+      "mean_net_bps": 40.304945349173444,
+      "win_rate": 0.46825396825396826,
+      "sharpe": 0.8803918123494381,
+      "sortino": 2.0738986915054207,
+      "max_drawdown": -0.28703063328652934,
+      "cumulative_return": 0.24375291937567733
+    },
+    {
+      "rank": 6,
+      "sessions": 126,
+      "mean_net_bps": -1.2757027630815108,
+      "win_rate": 0.47619047619047616,
+      "sharpe": -0.0499126431993247,
+      "sortino": -0.07409941618099983,
+      "max_drawdown": -0.4133809917371426,
+      "cumulative_return": -0.11282351839679805
+    },
+    {
+      "rank": 7,
+      "sessions": 126,
+      "mean_net_bps": 13.040775958298825,
+      "win_rate": 0.5317460317460317,
+      "sharpe": 0.4189203996761256,
+      "sortino": 0.44896010624338567,
+      "max_drawdown": -0.45957182661480844,
+      "cumulative_return": 0.0023731174529719734
+    },
+    {
+      "rank": 8,
+      "sessions": 126,
+      "mean_net_bps": -70.74633608971506,
+      "win_rate": 0.4444444444444444,
+      "sharpe": -2.312220638637249,
+      "sortino": -2.7239339336434543,
+      "max_drawdown": -0.6093816702551687,
+      "cumulative_return": -0.6502125880818719
+    },
+    {
+      "rank": 9,
+      "sessions": 126,
+      "mean_net_bps": 20.554970651132557,
+      "win_rate": 0.5158730158730159,
+      "sharpe": 0.7998028405399356,
+      "sortino": 1.270392310678597,
+      "max_drawdown": -0.3492677657464083,
+      "cumulative_return": 0.16928887857961028
+    },
+    {
+      "rank": 10,
+      "sessions": 126,
+      "mean_net_bps": -2.856651264851418,
+      "win_rate": 0.4603174603174603,
+      "sharpe": -0.11511622324743055,
+      "sortino": -0.1599811150879911,
+      "max_drawdown": -0.3348603157255884,
+      "cumulative_return": -0.12625917762458871
+    }
+  ],
+  "validation_adjacent_rank_spreads_bps": [
+    -187.11675844398553,
+    50.66587390951278,
+    -62.556453232455326,
+    20.764627152335684,
+    41.580648112254956,
+    -14.316478721380335,
+    83.78711204801388,
+    -91.30130674084762,
+    23.411621915983975
+  ],
+  "validation_monotonic_violations": 4,
+  "validation_strictly_monotonic_rank_returns": false,
+  "validation_fold_metrics": [
+    {
+      "fold": 1,
+      "sessions": 63,
+      "start": "2026-05-07 04:00:00+00:00",
+      "end": "2026-08-06 04:00:00+00:00",
+      "top1_mean_bps": -113.7574120190115,
+      "top1_sharpe": -2.7779271058129873,
+      "top10_mean_bps": 31.68932668625144,
+      "top10_sharpe": 1.4763051617545588
+    },
+    {
+      "fold": 2,
+      "sessions": 63,
+      "start": "2026-08-07 04:00:00+00:00",
+      "end": "2026-11-04 05:00:00+00:00",
+      "top1_mean_bps": -162.11811851182634,
+      "top1_sharpe": -4.645819157287277,
+      "top10_mean_bps": -37.720142381317935,
+      "top10_sharpe": -2.5853094309582745
+    }
+  ],
+  "validation_worst_fold_top1_mean_bps": -162.11811851182634,
+  "validation_median_fold_top1_mean_bps": -137.93776526541893,
+  "validation_positive_top1_folds": 0,
+  "top_features": [
+    {
+      "feature": "falling_deceleration",
+      "gain": 33.68403378245421,
+      "gain_share": 0.38605009470067136
+    },
+    {
+      "feature": "CNTD5",
+      "gain": 6.5174367220606655,
+      "gain_share": 0.07469583601557099
+    },
+    {
+      "feature": "forward_earnings_days_to_event",
+      "gain": 4.37921004567761,
+      "gain_share": 0.050189786168917574
+    },
+    {
+      "feature": "atr_14",
+      "gain": 3.6353971275966614,
+      "gain_share": 0.041665004092065874
+    },
+    {
+      "feature": "RANK20",
+      "gain": 3.5936932677868754,
+      "gain_share": 0.04118703939422325
+    },
+    {
+      "feature": "previous_overnight",
+      "gain": 3.5931918905116618,
+      "gain_share": 0.04118129314821759
+    },
+    {
+      "feature": "realized_vol_20",
+      "gain": 2.6927996838930994,
+      "gain_share": 0.030861968008070537
+    },
+    {
+      "feature": "forward_earnings_iv",
+      "gain": 2.632965818513185,
+      "gain_share": 0.030176216724675988
+    },
+    {
+      "feature": "RESI5",
+      "gain": 2.1646022780332714,
+      "gain_share": 0.024808338568384745
+    },
+    {
+      "feature": "ret_1d",
+      "gain": 2.0513016412733123,
+      "gain_share": 0.02350980877135039
+    },
+    {
+      "feature": "drawdown_60",
+      "gain": 1.5345331350108609,
+      "gain_share": 0.017587165062185686
+    },
+    {
+      "feature": "STD5",
+      "gain": 1.2183573733782396,
+      "gain_share": 0.01396349921774901
+    },
+    {
+      "feature": "ROC60",
+      "gain": 1.1609116668114439,
+      "gain_share": 0.01330511843700623
+    },
+    {
+      "feature": "distance_ma_200",
+      "gain": 1.1207118313759565,
+      "gain_share": 0.012844391245689103
+    },
+    {
+      "feature": "IMXD20",
+      "gain": 0.9864245199132711,
+      "gain_share": 0.011305334800072063
+    },
+    {
+      "feature": "ret_3d",
+      "gain": 0.9145481925224885,
+      "gain_share": 0.010481565794995191
+    },
+    {
+      "feature": "FINRL_MACD",
+      "gain": 0.8778607649728656,
+      "gain_share": 0.010061094037624093
+    },
+    {
+      "feature": "FINRL_RSI30",
+      "gain": 0.8105359531473368,
+      "gain_share": 0.009289489598891799
+    },
+    {
+      "feature": "STD20",
+      "gain": 0.7171657802537084,
+      "gain_share": 0.008219381300087656
+    },
+    {
+      "feature": "drawdown_20",
+      "gain": 0.6465337148401886,
+      "gain_share": 0.007409872684881458
+    }
+  ],
+  "cost_bps": 20.0,
+  "panel_path": "data\\us_overnight_corrected\\features\\historical_panel_61_plus_event_v1.parquet",
+  "exclude_label_abs_above": null,
+  "risk_gate_thresholds": {
+    "minimum_net_bps": 10.0,
+    "minimum_win_rate": 0.55,
+    "minimum_sharpe": 1.0,
+    "require_positive_5pct_trimmed_mean": true,
+    "require_positive_without_best_5_nights": true,
+    "require_strict_top1_through_top10_monotonicity": true
+  },
+  "risk_gate": "BLOCK_WEAK_OR_UNSTABLE_EDGE",
+  "real_orders_enabled": false
+}

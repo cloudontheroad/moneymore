@@ -1,5 +1,5 @@
-import Dashboard from "./Dashboard";
+import HomeOverview from "./HomeOverview";
 
 export default function Home() {
-  return <Dashboard />;
+  return <HomeOverview />;
 }

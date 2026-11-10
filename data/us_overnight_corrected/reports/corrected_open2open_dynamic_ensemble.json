@@ -1,0 +1,206 @@
+{
+  "method": "trailing-63-session selection, frozen 21 sessions",
+  "selection_objective": "top1 Sharpe + top10 Sharpe on past data only",
+  "candidate_count": 282,
+  "test_start": "2026-02-05",
+  "test_end": "2026-11-04",
+  "dynamic": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": -41.297334413502526,
+      "win_rate": 0.48148148148148145,
+      "sharpe": -1.2315862975940834,
+      "cumulative_return": -0.6500448192854364,
+      "max_drawdown": -0.7751998894725254
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": -2.7796383719755773,
+      "win_rate": 0.5396825396825397,
+      "sharpe": -0.13938807719211319,
+      "cumulative_return": -0.13653657264595598,
+      "max_drawdown": -0.4753885130031348
+    }
+  },
+  "initial_63_frozen": {
+    "weights": {
+      "champion": 0.3,
+      "half63": 0.2,
+      "top1w5": 0.1,
+      "daily_centered": 0.4
+    },
+    "calibration_score": 4.1239170387833335,
+    "top1": {
+      "sessions": 189,
+      "mean_bps": 6.059148437978687,
+      "win_rate": 0.4973544973544973,
+      "sharpe": 0.16636882825744173,
+      "cumulative_return": -0.1796571685270414,
+      "max_drawdown": -0.54443493555589
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": -7.246008231969163,
+      "win_rate": 0.49206349206349204,
+      "sharpe": -0.35947960731235534,
+      "cumulative_return": -0.2077824099536033,
+      "max_drawdown": -0.4562374893428346
+    }
+  },
+  "equal_weight": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": -4.876804055782826,
+      "win_rate": 0.48677248677248675,
+      "sharpe": -0.13187622488573267,
+      "cumulative_return": -0.339806126542897,
+      "max_drawdown": -0.5603311769976372
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": -2.331546556219441,
+      "win_rate": 0.5079365079365079,
+      "sharpe": -0.10785617743732849,
+      "cumulative_return": -0.14284539462628676,
+      "max_drawdown": -0.4574267370722186
+    }
+  },
+  "fixed_incumbent": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": 12.612515637106458,
+      "win_rate": 0.48148148148148145,
+      "sharpe": 0.32769222942951665,
+      "cumulative_return": -0.10289538273769383,
+      "max_drawdown": -0.5083325446834535
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": -10.58561218989165,
+      "win_rate": 0.5026455026455027,
+      "sharpe": -0.5160647595045155,
+      "cumulative_return": -0.2588810424531802,
+      "max_drawdown": -0.46164513229467763
+    }
+  },
+  "fixed_retrospective_winner": {
+    "top1": {
+      "sessions": 189,
+      "mean_bps": 32.59301637502356,
+      "win_rate": 0.5079365079365079,
+      "sharpe": 0.7640103677340976,
+      "cumulative_return": 0.21133400502181243,
+      "max_drawdown": -0.6501825215741319
+    },
+    "top10": {
+      "sessions": 189,
+      "mean_bps": 1.0434029865215264,
+      "win_rate": 0.5238095238095238,
+      "sharpe": 0.0426072588967309,
+      "cumulative_return": -0.11465870212902407,
+      "max_drawdown": -0.5571907380892432
+    }
+  },
+  "blocks": [
+    {
+      "block": 1,
+      "calibration_start": "2025-11-04",
+      "calibration_end": "2026-02-04",
+      "hold_start": "2026-02-05",
+      "hold_end": "2026-03-06",
+      "weights": "{\"champion\": 0.3, \"daily_centered\": 0.4, \"half63\": 0.2, \"top1w5\": 0.1}",
+      "calibration_score": 4.1239170387833335,
+      "top1_mean_bps": 0.9648712916540814,
+      "top10_mean_bps": -12.62145550167255
+    },
+    {
+      "block": 2,
+      "calibration_start": "2025-12-04",
+      "calibration_end": "2026-03-06",
+      "hold_start": "2026-03-09",
+      "hold_end": "2026-04-07",
+      "weights": "{\"half63\": 0.8, \"top1w5\": 0.2}",
+      "calibration_score": 5.845533998990353,
+      "top1_mean_bps": -86.91254063790491,
+      "top10_mean_bps": 79.633373821471
+    },
+    {
+      "block": 3,
+      "calibration_start": "2026-01-06",
+      "calibration_end": "2026-04-07",
+      "hold_start": "2026-04-08",
+      "hold_end": "2026-05-06",
+      "weights": "{\"half63\": 0.7, \"top1w5\": 0.3}",
+      "calibration_score": 5.201871312540096,
+      "top1_mean_bps": -29.455004652749064,
+      "top10_mean_bps": 90.09415753940523
+    },
+    {
+      "block": 4,
+      "calibration_start": "2026-02-05",
+      "calibration_end": "2026-05-06",
+      "hold_start": "2026-05-07",
+      "hold_end": "2026-06-05",
+      "weights": "{\"champion\": 0.1, \"top1w5\": 0.9}",
+      "calibration_score": 8.202788617768249,
+      "top1_mean_bps": 67.39792167982193,
+      "top10_mean_bps": 45.90650879243712
+    },
+    {
+      "block": 5,
+      "calibration_start": "2026-03-09",
+      "calibration_end": "2026-06-05",
+      "hold_start": "2026-06-08",
+      "hold_end": "2026-07-08",
+      "weights": "{\"champion\": 0.2, \"top1w5\": 0.8}",
+      "calibration_score": 8.357517659251739,
+      "top1_mean_bps": -198.5141471878142,
+      "top10_mean_bps": -23.244465933962342
+    },
+    {
+      "block": 6,
+      "calibration_start": "2026-04-08",
+      "calibration_end": "2026-07-08",
+      "hold_start": "2026-07-09",
+      "hold_end": "2026-08-06",
+      "weights": "{\"champion\": 0.4, \"daily_centered\": 0.3, \"half63\": 0.2, \"top1w5\": 0.1}",
+      "calibration_score": 3.826598833374153,
+      "top1_mean_bps": -128.19139422156633,
+      "top10_mean_bps": -65.99541015923256
+    },
+    {
+      "block": 7,
+      "calibration_start": "2026-05-07",
+      "calibration_end": "2026-08-06",
+      "hold_start": "2026-08-07",
+      "hold_end": "2026-09-04",
+      "weights": "{\"champion\": 0.4, \"daily_centered\": 0.4, \"half63\": 0.1, \"top1w5\": 0.1}",
+      "calibration_score": 0.661586156384438,
+      "top1_mean_bps": -10.493069325363694,
+      "top10_mean_bps": -16.89590771632181
+    },
+    {
+      "block": 8,
+      "calibration_start": "2026-06-08",
+      "calibration_end": "2026-09-04",
+      "hold_start": "2026-09-08",
+      "hold_end": "2026-10-06",
+      "weights": "{\"champion\": 0.4, \"daily_centered\": 0.6}",
+      "calibration_score": -1.5711910807632903,
+      "top1_mean_bps": 95.59437407749137,
+      "top10_mean_bps": 20.4332954326109
+    },
+    {
+      "block": 9,
+      "calibration_start": "2026-07-09",
+      "calibration_end": "2026-10-06",
+      "hold_start": "2026-10-07",
+      "hold_end": "2026-11-04",
+      "weights": "{\"champion\": 0.3, \"daily_centered\": 0.7}",
+      "calibration_score": 2.75800911873751,
+      "top1_mean_bps": -82.06702074509195,
+      "top10_mean_bps": -142.32684162251522
+    }
+  ],
+  "decision_rule": "adopt only if dynamic improves both declared goals out of sample"
+}

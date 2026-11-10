@@ -1,0 +1,11 @@
+{
+  "bundle": "right_market_options_calendar",
+  "top10_mean_net_bps": -5.513086138365887,
+  "top10_win_rate": 0.5634920634920635,
+  "top10_sharpe": -0.3414994407893151,
+  "top10_max_drawdown": -0.2646879320464216,
+  "top1_mean_net_bps": 39.25277601236869,
+  "top1_win_rate": 0.5158730158730159,
+  "top1_sharpe": 1.1322192720470832,
+  "top1_max_drawdown": -0.26043188249399085
+}

@@ -17,6 +17,7 @@ dependencies = [
   "tushare>=1.4,<2",
   "fastapi>=0.116,<1",
   "uvicorn[standard]>=0.35,<1",
+  "exchange-calendars>=4.5,<5",
 ]
 
 [project.optional-dependencies]
@@ -38,6 +39,7 @@ risk = [
   "stable-baselines3>=2.6,<3",
   "torch>=2.7",
 ]
+us = ["futu-api>=10.4,<11"]
 
 [project.scripts]
 moneymore = "moneymore.cli:main"

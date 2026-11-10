@@ -1,0 +1,81 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-09",
+  "exit_session": "2026-11-10",
+  "feature_session": "2026-11-06",
+  "cutoff": "2026-11-09T14:25:00+00:00",
+  "generated_at": "2026-11-09T06:03:02.842002+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.STRL",
+      "name": "Sterling Infrastructure",
+      "score": 0.0219377484,
+      "rank": 1
+    },
+    {
+      "symbol": "US.CIEN",
+      "name": "Ciena",
+      "score": 0.0191742617,
+      "rank": 2
+    },
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0184614408,
+      "rank": 3
+    },
+    {
+      "symbol": "US.MRVL",
+      "name": "迈威尔科技",
+      "score": 0.0167419211,
+      "rank": 4
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.0166080242,
+      "rank": 5
+    },
+    {
+      "symbol": "US.CRDO",
+      "name": "Credo Technology",
+      "score": 0.0165116177,
+      "rank": 6
+    },
+    {
+      "symbol": "US.TER",
+      "name": "泰瑞达",
+      "score": 0.0143172718,
+      "rank": 7
+    },
+    {
+      "symbol": "US.ALAB",
+      "name": "Astera Labs",
+      "score": 0.0138049928,
+      "rank": 8
+    },
+    {
+      "symbol": "US.VRT",
+      "name": "Vertiv Holdings",
+      "score": 0.0132270359,
+      "rank": 9
+    },
+    {
+      "symbol": "US.DELL",
+      "name": "戴尔科技",
+      "score": 0.0131688896,
+      "rank": 10
+    }
+  ],
+  "market_forecast_bps": 18.043830272613103,
+  "universe_snapshot": "top1000-2026-11-05T100515Z.parquet",
+  "universe_sha256": "911d267ba7df2139503128d60b5fb3520274841af621f7363a7385f6f275332a",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "history_last_label_end": "2026-11-05T05:00:00+00:00",
+  "status": "READY"
+}

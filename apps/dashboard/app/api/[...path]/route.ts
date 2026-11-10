@@ -23,6 +23,7 @@ async function proxy(request: NextRequest, context: RouteContext) {
     },
     body,
     cache: "no-store",
+    signal: AbortSignal.timeout(path[0] === "us-overnight-dashboard" ? 7_000 : 90_000),
   });
   return new Response(response.body, {
     status: response.status,

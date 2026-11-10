@@ -1,0 +1,33 @@
+{
+  "method": "top1_minus_top2_score_margin",
+  "threshold_policy": "median fixed on first 63 validation sessions",
+  "threshold": 0.0017310177703545697,
+  "calibration_range": [
+    "2026-05-07 04:00:00+00:00",
+    "2026-08-06 04:00:00+00:00"
+  ],
+  "test_range": [
+    "2026-08-07 04:00:00+00:00",
+    "2026-11-04 05:00:00+00:00"
+  ],
+  "ungated_test": {
+    "sessions": 63,
+    "traded_sessions": 63,
+    "coverage": 1.0,
+    "active_win_rate": 0.4603174603174603,
+    "mean_all_sessions_bps": -54.470952144743784,
+    "mean_active_bps": -54.470952144743784,
+    "sharpe_all_sessions": -4.387275130954218,
+    "max_drawdown": -0.3161928559762395
+  },
+  "gated_test": {
+    "sessions": 63,
+    "traded_sessions": 17,
+    "coverage": 0.2698412698412698,
+    "active_win_rate": 0.47058823529411764,
+    "mean_all_sessions_bps": -10.284762018618686,
+    "mean_active_bps": -38.11411806899865,
+    "sharpe_all_sessions": -1.670715381713896,
+    "max_drawdown": -0.10018574237451583
+  }
+}

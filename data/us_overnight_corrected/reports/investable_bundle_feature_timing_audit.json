@@ -1,0 +1,30 @@
+{
+  "audited_at_utc": "2026-11-08T15:25:22.049199+00:00",
+  "panel": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\features\\historical_panel_bundle_investable_120d_20m_5.parquet",
+  "rows": 600201,
+  "feature_families": {
+    "base": 61,
+    "right_side": 26,
+    "market": 23,
+    "options": 12,
+    "ratings": 4,
+    "calendar": 6
+  },
+  "checks": {
+    "feature_asof_not_before_signal": 0,
+    "base_max_abs_difference": 0.0,
+    "base_nan_mismatch": 0,
+    "right_side_max_abs_difference": 0.0,
+    "right_side_nan_mismatch": 0,
+    "market_max_abs_difference": 0.0,
+    "market_nan_mismatch": 0,
+    "option_available_rows": 591071,
+    "option_available_without_exact_feature_asof_source": 0,
+    "rating_max_abs_difference": 0.0,
+    "rating_nan_mismatch": 0
+  },
+  "calendar_policy": "deterministic from signal session date; known before open",
+  "option_policy": "exact option session equal to feature_asof local date",
+  "rating_policy": "date-only rating becomes available on the next US session",
+  "decision": "PASS"
+}

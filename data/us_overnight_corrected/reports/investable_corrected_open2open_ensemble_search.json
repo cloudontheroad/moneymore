@@ -1,0 +1,45 @@
+{
+  "tested": 282,
+  "primary_improvements": 29,
+  "baseline": {
+    "top1_mean_bps": 38.28643651133816,
+    "top1_sharpe": 0.9229765273350732,
+    "top1_max_drawdown": -0.5083325446834538,
+    "top1_cumulative_return": 0.525016519313471,
+    "top10_mean_bps": -3.1766237673885844,
+    "top10_sharpe": -0.14926421269668885,
+    "top10_max_drawdown": -0.46164513229467774,
+    "top10_cumulative_return": -0.20037101199313967
+  },
+  "winner": {
+    "weights": "{\"champion\": 0.1, \"half63\": 0.1, \"top1w5\": 0.7, \"daily_centered\": 0.1}",
+    "top1_mean_bps": 58.64085237934765,
+    "top1_sharpe": 1.3137095818025426,
+    "top1_max_drawdown": -0.6501825215741321,
+    "top1_cumulative_return": 1.352583046526496,
+    "top10_mean_bps": 4.280446959001416,
+    "top10_sharpe": 0.17005368107345553,
+    "top10_max_drawdown": -0.5571907380892435,
+    "top10_cumulative_return": -0.08887108306386604,
+    "primary_improvement": true,
+    "balanced_delta": 2.2699346555969937
+  },
+  "decision": "accept",
+  "reference_metrics_are_not_adoption_gates": true,
+  "previous_champion_fixed_weights": {
+    "champion": 0.3,
+    "half63": 0.2,
+    "top1w5": 0.2,
+    "daily_centered": 0.3
+  },
+  "previous_champion_on_investable_panel": {
+    "top1_mean_bps": 38.28643651133816,
+    "top1_sharpe": 0.9229765273350732,
+    "top1_max_drawdown": -0.5083325446834538,
+    "top1_cumulative_return": 0.525016519313471,
+    "top10_mean_bps": -3.1766237673885844,
+    "top10_sharpe": -0.14926421269668885,
+    "top10_max_drawdown": -0.46164513229467774,
+    "top10_cumulative_return": -0.20037101199313967
+  }
+}

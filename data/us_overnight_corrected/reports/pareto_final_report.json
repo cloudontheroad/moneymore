@@ -1,0 +1,65 @@
+{
+  "generated_at_utc": "2026-11-07T16:21:24.155376+00:00",
+  "panel_contract": "corrected 2026-11-06 panel only; old 2026-11-05 champion invalidated",
+  "acceptance": "strict Pareto: improve at least one core metric and worsen none, including Top1",
+  "trained_rounds": 9,
+  "accepted_rounds": 0,
+  "final_baseline": {
+    "order": 0,
+    "module": "reproducible_corrected_baseline",
+    "model_prefix": "pareto_00_baseline_replay",
+    "decision": "BASELINE",
+    "top10_mean_net_bps": -20.17776085870306,
+    "top10_win_rate": 0.5,
+    "top10_sharpe": -1.2299594013318929,
+    "top10_max_drawdown": -0.33672054274820795,
+    "top1_mean_net_bps": 17.633507692051857,
+    "top1_win_rate": 0.47619047619047616,
+    "top1_sharpe": 0.4915806128789631,
+    "top1_max_drawdown": -0.3125834799371485,
+    "monotonic_violations": 4
+  },
+  "confidence_gate": {
+    "method": "top1_minus_top2_score_margin",
+    "threshold_policy": "median fixed on first 63 validation sessions",
+    "threshold": 0.0017310177703545697,
+    "calibration_range": [
+      "2026-05-07 04:00:00+00:00",
+      "2026-08-06 04:00:00+00:00"
+    ],
+    "test_range": [
+      "2026-08-07 04:00:00+00:00",
+      "2026-11-04 05:00:00+00:00"
+    ],
+    "ungated_test": {
+      "sessions": 63,
+      "traded_sessions": 63,
+      "coverage": 1.0,
+      "active_win_rate": 0.4603174603174603,
+      "mean_all_sessions_bps": -54.470952144743784,
+      "mean_active_bps": -54.470952144743784,
+      "sharpe_all_sessions": -4.387275130954218,
+      "max_drawdown": -0.3161928559762395
+    },
+    "gated_test": {
+      "sessions": 63,
+      "traded_sessions": 17,
+      "coverage": 0.2698412698412698,
+      "active_win_rate": 0.47058823529411764,
+      "mean_all_sessions_bps": -10.284762018618686,
+      "mean_active_bps": -38.11411806899865,
+      "sharpe_all_sessions": -1.670715381713896,
+      "max_drawdown": -0.10018574237451583
+    }
+  },
+  "not_backtest_eligible": {
+    "analyst_estimate_revisions": "no historical daily consensus revision snapshots",
+    "social_sentiment": "immutable snapshots start now; no complete timestamped history",
+    "industry_event_diffusion": "no point-in-time historical company relationship graph"
+  },
+  "data_built": {
+    "option_symbols": 975,
+    "option_panel_symbols": 974,
+    "social_snapshot_contract": "configs/us_social_expectation_websearch.yaml"
+  }
+}

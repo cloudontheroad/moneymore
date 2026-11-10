@@ -13,7 +13,8 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-from .tqqq_cycle import cycle_decisions, latest_cycle_decision
+from .tqqq_cycle import CycleParameters, cycle_decisions, cycle_target, latest_cycle_decision
+from .tqqq_execution import fill_at_open, share_delta
 
 ACCOUNT_ID = "tqqq_sqqq_v5a_paper"
 STRATEGY_ID = "cycle_rates_fear_v2"
@@ -110,7 +111,7 @@ class LeveragedEtfPaper:
         self.initial_cash = initial_cash
         self.database.parent.mkdir(parents=True, exist_ok=True)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self._display_backtest_cache: tuple[tuple[float, ...], list[dict[str, object]]] | None = None
+        self._display_backtest_cache: tuple[tuple, list[dict[str, object]], list[dict[str, object]]] | None = None
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
@@ -360,26 +361,23 @@ class LeveragedEtfPaper:
             ).fetchall()
             for order in pending:
                 symbol, side, requested = str(order["symbol"]), str(order["side"]), int(order["quantity"])
-                raw_price = float(opens[symbol])
-                price = raw_price * (1.0005 if side == "BUY" else 0.9995)
                 account = connection.execute(
                     "SELECT cash FROM account WHERE account_id = ?", (self.account_id,)
                 ).fetchone()
                 position = connection.execute("SELECT quantity, avg_cost FROM positions WHERE symbol = ?", (symbol,)).fetchone()
                 held = int(position["quantity"]) if position else 0
-                quantity = min(requested, int(float(account["cash"]) // price)) if side == "BUY" else min(requested, held)
+                fill = fill_at_open(side, requested, opens[symbol], float(account["cash"]), held)
+                quantity, price, fee = fill.quantity, fill.price, fill.fee
                 if quantity <= 0:
                     connection.execute("UPDATE orders SET status='CANCELLED', execution_date=? WHERE id=?", (trade_date, order["id"]))
                     continue
-                fee = quantity * price * 0.0001
-                cash_delta = -(quantity * price + fee) if side == "BUY" else quantity * price - fee
                 new_quantity = held + quantity if side == "BUY" else held - quantity
                 old_cost = float(position["avg_cost"]) if position else 0.0
                 avg_cost = ((held * old_cost + quantity * price) / new_quantity) if side == "BUY" and new_quantity else (old_cost if new_quantity else 0.0)
                 now = datetime.now(UTC).isoformat()
                 connection.execute(
                     "UPDATE account SET cash=cash+?, updated_at=? WHERE account_id=?",
-                    (cash_delta, now, self.account_id),
+                    (fill.cash_delta, now, self.account_id),
                 )
                 connection.execute(
                     "INSERT INTO positions VALUES (?, ?, ?, ?) ON CONFLICT(symbol) DO UPDATE SET quantity=excluded.quantity, avg_cost=excluded.avg_cost, updated_at=excluded.updated_at",
@@ -428,9 +426,8 @@ class LeveragedEtfPaper:
                      allocation.cash, allocation.score, json.dumps(indicators), now),
                 )
             for symbol in TRADE_SYMBOLS:
-                target = int(equity * weights[symbol] // closes[symbol])
                 current = positions.get(symbol, 0)
-                difference = target - current
+                difference = share_delta(equity, weights[symbol], closes[symbol], current)
                 if difference == 0:
                     continue
                 side = "BUY" if difference > 0 else "SELL"
@@ -467,6 +464,10 @@ class LeveragedEtfPaper:
             orders = [dict(row) for row in connection.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 100")]
             fills = [dict(row) for row in connection.execute("SELECT * FROM fills ORDER BY id DESC LIMIT 100")]
             history = [dict(row) for row in connection.execute("SELECT * FROM equity_daily ORDER BY trade_date")]
+            versions = connection.execute(
+                """SELECT signal_date, json_extract(indicators_json, '$.model_version')
+                   FROM signals ORDER BY signal_date"""
+            ).fetchall()
         for position in positions:
             price = float(mark_prices.get(str(position["symbol"]), position["avg_cost"]))
             position["mark_price"] = price
@@ -479,7 +480,17 @@ class LeveragedEtfPaper:
             latest_signal["indicators"] = json.loads(str(latest_signal.pop("indicators_json")))
         peak = max([self.initial_cash, *(float(row["equity"]) for row in history)])
         benchmark_history = self._buy_hold_benchmark(history)
-        backtest_history = self._year_backtest_history()
+        backtest_history, comparison_benchmark = self._year_backtest_history()
+        version_segments = []
+        equity_by_date = {row["trade_date"]: row["equity"] for row in history}
+        for day, version in versions:
+            if not version_segments or version_segments[-1]["version"] != version:
+                version_segments.append({"version": version, "start": day, "end": day})
+            version_segments[-1]["end"] = day
+        for segment in version_segments:
+            start = equity_by_date.get(segment["start"])
+            end = equity_by_date.get(segment["end"])
+            segment["return"] = end / start - 1 if start and end is not None else None
         return {
             "account_id": self.account_id, "strategy_id": self.strategy_id,
             "initial_cash": self.initial_cash, "currency": "USD", "status": "PAPER_ONLY",
@@ -488,7 +499,9 @@ class LeveragedEtfPaper:
             "positions": positions, "latest_signal": latest_signal,
             "orders": orders, "fills": fills, "history": history,
             "backtest_history": backtest_history,
+            "version_segments": version_segments,
             "benchmark_history": benchmark_history,
+            "comparison_benchmark": comparison_benchmark,
             "data_source": "Yahoo Finance daily chart; cached independently",
             "execution_policy": "close signal / next session open / 5 bps slippage / 1 bp fee",
         }
@@ -533,87 +546,119 @@ class LeveragedEtfPaper:
             })
         return result
 
-    def _year_backtest_history(self) -> list[dict[str, object]]:
+    def _year_backtest_history(self) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
         """Display-only replay from Jan 1; it never writes to the paper ledger."""
         paths = [self.cache_dir / f"{symbol.replace('^', '')}.csv" for symbol in DATA_SYMBOLS]
         if any(not path.exists() for path in paths):
-            return []
-        fingerprint = tuple(path.stat().st_mtime for path in paths)
+            return [], []
+        now = datetime.now(NEW_YORK)
+        fingerprint = (now.date(), (now.hour, now.minute) >= (16, 15),
+                       *(path.stat().st_mtime_ns for path in paths))
         if self._display_backtest_cache and self._display_backtest_cache[0] == fingerprint:
-            return self._display_backtest_cache[1]
+            return self._display_backtest_cache[1], self._display_backtest_cache[2]
         data = self._align({
             symbol: pd.read_csv(path)
             for symbol, path in zip(DATA_SYMBOLS, paths, strict=True)
         })
-        latest_date = str(data["QQQ"].iloc[-1]["trade_date"])
+        last_day = now.date().isoformat()
+        dates = data["QQQ"]["trade_date"].astype(str)
+        completed = dates <= last_day if (now.hour, now.minute) >= (16, 15) else dates < last_day
+        if not completed.any():
+            return [], []
+        latest_date = dates[completed].iloc[-1]
         year_start = f"{latest_date[:4]}-01-01"
         indices = [
             index for index, value in enumerate(data["QQQ"]["trade_date"].astype(str))
             if year_start < value <= latest_date
         ]
-        cash = self.initial_cash
+        targets = self._backtest_targets(data, start_index=indices[0] if indices else len(dates))
+        rows = self.replay(data, targets, indices, year_start, initial_cash=self.initial_cash)
+        benchmark = self.replay(data, targets, indices, year_start,
+                                initial_cash=self.initial_cash, buy_hold=True)
+        self._display_backtest_cache = (fingerprint, rows, benchmark)
+        return rows, benchmark
+
+    @staticmethod
+    def replay(
+        data: dict[str, pd.DataFrame], targets: pd.DataFrame, indices: list[int],
+        baseline_date: str, *, initial_cash: float = INITIAL_CASH,
+        slippage: float = 0.0005, cash_yield: float = 0.0, buy_hold: bool = False,
+        drift_band: float = 0.0,
+    ) -> list[dict[str, object]]:
+        """Recreate the close-size / next-open execution policy in memory."""
+        cash = initial_cash
         quantities = {symbol: 0 for symbol in TRADE_SYMBOLS}
+        opening_prices = {symbol: data[symbol]["open"].to_numpy(dtype=float) for symbol in TRADE_SYMBOLS}
+        closing_prices = {symbol: data[symbol]["close"].to_numpy(dtype=float) for symbol in TRADE_SYMBOLS}
+        dates = data["QQQ"]["trade_date"].astype(str).tolist()
+        target_weights = targets["tqqq"].to_numpy(dtype=float)
+        target_sqqq_weights = targets.get("sqqq", pd.Series(0.0, index=targets.index)).to_numpy(dtype=float)
+        regimes = targets["regime"].tolist()
         pending: list[tuple[str, str, int]] = []
         rows: list[dict[str, object]] = []
-        targets = self._backtest_targets(data)
         rows.append({
-            "trade_date": year_start,
-            "equity": self.initial_cash,
+            "trade_date": baseline_date,
+            "equity": initial_cash,
             "normalized_nav": 1.0,
             "target_tqqq": 0.0,
             "regime": "BASELINE",
             "is_baseline": True,
         })
-        for index in indices:
+        previous_equity = initial_cash
+        previous_targets: dict[str, float] = {}
+        for offset, index in enumerate(indices):
+            cash *= (1 + cash_yield) ** (1 / 252)
+            if buy_hold and offset == 0:
+                pending = [("TQQQ", "BUY", int(cash // opening_prices["TQQQ"][index]))]
+            fills = 0
+            notional = 0.0
+            cost = 0.0
+            opens = {symbol: prices[index] for symbol, prices in opening_prices.items()}
+            opening_equity = cash + sum(quantities[symbol] * opens[symbol] for symbol in TRADE_SYMBOLS)
             for symbol, side, requested in sorted(pending, key=lambda item: item[1] != "SELL"):
-                raw_price = float(data[symbol].iloc[index]["open"])
-                price = raw_price * (1.0005 if side == "BUY" else 0.9995)
                 held = quantities[symbol]
-                quantity = min(requested, int(cash // (price * 1.0001))) if side == "BUY" else min(requested, held)
-                if quantity <= 0:
+                fill = fill_at_open(side, requested, opens[symbol], cash, held, slippage=slippage)
+                if not fill.quantity:
                     continue
-                fee = quantity * price * 0.0001
-                if side == "BUY":
-                    cash -= quantity * price + fee
-                    quantities[symbol] += quantity
-                else:
-                    cash += quantity * price - fee
-                    quantities[symbol] -= quantity
-            closes = {symbol: float(data[symbol].iloc[index]["close"]) for symbol in TRADE_SYMBOLS}
+                cash += fill.cash_delta
+                quantities[symbol] += fill.quantity if side == "BUY" else -fill.quantity
+                fills += 1
+                notional += fill.price * fill.quantity
+                cost += fill.fee + abs(fill.price - opens[symbol]) * fill.quantity
+            closes = {symbol: prices[index] for symbol, prices in closing_prices.items()}
             equity = cash + sum(quantities[symbol] * closes[symbol] for symbol in TRADE_SYMBOLS)
-            target_row = targets.iloc[index]
-            if pd.isna(target_row["tqqq"]):
-                # Keep the year-to-date curve continuous when a short fixture or
-                # newly seeded cache does not yet contain enough macro warm-up.
-                rows.append({
-                    "trade_date": str(data["QQQ"].iloc[index]["trade_date"]),
-                    "equity": equity,
-                    "normalized_nav": equity / self.initial_cash,
-                    "target_tqqq": 0.0,
-                    "regime": "WARMUP",
-                })
-                pending = []
-                continue
-            target_tqqq = float(target_row["tqqq"])
-            target_sqqq = float(target_row.get("sqqq", 0.0))
-            regime = str(target_row["regime"])
+            target_tqqq = 1.0 if buy_hold else target_weights[index]
+            target_sqqq = 0.0 if buy_hold else target_sqqq_weights[index]
+            regime = "BUY_AND_HOLD" if buy_hold else regimes[index]
             rows.append({
-                "trade_date": str(data["QQQ"].iloc[index]["trade_date"]),
+                "trade_date": dates[index],
                 "equity": equity,
-                "normalized_nav": equity / self.initial_cash,
-                "target_tqqq": target_tqqq,
-                "regime": regime,
+                "normalized_nav": equity / initial_cash,
+                "target_tqqq": target_tqqq if math.isfinite(target_tqqq) else 0.0,
+                "regime": regime if math.isfinite(target_tqqq) else "WARMUP",
+                "actual_tqqq": quantities["TQQQ"] * closes["TQQQ"] / equity,
+                "fill_count": fills,
+                "turnover": notional / opening_equity,
+                "cost": cost,
+                "overnight_return": opening_equity / previous_equity - 1,
             })
+            previous_equity = equity
             pending = []
+            if buy_hold or not math.isfinite(target_tqqq):
+                continue
             for symbol, weight in (("TQQQ", target_tqqq), ("SQQQ", target_sqqq)):
-                target = int(equity * weight // closes[symbol])
-                difference = target - quantities[symbol]
+                actual_weight = quantities[symbol] * closes[symbol] / equity
+                target_changed = previous_targets.get(symbol) != weight
+                previous_targets[symbol] = weight
+                if not target_changed and abs(weight - actual_weight) < drift_band:
+                    continue
+                difference = share_delta(equity, weight, closes[symbol], quantities[symbol])
                 if difference:
                     pending.append((symbol, "BUY" if difference > 0 else "SELL", abs(difference)))
-        self._display_backtest_cache = (fingerprint, rows)
         return rows
 
-    def _backtest_targets(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    @staticmethod
+    def _backtest_targets(data: dict[str, pd.DataFrame], start_index: int = 0) -> pd.DataFrame:
         dates = pd.to_datetime(data["QQQ"]["trade_date"])
 
         def series(symbol: str) -> pd.Series:
@@ -622,8 +667,20 @@ class LeveragedEtfPaper:
         decisions = cycle_decisions(
             series("QQQ"), series("^VIX"), series("^TNX"), series("^VIX3M")
         )
+        months = dates.dt.to_period("M")
+        month_opens = months.ne(months.shift())
+        band = CycleParameters().rebalance_band
+        targets = [math.nan] * len(decisions)
+        prior = None
+        for index, row in enumerate(decisions.itertuples()):
+            if index < start_index or not math.isfinite(row.raw_target):
+                continue
+            prior = round(cycle_target(
+                row.raw_target, prior, row.crash_guard_active, bool(month_opens.iloc[index]), band
+            ), 6)
+            targets[index] = prior
         return pd.DataFrame({
-            "tqqq": decisions["target_tqqq"].to_numpy(),
+            "tqqq": targets,
             "sqqq": 0.0,
             "regime": decisions["regime"].to_numpy(),
         })

@@ -1,0 +1,35 @@
+{
+  "captured_at_utc": "2026-11-09T05:58:22.823960+00:00",
+  "source": "Yahoo chart split-adjusted OHLCV plus cash dividends",
+  "source_universe": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_paper_only\\universe\\top1000-2026-11-05T100515Z.parquet",
+  "start": "2023-09-11",
+  "end": "2026-11-09",
+  "requested": 1000,
+  "downloaded": 995,
+  "skipped": 0,
+  "failures": [
+    {
+      "symbol": "US.ENBA",
+      "error": "RuntimeError: US.ENBA: HTTP Error 404: Not Found"
+    },
+    {
+      "symbol": "US.NIMC",
+      "error": "RuntimeError: US.NIMC: HTTP Error 404: Not Found"
+    },
+    {
+      "symbol": "US.SABRP",
+      "error": "RuntimeError: US.SABRP: HTTP Error 404: Not Found"
+    },
+    {
+      "symbol": "US.DTP",
+      "error": "RuntimeError: US.DTP: HTTP Error 404: Not Found"
+    },
+    {
+      "symbol": "US.RZA",
+      "error": "RuntimeError: US.RZA: HTTP Error 404: Not Found"
+    }
+  ],
+  "feature_timing": "all model predictors lagged one completed session",
+  "known_limitation": "current-universe membership; historical PIT universe pending",
+  "real_orders_enabled": false
+}

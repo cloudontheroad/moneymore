@@ -1,0 +1,9 @@
+{
+  "rows": 745466,
+  "symbols": 967,
+  "schema_features": 360,
+  "effective_nonconstant_features": 300,
+  "vwap_features_filled_zero": 60,
+  "timing": "lag0 is completed bar t-1 for a decision before open(t)",
+  "source": "Microsoft Qlib Alpha360DL.get_feature_config"
+}

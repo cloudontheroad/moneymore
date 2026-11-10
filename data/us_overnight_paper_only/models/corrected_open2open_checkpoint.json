@@ -1,0 +1,34 @@
+{
+  "status": "corrected_research_checkpoint_not_deployment_ready",
+  "as_of": "2026-11-08",
+  "validation_sessions": 252,
+  "panel_integrity": "PASS",
+  "weights": {
+    "corrected_champion": 0.1,
+    "corrected_half63": 0.1,
+    "corrected_top1w5": 0.7,
+    "corrected_daily_centered": 0.1
+  },
+  "top1": {
+    "mean_bps": 58.64085237934765,
+    "median_bps": 54.66808461487617,
+    "win_rate": 0.5317460317460317,
+    "sharpe": 1.3137095818025426,
+    "annualized_volatility": 1.1248677032041883,
+    "cumulative_return": 1.352583046526496,
+    "max_drawdown": -0.6501825215741321,
+    "mean_without_best_5_bps": 19.906968365797226
+  },
+  "top10": {
+    "mean_bps": 4.280446959001416,
+    "median_bps": 40.53884352461401,
+    "win_rate": 0.5396825396825397,
+    "sharpe": 0.17005368107345553,
+    "annualized_volatility": 0.6343130162542138,
+    "cumulative_return": -0.08887108306386604,
+    "max_drawdown": -0.5571907380892435,
+    "mean_without_best_5_bps": -16.898772797818953
+  },
+  "decision": "retain_for_research; block deployment because top10 compounded return is negative and drawdowns are excessive",
+  "real_orders_enabled": false
+}

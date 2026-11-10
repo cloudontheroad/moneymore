@@ -1,0 +1,21 @@
+{
+  "members": {
+    "champion": 0.3,
+    "mcw1": 0.2,
+    "half63": 0.3,
+    "top1w5": 0.2
+  },
+  "metrics": {
+    "top1_mean_bps": 56.45588517531986,
+    "top1_sharpe": 1.5493681649832058,
+    "top1_win_rate": 0.5238095238095238,
+    "top1_max_drawdown": -0.33006570917816647,
+    "top10_mean_bps": 0.2898778895914035,
+    "top10_sharpe": 0.017940236379049113,
+    "top10_win_rate": 0.5,
+    "top10_max_drawdown": -0.2344779926000362
+  },
+  "prediction_file": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_corrected\\reports\\parameter_rank_ensemble_winner_predictions.parquet",
+  "deployment": "BLOCKED",
+  "real_orders_enabled": false
+}

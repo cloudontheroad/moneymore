@@ -155,6 +155,17 @@ def cycle_decisions(
     )
 
 
+def cycle_target(
+    raw_target: float, previous_target: float | None, crash_guard: bool,
+    month_open: bool, band: float,
+) -> float:
+    if previous_target is None or crash_guard or (
+        month_open and abs(raw_target - previous_target) >= band
+    ):
+        return raw_target
+    return previous_target
+
+
 def latest_cycle_decision(
     qqq_close: pd.Series,
     vix_close: pd.Series,
@@ -172,17 +183,10 @@ def latest_cycle_decision(
     latest_is_month_open = len(qqq_close) == 1 or qqq_close.index[-1].to_period(
         "M"
     ) != qqq_close.index[-2].to_period("M")
-    if (
-        previous_target is None
-        or bool(row["crash_guard_active"])
-        or (
-            latest_is_month_open
-            and abs(raw_target - previous_target) >= params.rebalance_band
-        )
-    ):
-        target = raw_target
-    else:
-        target = previous_target
+    target = cycle_target(
+        raw_target, previous_target, bool(row["crash_guard_active"]),
+        latest_is_month_open, params.rebalance_band,
+    )
     return CycleDecision(
         target_tqqq=float(np.clip(target, 0.0, 1.0)),
         raw_target=raw_target,

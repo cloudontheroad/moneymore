@@ -1,0 +1,24 @@
+{
+  "audited_at_utc": "2026-11-08T15:08:07.183691+00:00",
+  "scope": "investable abs(open_t_to_open_t_plus_1) >= 30%",
+  "rows": 71,
+  "audit_classes": {
+    "CROSS_SOURCE_CONFIRMED": 70,
+    "THIRD_PARTY_CONFIRMED": 1
+  },
+  "maximum_cross_source_gap_difference": 0.00014514003006826925,
+  "median_cross_source_gap_difference": 2.6017074050699307e-08,
+  "maximum_signal_volume_relative_difference": 0.796413670433917,
+  "selected_top10_extreme_rows": 1,
+  "selected_top1_extreme_rows": 0,
+  "selected_top10_cross_source_confirmed": 1,
+  "selected_top1_cross_source_confirmed": 0,
+  "third_party_confirmed": 1,
+  "selected_top10_label_sum": 0.32638288230124446,
+  "selected_top1_label_sum": 0.0,
+  "decision_rule": {
+    "confirmed": "absolute Yahoo-vs-Futu return difference <= 50 bps",
+    "source_mismatch": "quarantine pending corporate-action repair",
+    "confirmed_large_move": "retain; magnitude alone is not a data error"
+  }
+}
