@@ -1,0 +1,36 @@
+{
+  "trade_session": "2025-11-26",
+  "exit_session": "2025-11-28",
+  "status": "READY",
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.ABC",
+      "rank": 1
+    }
+  ],
+  "settled_at": "2026-11-11T07:49:14.837756+00:00",
+  "realized": [
+    {
+      "symbol": "US.ABC",
+      "rank": 1,
+      "entry_open": 100.0,
+      "allocation_usd": 10000,
+      "shares": 100.0,
+      "exit_open": 103.0,
+      "dividend_per_share": 1.0,
+      "net_return": 0.039519,
+      "pnl_usd": 395.19,
+      "cost_usd": 4.81,
+      "buy_fee_usd": 2.29,
+      "sell_fee_usd": 2.52
+    }
+  ],
+  "cost_usd": 4.81,
+  "capital_usd": 100000,
+  "pnl_usd": 395.19,
+  "daily_return": 0.0039519,
+  "top1_net_return": 0.039519,
+  "top10_net_return": 0.039519,
+  "fee_model": "futu_hk_us_fixed"
+}

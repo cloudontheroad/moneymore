@@ -1,0 +1,20 @@
+{
+  "study": "Frozen HIST ten-seed post-2020 extension",
+  "source_run": "state/hist-reproduction-20261113",
+  "output": "state/hist-extension-20261114",
+  "raw_start": "20200901",
+  "extension_start": "20210101",
+  "requested_end": "20261113",
+  "continuous_start": "20170101",
+  "index_code": "399300.SZ",
+  "universe_policy": "latest dated historical CSI300 weight snapshot available on or before signal date; never current members backfilled",
+  "models": "all ten existing selected checkpoints, unchanged; no retraining or new test-based selection",
+  "normalization": "fit only original 2007-2014 data; parity against saved features required",
+  "concepts": "unchanged author static matrix; unknown symbols use original zero row 733 and coverage is reported",
+  "inference_membership": "no future-label filtering after 2020; observed historical members with current valid bars",
+  "vwap": "retain original model zero VWAP channel, even though official amount/volume is collected",
+  "replay": "all three frozen execution lanes, cash-safe-v2, daily valuation and independent ledger audit",
+  "fetch": {"interval_seconds": 0.8, "max_attempts": 2, "max_requests": 1500},
+  "production_enabled": false,
+  "real_orders_enabled": false
+}

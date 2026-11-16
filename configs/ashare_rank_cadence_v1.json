@@ -1,0 +1,29 @@
+{
+  "version": "n3r_cadence_v1",
+  "models": ["doubleensemble_full"],
+  "eligibility_models": ["ridge_three_scores", "ridge_full", "doubleensemble_alpha158", "doubleensemble_full"],
+  "allocators": ["rank_cap", "rank_cap_buffer", "rank_cap_fast", "rank_cap_fast_buffer"],
+  "case_specs": {
+    "rank_cap": {"rebalance_sessions": 20, "max_optional_exits": null},
+    "rank_cap_buffer": {"rebalance_sessions": 20, "max_optional_exits": 5},
+    "rank_cap_fast": {"rebalance_sessions": 10, "max_optional_exits": null},
+    "rank_cap_fast_buffer": {"rebalance_sessions": 10, "max_optional_exits": 5}
+  },
+  "window": ["20260101", "20260930"],
+  "initial_cash": 10000000,
+  "slippage_bps": [10, 20],
+  "rebalance_sessions": 20,
+  "risk_sessions": 120,
+  "risk_horizon": 20,
+  "stock_exposure": 0.995,
+  "max_stock_weight": 0.05,
+  "industry_active_upper_planning": 0.08,
+  "industry_active_upper_execution": 0.10,
+  "topk": 50,
+  "n_drop": 5,
+  "score_units": "raw_ordinal_preference_not_expected_return",
+  "weight_policy": "unchanged_equal_slots",
+  "experiment": "fixed_2x2_cadence20or10_by_unbuffered_or_rawscore_drop5",
+  "real_orders_enabled": false,
+  "production_enabled": false
+}

@@ -18,6 +18,7 @@ from replay_us_open2open import ROOT, SPEC, daily_context, fit_market, fit_ranke
 from train_us_overnight_ranker import _cross_sectionalize, _winsorize_by_date
 from sync_us_yahoo_adjusted_history import download
 from moneymore.us_overnight.config import USOvernightConfig
+from moneymore.us_overnight.fees import FUTU_HK_US_FIXED, futu_book_totals, settle_futu_position
 from moneymore.us_overnight.features import FEATURE_COLUMNS, daily_stock_features
 
 BOOK = ROOT / "configs/us_open2open_paper_book.json"
@@ -26,11 +27,19 @@ def book_config():
     return json.loads(BOOK.read_text(encoding="utf-8"))
 
 
-def write_record(path, record):
+def write_record(path, record, *, once=False):
     path.parent.mkdir(parents=True, exist_ok=True)
     with NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as handle:
         json.dump(record, handle, ensure_ascii=False, allow_nan=False, indent=2)
-    os.replace(handle.name, path)
+    if once:
+        try:
+            os.link(handle.name, path)
+        except FileExistsError:
+            pass
+        finally:
+            os.unlink(handle.name)
+    else:
+        os.replace(handle.name, path)
 
 
 def bars_at(path, through):
@@ -67,7 +76,8 @@ def stock_inputs(output, universe, previous, config):
             warnings.simplefilter("ignore", pd.errors.PerformanceWarning)
             features = daily_stock_features(bars)
         row = features.iloc[-1][FEATURE_COLUMNS].to_dict()
-        rows.append(row | {"symbol": item.code, "name": item.name, "timestamp": previous})
+        rows.append(row | {"symbol": item.code, "name": item.name, "timestamp": previous,
+                           "prior_close": float(bars.close.iloc[-1])})
         if (len(bars) >= config.minimum_listing_days
                 and bars.close.iloc[-1] >= config.minimum_price and bars.volume.iloc[-1] > 0
                 and (bars.close * bars.volume).tail(20).median() >= config.minimum_median_dollar_volume_20d):
@@ -127,6 +137,7 @@ def score(output, config, cal):
         "strategy_id": spec["id"], "spec_sha256": hashlib.sha256(SPEC.read_bytes()).hexdigest(),
         "trade_session": str(session.date()), "exit_session": str(cal.next_session(session).date()),
         "feature_session": str(previous.date()), "cutoff": cutoff.isoformat(),
+        "prior_close_at": cal.session_close(previous).isoformat(),
         "generated_at": now.isoformat(), "real_orders_enabled": False,
         "cost_bps": spec["cost_bps"], "candidates": [],
     }
@@ -183,10 +194,11 @@ def score(output, config, cal):
                 daily, stock_anchor, spec["stock_train_sessions"]
             ).label_end.max().isoformat()
             stocks["score"] = model.predict(stocks[spec["stock_features"]])
-            records = stocks.nlargest(config.top_n, "score")[["symbol", "name", "score"]]
-            record["candidates"] = json.loads(records.to_json(orient="records"))
-            for rank, candidate in enumerate(record["candidates"], 1):
+            records = stocks.nlargest(50, "score")[["symbol", "name", "score", "prior_close"]]
+            record["review_pool"] = json.loads(records.to_json(orient="records"))
+            for rank, candidate in enumerate(record["review_pool"], 1):
                 candidate["rank"] = rank
+            record["candidates"] = record["review_pool"][:config.top_n]
             record["status"] = "READY"
         record["generated_at"] = pd.Timestamp.now(tz="UTC").isoformat()
         if pd.Timestamp(record["generated_at"]) >= cutoff:
@@ -197,8 +209,7 @@ def score(output, config, cal):
     return record
 
 
-def settle(output, cal, *, refresh=False, official=False):
-    directory = output / "open2open_v1"
+def settle_book(output, directory, cal, *, refresh=False, official=False, price_cache):
     count = 0
     book = book_config()
     now = pd.Timestamp.now(tz="UTC")
@@ -222,8 +233,12 @@ def settle(output, cal, *, refresh=False, official=False):
         for candidate in plan["candidates"]:
             symbol = candidate["symbol"]
             if refresh:
+                through = exit_ if exiting else entry
+                key = (symbol, entry, through)
                 try:
-                    bars = download(symbol, str(entry.date()), str((exit_ if exiting else entry).date()), timeout=8)
+                    if key not in price_cache:
+                        price_cache[key] = download(symbol, str(entry.date()), str(through.date()), timeout=8)
+                    bars = price_cache[key].copy()
                 except (OSError, KeyError, TypeError, IndexError, ValueError):
                     break
                 bars["session"] = pd.to_datetime(bars.timestamp, utc=True).dt.tz_convert(
@@ -248,36 +263,65 @@ def settle(output, cal, *, refresh=False, official=False):
             dividend = bars.loc[exit_, "cash_dividend"] if "cash_dividend" in bars else 0.0
             if not np.isfinite([start, end, dividend]).all() or min(start, end) <= 0:
                 break
-            net = (end + dividend) / start - 1 - plan["cost_bps"] / 1e4
-            realized.append(position | {
-                "exit_open": end, "dividend_per_share": float(dividend), "net_return": net,
-                "pnl_usd": allocation * net, "cost_usd": allocation * plan["cost_bps"] / 1e4,
-            })
+            realized.append(settle_futu_position(position, end, float(dividend)))
         if len(positions) == len(plan["candidates"]) and not entry_path.exists():
             write_record(entry_path, {"positions": positions, "recorded_at": now.isoformat()})
         if not exiting or len(realized) != len(plan["candidates"]):
             continue
-        pnl = sum(row["pnl_usd"] for row in realized)
         write_record(target, plan | {
-            "settled_at": pd.Timestamp.now(tz="UTC").isoformat(), "realized": realized,
-            "capital_usd": book["capital_usd"], "pnl_usd": pnl,
-            "daily_return": pnl / book["capital_usd"],
-            "top1_net_return": realized[0]["net_return"] if realized else 0.0,
-            "top10_net_return": float(np.mean([row["net_return"] for row in realized])) if realized else 0.0,
+            "settled_at": pd.Timestamp.now(tz="UTC").isoformat(),
+            **futu_book_totals(realized, book["capital_usd"]),
         })
         count += 1
-    return {"newly_settled": count, "real_orders_enabled": False}
+    return count
+
+
+def reprice_settled(output):
+    directory = output / "open2open_v1"
+    updated = []
+    for book in (directory, directory / "premarket"):
+        for path in sorted((book / "settled").glob("*.json")):
+            record = json.loads(path.read_text(encoding="utf-8"))
+            if record.get("fee_model") == FUTU_HK_US_FIXED:
+                continue
+            rows = [settle_futu_position(row, row["exit_open"], row["dividend_per_share"])
+                    for row in record["realized"]]
+            totals = futu_book_totals(rows, record["capital_usd"])
+            write_record(path, record | totals)
+            updated.append({"session": path.stem, "book": book.name,
+                            "previous_pnl_usd": record["pnl_usd"],
+                            "pnl_usd": totals["pnl_usd"], "cost_usd": totals["cost_usd"]})
+    return {"repriced": updated}
+
+
+def settle(output, cal, *, refresh=False, official=False):
+    directory = output / "open2open_v1"
+    options = {"refresh": refresh, "official": official, "price_cache": {}}
+    return {
+        "newly_settled": settle_book(output, directory, cal, **options),
+        "premarket_newly_settled": settle_book(output, directory / "premarket", cal, **options),
+        "real_orders_enabled": False,
+    }
 
 
 def main(action=None):
     if action is None:
         parser = argparse.ArgumentParser()
-        parser.add_argument("action", choices=["score", "settle"])
+        parser.add_argument("action", choices=["score", "review", "settle", "reprice-settled"])
         action = parser.parse_args().action
     config = USOvernightConfig.from_yaml(ROOT / "configs/us_overnight_paper_only.yaml")
     output = ROOT / config.output_root
     cal = xcals.get_calendar("XNYS")
-    result = score(output, config, cal) if action == "score" else settle(output, cal, refresh=True, official=True)
+    if action == "review":
+        from us_open2open_premarket import review
+
+        result = review(output, config, cal)
+    elif action == "score":
+        result = score(output, config, cal)
+    elif action == "reprice-settled":
+        result = reprice_settled(output)
+    else:
+        result = settle(output, cal, refresh=True, official=True)
     print(json.dumps(result, ensure_ascii=True, indent=2))
     return 0
 

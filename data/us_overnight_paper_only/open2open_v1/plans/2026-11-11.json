@@ -1,0 +1,447 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-11",
+  "exit_session": "2026-11-12",
+  "feature_session": "2026-11-10",
+  "cutoff": "2026-11-11T14:25:00+00:00",
+  "prior_close_at": "2026-11-10T21:00:00+00:00",
+  "generated_at": "2026-11-10T21:08:06.918612+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0215649959,
+      "prior_close": 859.9899902344,
+      "rank": 1
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0109522336,
+      "prior_close": 62.9000015259,
+      "rank": 2
+    },
+    {
+      "symbol": "US.NBIS",
+      "name": "NEBIUS",
+      "score": 0.0107261585,
+      "prior_close": 134.0,
+      "rank": 3
+    },
+    {
+      "symbol": "US.TWST",
+      "name": "Twist Bioscience",
+      "score": 0.0106729293,
+      "prior_close": 132.1300048828,
+      "rank": 4
+    },
+    {
+      "symbol": "US.BE",
+      "name": "Bloom Energy",
+      "score": 0.0097246584,
+      "prior_close": 185.5,
+      "rank": 5
+    },
+    {
+      "symbol": "US.DELL",
+      "name": "戴尔科技",
+      "score": 0.0094375299,
+      "prior_close": 334.3150024414,
+      "rank": 6
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0093390045,
+      "prior_close": 19.7299995422,
+      "rank": 7
+    },
+    {
+      "symbol": "US.CRDO",
+      "name": "Credo Technology",
+      "score": 0.0088934399,
+      "prior_close": 129.8000030518,
+      "rank": 8
+    },
+    {
+      "symbol": "US.ASTS",
+      "name": "AST SpaceMobile",
+      "score": 0.0085451726,
+      "prior_close": 33.6899986267,
+      "rank": 9
+    },
+    {
+      "symbol": "US.TSEM",
+      "name": "Tower半导体",
+      "score": 0.0080374257,
+      "prior_close": 147.6000061035,
+      "rank": 10
+    }
+  ],
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -3.258923254318969,
+  "universe_snapshot": "top1000-2026-11-10T210227Z.parquet",
+  "universe_sha256": "f686105da089e4d5564f4c42ac704562a49e9f79d864ef866230b510e0575a10",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "READY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_pool": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0215649959,
+      "prior_close": 859.9899902344,
+      "rank": 1
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0109522336,
+      "prior_close": 62.9000015259,
+      "rank": 2
+    },
+    {
+      "symbol": "US.NBIS",
+      "name": "NEBIUS",
+      "score": 0.0107261585,
+      "prior_close": 134.0,
+      "rank": 3
+    },
+    {
+      "symbol": "US.TWST",
+      "name": "Twist Bioscience",
+      "score": 0.0106729293,
+      "prior_close": 132.1300048828,
+      "rank": 4
+    },
+    {
+      "symbol": "US.BE",
+      "name": "Bloom Energy",
+      "score": 0.0097246584,
+      "prior_close": 185.5,
+      "rank": 5
+    },
+    {
+      "symbol": "US.DELL",
+      "name": "戴尔科技",
+      "score": 0.0094375299,
+      "prior_close": 334.3150024414,
+      "rank": 6
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0093390045,
+      "prior_close": 19.7299995422,
+      "rank": 7
+    },
+    {
+      "symbol": "US.CRDO",
+      "name": "Credo Technology",
+      "score": 0.0088934399,
+      "prior_close": 129.8000030518,
+      "rank": 8
+    },
+    {
+      "symbol": "US.ASTS",
+      "name": "AST SpaceMobile",
+      "score": 0.0085451726,
+      "prior_close": 33.6899986267,
+      "rank": 9
+    },
+    {
+      "symbol": "US.TSEM",
+      "name": "Tower半导体",
+      "score": 0.0080374257,
+      "prior_close": 147.6000061035,
+      "rank": 10
+    },
+    {
+      "symbol": "US.CBRS",
+      "name": "Cerebras Systems",
+      "score": 0.0079017029,
+      "prior_close": 93.6600036621,
+      "rank": 11
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.007684429,
+      "prior_close": 585.5700073242,
+      "rank": 12
+    },
+    {
+      "symbol": "US.MU",
+      "name": "美光科技",
+      "score": 0.0075694092,
+      "prior_close": 725.1099853516,
+      "rank": 13
+    },
+    {
+      "symbol": "US.AMKR",
+      "name": "艾马克技术",
+      "score": 0.0075116188,
+      "prior_close": 34.4700012207,
+      "rank": 14
+    },
+    {
+      "symbol": "US.STX",
+      "name": "希捷科技",
+      "score": 0.0070547891,
+      "prior_close": 501.6199951172,
+      "rank": 15
+    },
+    {
+      "symbol": "US.WDC",
+      "name": "西部数据",
+      "score": 0.007013336,
+      "prior_close": 289.200012207,
+      "rank": 16
+    },
+    {
+      "symbol": "US.FIG",
+      "name": "Figma Inc",
+      "score": 0.0063719015,
+      "prior_close": 18.6149997711,
+      "rank": 17
+    },
+    {
+      "symbol": "US.RBRK",
+      "name": "Rubrik",
+      "score": 0.0063462256,
+      "prior_close": 109.4300003052,
+      "rank": 18
+    },
+    {
+      "symbol": "US.SITM",
+      "name": "SiTime",
+      "score": 0.0060630893,
+      "prior_close": 444.450012207,
+      "rank": 19
+    },
+    {
+      "symbol": "US.MTZ",
+      "name": "MasTec",
+      "score": 0.0060498052,
+      "prior_close": 181.0599975586,
+      "rank": 20
+    },
+    {
+      "symbol": "US.P",
+      "name": "Everpure",
+      "score": 0.0059231222,
+      "prior_close": 102.0,
+      "rank": 21
+    },
+    {
+      "symbol": "US.FIX",
+      "name": "美国舒适系统",
+      "score": 0.005874909,
+      "prior_close": 1104.4599609375,
+      "rank": 22
+    },
+    {
+      "symbol": "US.VRT",
+      "name": "Vertiv Holdings",
+      "score": 0.0055229477,
+      "prior_close": 194.1900024414,
+      "rank": 23
+    },
+    {
+      "symbol": "US.MRNA",
+      "name": "Moderna",
+      "score": 0.0054945091,
+      "prior_close": 250.8300018311,
+      "rank": 24
+    },
+    {
+      "symbol": "US.FLEX",
+      "name": "伟创力",
+      "score": 0.0052674392,
+      "prior_close": 76.0899963379,
+      "rank": 25
+    },
+    {
+      "symbol": "US.TEM",
+      "name": "Tempus AI",
+      "score": 0.0052277094,
+      "prior_close": 80.5400009155,
+      "rank": 26
+    },
+    {
+      "symbol": "US.CRS",
+      "name": "卡朋特科技",
+      "score": 0.0051902829,
+      "prior_close": 297.3599853516,
+      "rank": 27
+    },
+    {
+      "symbol": "US.NVMI",
+      "name": "Nova",
+      "score": 0.0051560004,
+      "prior_close": 325.700012207,
+      "rank": 28
+    },
+    {
+      "symbol": "US.ENTG",
+      "name": "英特格",
+      "score": 0.0050312152,
+      "prior_close": 138.5700073242,
+      "rank": 29
+    },
+    {
+      "symbol": "US.INTC",
+      "name": "英特尔",
+      "score": 0.004842962,
+      "prior_close": 58.1300010681,
+      "rank": 30
+    },
+    {
+      "symbol": "US.EGO",
+      "name": "埃氏金业",
+      "score": 0.0047716936,
+      "prior_close": 35.5099983215,
+      "rank": 31
+    },
+    {
+      "symbol": "US.STRL",
+      "name": "Sterling Infrastructure",
+      "score": 0.0046204578,
+      "prior_close": 289.5599975586,
+      "rank": 32
+    },
+    {
+      "symbol": "US.VST",
+      "name": "Vistra Energy",
+      "score": 0.0046144104,
+      "prior_close": 131.1300048828,
+      "rank": 33
+    },
+    {
+      "symbol": "US.HBM",
+      "name": "Hudbay Minerals",
+      "score": 0.0045797354,
+      "prior_close": 21.9349994659,
+      "rank": 34
+    },
+    {
+      "symbol": "US.GLW",
+      "name": "康宁",
+      "score": 0.0045222109,
+      "prior_close": 112.1600036621,
+      "rank": 35
+    },
+    {
+      "symbol": "US.RMBS",
+      "name": "Rambus",
+      "score": 0.0045218938,
+      "prior_close": 80.7600021362,
+      "rank": 36
+    },
+    {
+      "symbol": "US.CDE",
+      "name": "科尔黛伦矿业",
+      "score": 0.0045083634,
+      "prior_close": 15.3050003052,
+      "rank": 37
+    },
+    {
+      "symbol": "US.UMC",
+      "name": "联电",
+      "score": 0.0044253436,
+      "prior_close": 15.0349998474,
+      "rank": 38
+    },
+    {
+      "symbol": "US.CRWD",
+      "name": "CrowdStrike",
+      "score": 0.0043095784,
+      "prior_close": 225.7599945068,
+      "rank": 39
+    },
+    {
+      "symbol": "US.SMCI",
+      "name": "超微电脑",
+      "score": 0.0042484697,
+      "prior_close": 27.7900009155,
+      "rank": 40
+    },
+    {
+      "symbol": "US.MPWR",
+      "name": "Monolithic Power Systems",
+      "score": 0.0042263727,
+      "prior_close": 1357.5999755859,
+      "rank": 41
+    },
+    {
+      "symbol": "US.CLS",
+      "name": "天弘科技",
+      "score": 0.0042256756,
+      "prior_close": 223.9450073242,
+      "rank": 42
+    },
+    {
+      "symbol": "US.RDDT",
+      "name": "Reddit",
+      "score": 0.004194124,
+      "prior_close": 98.6800003052,
+      "rank": 43
+    },
+    {
+      "symbol": "US.FN",
+      "name": "Fabrinet",
+      "score": 0.0040459051,
+      "prior_close": 348.6329956055,
+      "rank": 44
+    },
+    {
+      "symbol": "US.FTAI",
+      "name": "FTAI Aviation",
+      "score": 0.0040397824,
+      "prior_close": 188.0,
+      "rank": 45
+    },
+    {
+      "symbol": "US.GFI",
+      "name": "金田",
+      "score": 0.0039796339,
+      "prior_close": 38.1349983215,
+      "rank": 46
+    },
+    {
+      "symbol": "US.DDOG",
+      "name": "Datadog",
+      "score": 0.0039333506,
+      "prior_close": 178.3999938965,
+      "rank": 47
+    },
+    {
+      "symbol": "US.HOOD",
+      "name": "Robinhood",
+      "score": 0.0038917497,
+      "prior_close": 81.3300018311,
+      "rank": 48
+    },
+    {
+      "symbol": "US.IONQ",
+      "name": "IonQ Inc",
+      "score": 0.0038843585,
+      "prior_close": 34.9599990845,
+      "rank": 49
+    },
+    {
+      "symbol": "US.BRKR",
+      "name": "布鲁克",
+      "score": 0.0038722786,
+      "prior_close": 62.2400016785,
+      "rank": 50
+    }
+  ]
+}

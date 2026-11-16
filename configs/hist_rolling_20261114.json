@@ -1,0 +1,22 @@
+{
+  "study": "HIST annual rolling retraining vs matched frozen models",
+  "output": "state/hist-rolling-20261114",
+  "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+  "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "cutoff": "2026-11-13",
+  "training_years": 3,
+  "validation_months": 3,
+  "refresh": "annual; independent fit from scratch; no test-dependent schedule or seed selection",
+  "purge": "next-session label realization must be within its own train/validation cutoff",
+  "signal_timing": "new yearly model first predicts prior-year last close; earliest execution next session",
+  "preprocessing": "RobustZScoreNorm fitted only rolling train features; author CSRankNorm labels within each day",
+  "market_value_missing": "pre-2021 author data only: rolling train mean; post-2020 actual values required",
+  "concepts": "unchanged author static concepts; unknown row733; point-in-time provenance not certified",
+  "vwap": "retain absent channel as zero; no simultaneous feature or architecture change",
+  "execution": "all three prior frozen lanes, same fees/capital; common 2017-2019 inherited portfolio per seed",
+  "control": "same inference row set; original model and 2007-2014 normalizer; recompute frozen scores",
+  "maximum_training_workers": 2,
+  "retry_attempts": 2,
+  "production_enabled": false,
+  "real_orders_enabled": false
+}

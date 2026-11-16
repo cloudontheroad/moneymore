@@ -233,6 +233,13 @@ def run_candidate_queue_daily(
         candidates=[row for row in candidates if not str(row.get('portfolio_variant','')).startswith('mature_alpha158_')]
     lifecycle = run_lifecycle_review(root, store, candidates, policy, trade_date)
     results = []
+    failures = []
+    def run_one(candidate):
+        try:
+            results.append(run_candidate_daily(candidate=candidate, root=root, store=store,
+                broker=broker, config=config, trade_date=trade_date))
+        except Exception as error:
+            failures.append(f"{candidate['candidate_tag']}: {type(error).__name__}: {error}")
     for candidate in reversed(candidates):
         tag = str(candidate["candidate_tag"])
         if (str(candidate.get('activation_date',tag)) if str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_') else tag) > trade_date:
@@ -254,11 +261,10 @@ def run_candidate_queue_daily(
         if existing_report.exists():
             payload = json.loads(existing_report.read_text(encoding="utf-8"))
             if str(candidate.get('portfolio_variant','')).startswith('mature_alpha158_') and payload.get('status') in {'AWAITING_FRESH_CLOSE','DATA_QUALITY_BLOCKED'}:
-                results.append(run_candidate_daily(candidate=candidate,root=root,store=store,broker=broker,config=config,trade_date=trade_date))
+                run_one(candidate)
                 continue
             if candidate.get("portfolio_variant") == "factor_baseline_v2" and str(payload.get("signal_date", trade_date)) < trade_date:
-                results.append(run_candidate_daily(candidate=candidate, root=root, store=store,
-                                                   broker=broker, config=config, trade_date=trade_date))
+                run_one(candidate)
                 continue
             results.append(
                 ChallengerDailyResult(
@@ -275,21 +281,14 @@ def run_candidate_queue_daily(
                 )
             )
             continue
-        results.append(
-            run_candidate_daily(
-                candidate=candidate,
-                root=root,
-                store=store,
-                broker=broker,
-                config=config,
-                trade_date=trade_date,
-            )
-        )
+        run_one(candidate)
     # Review again after today's close snapshots: checkpoints take effect immediately.
     lifecycle = run_lifecycle_review(root, store, candidates, policy, trade_date)
     for tag, state in lifecycle.items():
         if state.get("status") in FROZEN:
             broker.cancel_pending(candidate_account_id(tag), "CANDIDATE_LIFECYCLE_FROZEN")
+    if failures:
+        raise RuntimeError('independent candidate failures: ' + ' | '.join(failures))
     return results
 
 

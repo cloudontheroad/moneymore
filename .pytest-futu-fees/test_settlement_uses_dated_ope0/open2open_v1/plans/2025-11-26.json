@@ -1,0 +1,12 @@
+{
+  "trade_session": "2025-11-26",
+  "exit_session": "2025-11-28",
+  "status": "READY",
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.ABC",
+      "rank": 1
+    }
+  ]
+}

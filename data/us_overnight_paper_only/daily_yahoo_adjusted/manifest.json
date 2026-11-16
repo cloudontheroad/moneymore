@@ -1,9 +1,9 @@
 {
-  "captured_at_utc": "2026-11-09T05:58:22.823960+00:00",
+  "captured_at_utc": "2026-11-13T21:02:56.691355+00:00",
   "source": "Yahoo chart split-adjusted OHLCV plus cash dividends",
-  "source_universe": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_paper_only\\universe\\top1000-2026-11-05T100515Z.parquet",
-  "start": "2023-09-11",
-  "end": "2026-11-09",
+  "source_universe": "D:\\Users\\cloud\\Documents\\MoneyMore\\data\\us_overnight_paper_only\\universe\\top1000-2026-11-10T210227Z.parquet",
+  "start": "2023-09-15",
+  "end": "2026-11-13",
   "requested": 1000,
   "downloaded": 995,
   "skipped": 0,

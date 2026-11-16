@@ -1,0 +1,312 @@
+{
+  "status": "READY",
+  "trade_session": "2026-11-10",
+  "exit_session": "2026-11-11",
+  "generated_at": "2026-11-09T22:00:00Z",
+  "prior_close_at": "2026-11-09T21:00:00Z",
+  "candidates": [
+    {
+      "symbol": "US.TEST0",
+      "score": 50,
+      "rank": 1
+    },
+    {
+      "symbol": "US.TEST1",
+      "score": 49,
+      "rank": 2
+    },
+    {
+      "symbol": "US.TEST2",
+      "score": 48,
+      "rank": 3
+    },
+    {
+      "symbol": "US.TEST3",
+      "score": 47,
+      "rank": 4
+    },
+    {
+      "symbol": "US.TEST4",
+      "score": 46,
+      "rank": 5
+    },
+    {
+      "symbol": "US.TEST5",
+      "score": 45,
+      "rank": 6
+    },
+    {
+      "symbol": "US.TEST6",
+      "score": 44,
+      "rank": 7
+    },
+    {
+      "symbol": "US.TEST7",
+      "score": 43,
+      "rank": 8
+    },
+    {
+      "symbol": "US.TEST8",
+      "score": 42,
+      "rank": 9
+    },
+    {
+      "symbol": "US.TEST9",
+      "score": 41,
+      "rank": 10
+    }
+  ],
+  "review_pool": [
+    {
+      "symbol": "US.TEST0",
+      "score": 50,
+      "rank": 1
+    },
+    {
+      "symbol": "US.TEST1",
+      "score": 49,
+      "rank": 2
+    },
+    {
+      "symbol": "US.TEST2",
+      "score": 48,
+      "rank": 3
+    },
+    {
+      "symbol": "US.TEST3",
+      "score": 47,
+      "rank": 4
+    },
+    {
+      "symbol": "US.TEST4",
+      "score": 46,
+      "rank": 5
+    },
+    {
+      "symbol": "US.TEST5",
+      "score": 45,
+      "rank": 6
+    },
+    {
+      "symbol": "US.TEST6",
+      "score": 44,
+      "rank": 7
+    },
+    {
+      "symbol": "US.TEST7",
+      "score": 43,
+      "rank": 8
+    },
+    {
+      "symbol": "US.TEST8",
+      "score": 42,
+      "rank": 9
+    },
+    {
+      "symbol": "US.TEST9",
+      "score": 41,
+      "rank": 10
+    },
+    {
+      "symbol": "US.TEST10",
+      "score": 40,
+      "rank": 11
+    },
+    {
+      "symbol": "US.TEST11",
+      "score": 39,
+      "rank": 12
+    },
+    {
+      "symbol": "US.TEST12",
+      "score": 38,
+      "rank": 13
+    },
+    {
+      "symbol": "US.TEST13",
+      "score": 37,
+      "rank": 14
+    },
+    {
+      "symbol": "US.TEST14",
+      "score": 36,
+      "rank": 15
+    },
+    {
+      "symbol": "US.TEST15",
+      "score": 35,
+      "rank": 16
+    },
+    {
+      "symbol": "US.TEST16",
+      "score": 34,
+      "rank": 17
+    },
+    {
+      "symbol": "US.TEST17",
+      "score": 33,
+      "rank": 18
+    },
+    {
+      "symbol": "US.TEST18",
+      "score": 32,
+      "rank": 19
+    },
+    {
+      "symbol": "US.TEST19",
+      "score": 31,
+      "rank": 20
+    },
+    {
+      "symbol": "US.TEST20",
+      "score": 30,
+      "rank": 21
+    },
+    {
+      "symbol": "US.TEST21",
+      "score": 29,
+      "rank": 22
+    },
+    {
+      "symbol": "US.TEST22",
+      "score": 28,
+      "rank": 23
+    },
+    {
+      "symbol": "US.TEST23",
+      "score": 27,
+      "rank": 24
+    },
+    {
+      "symbol": "US.TEST24",
+      "score": 26,
+      "rank": 25
+    },
+    {
+      "symbol": "US.TEST25",
+      "score": 25,
+      "rank": 26
+    },
+    {
+      "symbol": "US.TEST26",
+      "score": 24,
+      "rank": 27
+    },
+    {
+      "symbol": "US.TEST27",
+      "score": 23,
+      "rank": 28
+    },
+    {
+      "symbol": "US.TEST28",
+      "score": 22,
+      "rank": 29
+    },
+    {
+      "symbol": "US.TEST29",
+      "score": 21,
+      "rank": 30
+    },
+    {
+      "symbol": "US.TEST30",
+      "score": 20,
+      "rank": 31
+    },
+    {
+      "symbol": "US.TEST31",
+      "score": 19,
+      "rank": 32
+    },
+    {
+      "symbol": "US.TEST32",
+      "score": 18,
+      "rank": 33
+    },
+    {
+      "symbol": "US.TEST33",
+      "score": 17,
+      "rank": 34
+    },
+    {
+      "symbol": "US.TEST34",
+      "score": 16,
+      "rank": 35
+    },
+    {
+      "symbol": "US.TEST35",
+      "score": 15,
+      "rank": 36
+    },
+    {
+      "symbol": "US.TEST36",
+      "score": 14,
+      "rank": 37
+    },
+    {
+      "symbol": "US.TEST37",
+      "score": 13,
+      "rank": 38
+    },
+    {
+      "symbol": "US.TEST38",
+      "score": 12,
+      "rank": 39
+    },
+    {
+      "symbol": "US.TEST39",
+      "score": 11,
+      "rank": 40
+    },
+    {
+      "symbol": "US.TEST40",
+      "score": 10,
+      "rank": 41
+    },
+    {
+      "symbol": "US.TEST41",
+      "score": 9,
+      "rank": 42
+    },
+    {
+      "symbol": "US.TEST42",
+      "score": 8,
+      "rank": 43
+    },
+    {
+      "symbol": "US.TEST43",
+      "score": 7,
+      "rank": 44
+    },
+    {
+      "symbol": "US.TEST44",
+      "score": 6,
+      "rank": 45
+    },
+    {
+      "symbol": "US.TEST45",
+      "score": 5,
+      "rank": 46
+    },
+    {
+      "symbol": "US.TEST46",
+      "score": 4,
+      "rank": 47
+    },
+    {
+      "symbol": "US.TEST47",
+      "score": 3,
+      "rank": 48
+    },
+    {
+      "symbol": "US.TEST48",
+      "score": 2,
+      "rank": 49
+    },
+    {
+      "symbol": "US.TEST49",
+      "score": 1,
+      "rank": 50
+    }
+  ],
+  "cost_bps": 20
+}

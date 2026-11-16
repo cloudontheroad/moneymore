@@ -1,0 +1,30 @@
+{
+  "version": "ashare_mainline_v1",
+  "seed": 42,
+  "threads": 2,
+  "horizon": 20,
+  "validation_sessions": 60,
+  "minimum_train_sessions": 100,
+  "minimum_alpha_fraction": 0.8,
+  "folds": ["2025Q1", "2025Q2", "2025Q3", "2025Q4", "2026Q1", "2026Q2", "2026Q3"],
+  "cases": {
+    "ridge_three_scores": {"model": "ridge", "features": "aggregate"},
+    "ridge_full": {"model": "ridge", "features": "full"},
+    "doubleensemble_alpha158": {"model": "doubleensemble", "features": "alpha158"},
+    "doubleensemble_full": {"model": "doubleensemble", "features": "full"}
+  },
+  "doubleensemble": {
+    "base_model": "gbm", "loss": "mse", "num_models": 3,
+    "enable_sr": true, "enable_fs": true, "alpha1": 1, "alpha2": 1,
+    "bins_sr": 10, "bins_fs": 5, "decay": 0.5,
+    "sample_ratios": [0.8, 0.7, 0.6, 0.5, 0.4],
+    "sub_weights": [1, 1, 1], "epochs": 28,
+    "colsample_bytree": 0.8879, "learning_rate": 0.2,
+    "subsample": 0.8789, "lambda_l1": 205.6999, "lambda_l2": 580.9768,
+    "max_depth": 8, "num_leaves": 210, "verbosity": -1
+  },
+  "initial_cash": 10000000,
+  "slippage_bps": [10, 20],
+  "production_enabled": false,
+  "real_orders_enabled": false
+}

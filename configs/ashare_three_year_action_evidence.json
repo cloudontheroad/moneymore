@@ -1,0 +1,18 @@
+{
+  "usage": "ISOLATED_THREE_YEAR_REPLAY_ONLY",
+  "cash_aggregate_overlap": [
+    {
+      "symbol": "002352.SZ",
+      "record_date": "20241106",
+      "ex_date": "20241107",
+      "pay_date": "20241107",
+      "imp_ann_date": "20241031",
+      "expected_rows": [["20241011", 1.0], ["20240630", 0.4], ["20240630", 1.4]],
+      "keep_end_date": "20240630",
+      "keep_cash_per_share": 1.4,
+      "source": "https://static.cninfo.com.cn/finalpage/2024-10-31/1221573964.PDF",
+      "issuer_notice_html": "https://paper.cnstock.com/html/2024-10/31/content_1988127.htm",
+      "evidence": "Issuer notice 2024-098: interim 0.4 plus special 1.0 equals total 1.4 CNY per share. The aggregate and its two components must not both accrue."
+    }
+  ]
+}

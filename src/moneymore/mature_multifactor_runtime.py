@@ -132,7 +132,7 @@ def infer(root,candidate,day):
 def prepare_mature_daily(*,root,store,broker,config,candidate,trade_date):
     from .qlib_challenger_daily import _finish,_record_account_history
     from .research.style_v2_experiment import candidate_execution_config,execution_policy_hash
-    from .research.replay_actions import official_replay_actions,economic_snapshot
+    from .research.replay_actions import account_replay_actions,economic_snapshot
     from .strategy_universe import active_strategy_universe
     tag=candidate['candidate_tag'];account=candidate['account_id'];config=candidate_execution_config(config,candidate)
     if trade_date<candidate['activation_date']:raise ValueError('MATURE_NOT_ACTIVE')
@@ -140,8 +140,7 @@ def prepare_mature_daily(*,root,store,broker,config,candidate,trade_date):
     scores,official,features=infer(root,candidate,trade_date)
     bars=pd.read_parquet(features/'bars-input.parquet');marks=bars.loc[bars.trade_date.astype(str).eq(trade_date)].set_index('ts_code').close.to_dict()
     snapshot=broker.account_snapshot(marks,account);held={p['symbol']:int(p['quantity']) for p in snapshot['positions'] if p['quantity']>0}
-    try:actions=official_replay_actions(store.read('dividend').loc[lambda x:x.ts_code.isin(held)])
-    except FileNotFoundError:actions=official_replay_actions(pd.DataFrame())
+    actions=account_replay_actions(store,broker,account,trade_date)
     broker.settle_corporate_actions(account,trade_date);broker.settle_available_positions(account,trade_date)
     for action in actions.loc[actions.record_date.eq(pd.Timestamp(trade_date))].itertuples():
         broker.register_corporate_entitlement(account_id=account,symbol=action.symbol,action_key=action.action_key,record_date=trade_date,

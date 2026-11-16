@@ -1,0 +1,447 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-16",
+  "exit_session": "2026-11-17",
+  "feature_session": "2026-11-13",
+  "cutoff": "2026-11-16T14:25:00+00:00",
+  "prior_close_at": "2026-11-13T21:00:00+00:00",
+  "generated_at": "2026-11-13T21:10:04.739369+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.MRNA",
+      "name": "Moderna",
+      "score": 0.0067423824,
+      "prior_close": 223.3699951172,
+      "rank": 1
+    },
+    {
+      "symbol": "US.MAIR",
+      "name": "Madison Air Solutions Corp",
+      "score": 0.0033074984,
+      "prior_close": 23.7900009155,
+      "rank": 2
+    },
+    {
+      "symbol": "US.EGO",
+      "name": "埃氏金业",
+      "score": 0.0031001937,
+      "prior_close": 31.5900001526,
+      "rank": 3
+    },
+    {
+      "symbol": "US.STN",
+      "name": "斯坦泰克",
+      "score": 0.0027797781,
+      "prior_close": 85.6500015259,
+      "rank": 4
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0025310064,
+      "prior_close": 58.1899986267,
+      "rank": 5
+    },
+    {
+      "symbol": "US.MFG",
+      "name": "瑞穗金融",
+      "score": 0.0023389663,
+      "prior_close": 10.3500003815,
+      "rank": 6
+    },
+    {
+      "symbol": "US.TGTX",
+      "name": "TG Therapeutics",
+      "score": 0.0020387239,
+      "prior_close": 64.5100021362,
+      "rank": 7
+    },
+    {
+      "symbol": "US.TTEK",
+      "name": "德照科技",
+      "score": 0.0019262613,
+      "prior_close": 38.8300018311,
+      "rank": 8
+    },
+    {
+      "symbol": "US.EQX",
+      "name": "Equinox Gold",
+      "score": 0.0016131117,
+      "prior_close": 10.3050003052,
+      "rank": 9
+    },
+    {
+      "symbol": "US.TBBB",
+      "name": "BBB Foods",
+      "score": 0.00160563,
+      "prior_close": 70.0350036621,
+      "rank": 10
+    }
+  ],
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -21.677004250220328,
+  "universe_snapshot": "top1000-2026-11-10T210227Z.parquet",
+  "universe_sha256": "f686105da089e4d5564f4c42ac704562a49e9f79d864ef866230b510e0575a10",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "READY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_pool": [
+    {
+      "symbol": "US.MRNA",
+      "name": "Moderna",
+      "score": 0.0067423824,
+      "prior_close": 223.3699951172,
+      "rank": 1
+    },
+    {
+      "symbol": "US.MAIR",
+      "name": "Madison Air Solutions Corp",
+      "score": 0.0033074984,
+      "prior_close": 23.7900009155,
+      "rank": 2
+    },
+    {
+      "symbol": "US.EGO",
+      "name": "埃氏金业",
+      "score": 0.0031001937,
+      "prior_close": 31.5900001526,
+      "rank": 3
+    },
+    {
+      "symbol": "US.STN",
+      "name": "斯坦泰克",
+      "score": 0.0027797781,
+      "prior_close": 85.6500015259,
+      "rank": 4
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0025310064,
+      "prior_close": 58.1899986267,
+      "rank": 5
+    },
+    {
+      "symbol": "US.MFG",
+      "name": "瑞穗金融",
+      "score": 0.0023389663,
+      "prior_close": 10.3500003815,
+      "rank": 6
+    },
+    {
+      "symbol": "US.TGTX",
+      "name": "TG Therapeutics",
+      "score": 0.0020387239,
+      "prior_close": 64.5100021362,
+      "rank": 7
+    },
+    {
+      "symbol": "US.TTEK",
+      "name": "德照科技",
+      "score": 0.0019262613,
+      "prior_close": 38.8300018311,
+      "rank": 8
+    },
+    {
+      "symbol": "US.EQX",
+      "name": "Equinox Gold",
+      "score": 0.0016131117,
+      "prior_close": 10.3050003052,
+      "rank": 9
+    },
+    {
+      "symbol": "US.TBBB",
+      "name": "BBB Foods",
+      "score": 0.00160563,
+      "prior_close": 70.0350036621,
+      "rank": 10
+    },
+    {
+      "symbol": "US.RRC",
+      "name": "山脉资源",
+      "score": 0.0015573941,
+      "prior_close": 51.8199996948,
+      "rank": 11
+    },
+    {
+      "symbol": "US.CDE",
+      "name": "科尔黛伦矿业",
+      "score": 0.0015330992,
+      "prior_close": 13.9750003815,
+      "rank": 12
+    },
+    {
+      "symbol": "US.MGM",
+      "name": "美高梅",
+      "score": 0.0015021708,
+      "prior_close": 33.4949989319,
+      "rank": 13
+    },
+    {
+      "symbol": "US.XEL",
+      "name": "埃克西尔能源",
+      "score": 0.0014720153,
+      "prior_close": 81.6100006104,
+      "rank": 14
+    },
+    {
+      "symbol": "US.FLUT",
+      "name": "Flutter Entertainment",
+      "score": 0.0013912228,
+      "prior_close": 81.1100006104,
+      "rank": 15
+    },
+    {
+      "symbol": "US.NVO",
+      "name": "诺和诺德",
+      "score": 0.0013793032,
+      "prior_close": 41.6450004578,
+      "rank": 16
+    },
+    {
+      "symbol": "US.WYNN",
+      "name": "永利度假村",
+      "score": 0.0013782699,
+      "prior_close": 85.0599975586,
+      "rank": 17
+    },
+    {
+      "symbol": "US.JEF",
+      "name": "杰富瑞",
+      "score": 0.0013705105,
+      "prior_close": 45.6800003052,
+      "rank": 18
+    },
+    {
+      "symbol": "US.NRG",
+      "name": "NRG Energy",
+      "score": 0.0013275747,
+      "prior_close": 97.0699996948,
+      "rank": 19
+    },
+    {
+      "symbol": "US.FDXF",
+      "name": "FEDEX FREIGHT HOLDING CO INC",
+      "score": 0.001318188,
+      "prior_close": 133.9349975586,
+      "rank": 20
+    },
+    {
+      "symbol": "US.DKS",
+      "name": "迪克体育用品",
+      "score": 0.0013105154,
+      "prior_close": 149.7299957275,
+      "rank": 21
+    },
+    {
+      "symbol": "US.PCTY",
+      "name": "Paylocity",
+      "score": 0.0012949949,
+      "prior_close": 178.2200012207,
+      "rank": 22
+    },
+    {
+      "symbol": "US.ALC",
+      "name": "Alcon",
+      "score": 0.0012846542,
+      "prior_close": 74.1299972534,
+      "rank": 23
+    },
+    {
+      "symbol": "US.CLX",
+      "name": "高乐氏",
+      "score": 0.0012712608,
+      "prior_close": 109.4599990845,
+      "rank": 24
+    },
+    {
+      "symbol": "US.HNGE",
+      "name": "Hinge Health",
+      "score": 0.0012633343,
+      "prior_close": 115.4000015259,
+      "rank": 25
+    },
+    {
+      "symbol": "US.DRS",
+      "name": "Leonardo DRS, Inc.",
+      "score": 0.0012440906,
+      "prior_close": 35.1800003052,
+      "rank": 26
+    },
+    {
+      "symbol": "US.ADSK",
+      "name": "欧特克",
+      "score": 0.0012405315,
+      "prior_close": 264.4200134277,
+      "rank": 27
+    },
+    {
+      "symbol": "US.AGI",
+      "name": "Alamos Gold",
+      "score": 0.0012172658,
+      "prior_close": 28.6100006104,
+      "rank": 28
+    },
+    {
+      "symbol": "US.WCN",
+      "name": "Waste Connections",
+      "score": 0.0011911664,
+      "prior_close": 193.9400024414,
+      "rank": 29
+    },
+    {
+      "symbol": "US.CMCSA",
+      "name": "康卡斯特",
+      "score": 0.0011823897,
+      "prior_close": 25.1599998474,
+      "rank": 30
+    },
+    {
+      "symbol": "US.OSCR",
+      "name": "Oscar Health",
+      "score": 0.0011821058,
+      "prior_close": 31.0550003052,
+      "rank": 31
+    },
+    {
+      "symbol": "US.KB",
+      "name": "韩国国民银行",
+      "score": 0.001164997,
+      "prior_close": 117.5199966431,
+      "rank": 32
+    },
+    {
+      "symbol": "US.ICLR",
+      "name": "Icon PLC",
+      "score": 0.0011568244,
+      "prior_close": 194.6499938965,
+      "rank": 33
+    },
+    {
+      "symbol": "US.DPZ",
+      "name": "达美乐比萨",
+      "score": 0.0011539677,
+      "prior_close": 341.7200012207,
+      "rank": 34
+    },
+    {
+      "symbol": "US.JBHT",
+      "name": "JB亨特运输服务",
+      "score": 0.0011390454,
+      "prior_close": 232.8500061035,
+      "rank": 35
+    },
+    {
+      "symbol": "US.BX",
+      "name": "黑石",
+      "score": 0.0011354503,
+      "prior_close": 120.1650009155,
+      "rank": 36
+    },
+    {
+      "symbol": "US.FNF",
+      "name": "富达国民金融",
+      "score": 0.0011169019,
+      "prior_close": 43.4199981689,
+      "rank": 37
+    },
+    {
+      "symbol": "US.W",
+      "name": "Wayfair",
+      "score": 0.0011048061,
+      "prior_close": 111.8949966431,
+      "rank": 38
+    },
+    {
+      "symbol": "US.WEC",
+      "name": "威州能源",
+      "score": 0.0011036413,
+      "prior_close": 117.5599975586,
+      "rank": 39
+    },
+    {
+      "symbol": "US.PODD",
+      "name": "银休特",
+      "score": 0.0010768159,
+      "prior_close": 152.4799957275,
+      "rank": 40
+    },
+    {
+      "symbol": "US.FNV",
+      "name": "Franco-Nevada",
+      "score": 0.0010750718,
+      "prior_close": 246.9649963379,
+      "rank": 41
+    },
+    {
+      "symbol": "US.WMS",
+      "name": "Advanced Drainage",
+      "score": 0.0010550594,
+      "prior_close": 125.5699996948,
+      "rank": 42
+    },
+    {
+      "symbol": "US.SAIL",
+      "name": "SailPoint",
+      "score": 0.0010252062,
+      "prior_close": 20.7900009155,
+      "rank": 43
+    },
+    {
+      "symbol": "US.CFR",
+      "name": "库伦佛寺银行",
+      "score": 0.0010201143,
+      "prior_close": 158.3000030518,
+      "rank": 44
+    },
+    {
+      "symbol": "US.SE",
+      "name": "Sea",
+      "score": 0.001019688,
+      "prior_close": 75.3899993896,
+      "rank": 45
+    },
+    {
+      "symbol": "US.ROL",
+      "name": "Rollins",
+      "score": 0.0010125559,
+      "prior_close": 38.875,
+      "rank": 46
+    },
+    {
+      "symbol": "US.TOST",
+      "name": "Toast",
+      "score": 0.0009997901,
+      "prior_close": 34.6800003052,
+      "rank": 47
+    },
+    {
+      "symbol": "US.DUK",
+      "name": "杜克能源",
+      "score": 0.0009691129,
+      "prior_close": 129.1399993896,
+      "rank": 48
+    },
+    {
+      "symbol": "US.MANH",
+      "name": "Manhattan Associates",
+      "score": 0.0009631913,
+      "prior_close": 257.1499938965,
+      "rank": 49
+    },
+    {
+      "symbol": "US.CART",
+      "name": "Maplebear",
+      "score": 0.0009598956,
+      "prior_close": 58.8699989319,
+      "rank": 50
+    }
+  ]
+}

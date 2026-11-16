@@ -1,0 +1,105 @@
+{
+  "positions": [
+    {
+      "symbol": "US.IT",
+      "name": "加特纳",
+      "score": 0.003939761,
+      "prior_close": 192.9100036621,
+      "rank": 1,
+      "entry_open": 186.86000061035156,
+      "allocation_usd": 10000,
+      "shares": 53.51600110958164
+    },
+    {
+      "symbol": "US.OSCR",
+      "name": "Oscar Health",
+      "score": 0.0035494999,
+      "prior_close": 32.1100006104,
+      "rank": 2,
+      "entry_open": 33.7400016784668,
+      "allocation_usd": 10000,
+      "shares": 296.38409906725343
+    },
+    {
+      "symbol": "US.NTSK",
+      "name": "Netskope",
+      "score": 0.0033066133,
+      "prior_close": 22.3700008392,
+      "rank": 3,
+      "entry_open": 21.889999389648438,
+      "allocation_usd": 10000,
+      "shares": 456.82961529587345
+    },
+    {
+      "symbol": "US.NOW",
+      "name": "ServiceNow",
+      "score": 0.0028539682,
+      "prior_close": 102.7399978638,
+      "rank": 4,
+      "entry_open": 100.51000213623047,
+      "allocation_usd": 10000,
+      "shares": 99.4925856876023
+    },
+    {
+      "symbol": "US.NTRA",
+      "name": "Natera",
+      "score": 0.0027771939,
+      "prior_close": 319.8200073242,
+      "rank": 5,
+      "entry_open": 310.989990234375,
+      "allocation_usd": 10000,
+      "shares": 32.15537578062749
+    },
+    {
+      "symbol": "US.MPC",
+      "name": "马拉松原油",
+      "score": 0.0026171965,
+      "prior_close": 402.7749938965,
+      "rank": 6,
+      "entry_open": 395.95001220703125,
+      "allocation_usd": 10000,
+      "shares": 25.255713326689527
+    },
+    {
+      "symbol": "US.SMMT",
+      "name": "Summit Therapeutics",
+      "score": 0.002606501,
+      "prior_close": 16.6399993896,
+      "rank": 7,
+      "entry_open": 16.378000259399414,
+      "allocation_usd": 10000,
+      "shares": 610.5751521319553
+    },
+    {
+      "symbol": "US.DINO",
+      "name": "HF Sinclair",
+      "score": 0.0025574179,
+      "prior_close": 101.7149963379,
+      "rank": 8,
+      "entry_open": 101.19999694824219,
+      "allocation_usd": 10000,
+      "shares": 98.81423222882515
+    },
+    {
+      "symbol": "US.CSGP",
+      "name": "科斯塔",
+      "score": 0.0024640152,
+      "prior_close": 30.2649993896,
+      "rank": 9,
+      "entry_open": 30.6200008392334,
+      "allocation_usd": 10000,
+      "shares": 326.5839231195253
+    },
+    {
+      "symbol": "US.FRO",
+      "name": "Frontline",
+      "score": 0.0023185547,
+      "prior_close": 45.5400009155,
+      "rank": 10,
+      "entry_open": 45.189998626708984,
+      "allocation_usd": 10000,
+      "shares": 221.28790227689063
+    }
+  ],
+  "recorded_at": "2026-11-12T14:32:59.993265+00:00"
+}

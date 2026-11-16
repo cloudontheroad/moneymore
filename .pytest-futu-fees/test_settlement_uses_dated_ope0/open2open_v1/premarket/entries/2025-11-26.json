@@ -1,0 +1,12 @@
+{
+  "positions": [
+    {
+      "symbol": "US.ABC",
+      "rank": 1,
+      "entry_open": 100.0,
+      "allocation_usd": 10000,
+      "shares": 100.0
+    }
+  ],
+  "recorded_at": "2026-11-11T07:45:02.294733+00:00"
+}

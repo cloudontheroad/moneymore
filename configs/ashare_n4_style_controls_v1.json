@@ -1,0 +1,12 @@
+{
+  "role": "Post-primary-result style identity controls, not an untouched validation or parameter search",
+  "cases": {
+    "factor_momentum": {"cadence": 20, "formula": "equal mean of cross-sectional percentile ranks of mom6_1 and mom12_1; missing rank fixed at 0.5, never reweighted"},
+    "factor_reversal": {"cadence": 5, "formula": "ROC5=close[t-5]/close[t], larger means prior loser; no learned sign; unavailable/nonfinite ratio fixed at neutral 1.0, never a fabricated quote"}
+  },
+  "capital": 10000000,
+  "window": ["20260101", "20260930"],
+  "costs": [10, 20],
+  "allocator": "unchanged rank_cap 50 equal slots, stock5%, industry planning+8pp/execution+10pp",
+  "production_modified": false
+}

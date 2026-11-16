@@ -581,6 +581,14 @@ class PaperBroker:
         )
         now = datetime.now(UTC).isoformat()
         with sqlite3.connect(self.database) as connection:
+            latest_date = connection.execute(
+                "SELECT MAX(trade_date) FROM risk_state_transitions WHERE account_id = ? AND transition_type = 'AUTOMATIC'",
+                (account_id,),
+            ).fetchone()[0]
+            # Replaying an old data outage must not re-freeze today's account.
+            # Same-day and newer risk escalations retain their usual latch.
+            if latest_date and trade_date < latest_date:
+                return current
             connection.execute(
                 """
                 UPDATE account_risk_states SET
@@ -597,7 +605,7 @@ class PaperBroker:
                     account_id,
                 ),
             )
-            if next_effective != effective or proposed_state != current["proposed_state"]:
+            if next_effective != effective or proposed_state != current["proposed_state"] or latest_date != trade_date:
                 connection.execute(
                     """
                     INSERT INTO risk_state_transitions(

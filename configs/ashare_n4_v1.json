@@ -1,0 +1,26 @@
+{
+  "version": "ashare_n4_v1",
+  "seed": 42,
+  "threads": 2,
+  "folds": ["2025Q2", "2025Q3", "2025Q4", "2026Q1", "2026Q2", "2026Q3"],
+  "validation_sessions": 40,
+  "minimum_train_sessions": 80,
+  "minimum_alpha_fraction": 0.8,
+  "sources": {
+    "fundamental": {"horizon": 60, "cadence": 60, "features": ["ep", "bp", "roe", "sales_yoy", "roe_change", "sales_change"]},
+    "trend": {"horizon": 20, "cadence": 20, "features": ["mom6_1", "mom12_1", "ROC20", "ROC30", "ROC60", "MA20", "MA30", "MA60", "STD20", "STD60", "BETA20", "BETA60", "RSQR20", "RSQR60", "RESI20", "RESI60", "VMA20", "VMA60"]},
+    "short": {"horizon": 5, "cadence": 5, "prefixes": ["ROC", "MA", "STD", "RSV", "RANK", "CORR", "CORD", "CNTP", "CNTN", "CNTD", "SUMP", "SUMN", "SUMD", "VMA", "VSTD", "WVMA", "VSUMP", "VSUMN", "VSUMD"], "windows": [5, 10], "features": ["KMID", "KLEN", "KMID2", "KUP", "KUP2", "KLOW", "KLOW2", "KSFT", "OPEN0", "HIGH0", "LOW0", "VWAP0"]}
+  },
+  "history_window": ["20250701", "20251231"],
+  "evaluation_window": ["20260101", "20260930"],
+  "allocation": {"methods": ["equal", "hrp", "hrp_positive"], "rebalance_sessions": 20, "lookback": 120, "minimum_observations": 100, "model": "HRP", "codependence": "pearson", "risk_measure": "MV", "linkage": "single", "maximum_sleeve_weight": 0.6, "gate": "prior_120_session_compounded_net_return_positive; core_always_eligible; core_only_fallback", "riskfolio_version": "7.0.1"},
+  "initial_cash": 10000000,
+  "slippage_bps": [10, 20],
+  "stock_exposure": 0.995,
+  "max_stock_weight": 0.05,
+  "topk": 50,
+  "industry_active_upper_planning": 0.08,
+  "industry_active_upper_execution": 0.10,
+  "real_orders_enabled": false,
+  "production_enabled": false
+}

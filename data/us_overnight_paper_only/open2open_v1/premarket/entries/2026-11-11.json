@@ -1,0 +1,115 @@
+{
+  "positions": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0215649959,
+      "prior_close": 859.9899902344,
+      "rank": 1,
+      "review_score": 0.9822222222222223,
+      "entry_open": 928.239990234375,
+      "allocation_usd": 10000,
+      "shares": 10.773076041978175
+    },
+    {
+      "symbol": "US.NBIS",
+      "name": "NEBIUS",
+      "score": 0.0107261585,
+      "prior_close": 134.0,
+      "rank": 2,
+      "review_score": 0.968,
+      "entry_open": 149.72000122070312,
+      "allocation_usd": 10000,
+      "shares": 66.79134329727223
+    },
+    {
+      "symbol": "US.TWST",
+      "name": "Twist Bioscience",
+      "score": 0.0106729293,
+      "prior_close": 132.1300048828,
+      "rank": 3,
+      "review_score": 0.912,
+      "entry_open": 141.0,
+      "allocation_usd": 10000,
+      "shares": 70.92198581560284
+    },
+    {
+      "symbol": "US.BE",
+      "name": "Bloom Energy",
+      "score": 0.0097246584,
+      "prior_close": 185.5,
+      "rank": 4,
+      "review_score": 0.904888888888889,
+      "entry_open": 185.0,
+      "allocation_usd": 10000,
+      "shares": 54.054054054054056
+    },
+    {
+      "symbol": "US.DELL",
+      "name": "戴尔科技",
+      "score": 0.0094375299,
+      "prior_close": 334.3150024414,
+      "rank": 5,
+      "review_score": 0.8844444444444446,
+      "entry_open": 337.7799987792969,
+      "allocation_usd": 10000,
+      "shares": 29.605068494697733
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0093390045,
+      "prior_close": 19.7299995422,
+      "rank": 6,
+      "review_score": 0.8506666666666667,
+      "entry_open": 20.959999084472656,
+      "allocation_usd": 10000,
+      "shares": 477.09925748079274
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0109522336,
+      "prior_close": 62.9000015259,
+      "rank": 7,
+      "review_score": 0.8373333333333334,
+      "entry_open": 64.11000061035156,
+      "allocation_usd": 10000,
+      "shares": 155.98190461388552
+    },
+    {
+      "symbol": "US.CRDO",
+      "name": "Credo Technology",
+      "score": 0.0088934399,
+      "prior_close": 129.8000030518,
+      "rank": 8,
+      "review_score": 0.8302222222222223,
+      "entry_open": 139.8800048828125,
+      "allocation_usd": 10000,
+      "shares": 71.48984594601434
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.007684429,
+      "prior_close": 585.5700073242,
+      "rank": 9,
+      "review_score": 0.8151111111111112,
+      "entry_open": 642.5961303710938,
+      "allocation_usd": 10000,
+      "shares": 15.561873978645165
+    },
+    {
+      "symbol": "US.TSEM",
+      "name": "Tower半导体",
+      "score": 0.0080374257,
+      "prior_close": 147.6000061035,
+      "rank": 10,
+      "review_score": 0.7671111111111112,
+      "entry_open": 157.00999450683594,
+      "allocation_usd": 10000,
+      "shares": 63.69021304286854
+    }
+  ],
+  "recorded_at": "2026-11-11T14:32:42.525505+00:00"
+}

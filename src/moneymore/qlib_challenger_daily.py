@@ -566,6 +566,8 @@ def _finish(
         "report_path": str(target),
         **(selection_metadata or {}),
     }
+    from .challenger_diagnostics import clean_json
+    payload = clean_json(payload)
     content = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
     if target.exists():
         existing = json.loads(target.read_text(encoding="utf-8"))

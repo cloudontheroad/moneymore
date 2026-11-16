@@ -12,6 +12,18 @@ def _config() -> BacktestConfig:
     return BacktestConfig.from_yaml("configs/default.yaml")
 
 
+def test_historical_outage_cannot_refreeze_latest_account(tmp_path):
+    broker = PaperBroker(tmp_path / 'paper.sqlite3')
+    broker.initialize_account(1_000_000,'a')
+    broker.update_risk_state('a','NORMAL','RISK_CHECKS_PASS','20261110')
+    old = broker.update_risk_state('a','SUSPENDED','DATA_QUALITY_BLOCKED','20261103')
+    assert old['effective_state']=='NORMAL' and not old['recovery_required']
+    current = broker.update_risk_state('a','SUSPENDED','DATA_QUALITY_BLOCKED','20261110')
+    assert current['effective_state']=='SUSPENDED'
+    broker.update_risk_state('a','NORMAL','RISK_CHECKS_PASS','20261111')
+    assert broker.risk_state('a')['recovery_required']
+
+
 def test_risk_state_rules_and_target_permissions() -> None:
     normal = evaluate_account_risk_state(
         _config(), 1_000_000, 500_000, 0.5, -0.02, "HEALTHY", True

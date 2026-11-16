@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from pathlib import Path
+import subprocess
 
 import numpy as np
 import pandas as pd
 
 import evaluate_us_corrected_market_hurdle as market
 import train_us_overnight_lightgbm as ranker
+from moneymore.us_overnight.fees import FUTU_HK_US_FIXED, futu_hk_us_order_fee
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import HuberRegressor
 from sklearn.pipeline import make_pipeline
@@ -17,6 +20,41 @@ from sklearn.preprocessing import StandardScaler
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "configs/us_open2open_v1.json"
 LABEL = "label_next_open_net"
+REPLAY_LABEL = "label_futu_net"
+
+
+def price_replay_fees(panel, dates, allocation, legacy_bps):
+    evaluation = panel.loc[panel.timestamp.isin(dates), ["timestamp", "symbol", "label_end", LABEL]]
+    daily_dir = ROOT / "data/us_overnight_paper_only/daily_yahoo_adjusted"
+    parts = []
+    archived_symbols = []
+    for symbol, rows in evaluation.groupby("symbol", sort=False):
+        path = daily_dir / f"{symbol.replace('.', '_')}.parquet"
+        columns = ["timestamp", "open"]
+        bars = pd.read_parquet(path, columns=columns) if path.exists() else pd.DataFrame(columns=columns)
+        opens = bars.set_index(pd.to_datetime(bars.timestamp, utc=True))["open"]
+        required = pd.Index(rows.timestamp).union(pd.Index(rows.label_end))
+        if opens.reindex(required).isna().any():
+            # A live refresh can leave only recent bars in the working file.
+            blob = subprocess.check_output(
+                ["git", "show", f"HEAD:{path.relative_to(ROOT).as_posix()}"], cwd=ROOT,
+            )
+            archive = pd.read_parquet(BytesIO(blob), columns=columns)
+            opens = archive.set_index(pd.to_datetime(archive.timestamp, utc=True))["open"].combine_first(opens)
+            archived_symbols.append(symbol)
+        entry = opens.reindex(rows.timestamp).to_numpy(dtype=float)
+        exit_ = opens.reindex(rows.label_end).to_numpy(dtype=float)
+        if not np.isfinite([entry, exit_]).all() or min(entry.min(), exit_.min()) <= 0:
+            raise ValueError(f"Missing or invalid dated opening prices for {symbol}")
+        fees = [
+            futu_hk_us_order_fee(allocation / start, start)
+            + futu_hk_us_order_fee(allocation / start, end, sell=True)
+            for start, end in zip(entry, exit_)
+        ]
+        # Recover the original gross label, including its point-in-time dividend.
+        parts.append(pd.Series(rows[LABEL].to_numpy() + legacy_bps / 10_000
+                               - np.asarray(fees) / allocation, index=rows.index))
+    return pd.concat(parts), archived_symbols
 
 
 def training_panel():
@@ -75,8 +113,11 @@ def main():
     panel = training_panel()
     daily, fields = daily_context(panel)
     daily_positions = {date: i for i, date in enumerate(daily.index)}
-    groups = panel.groupby("timestamp")
     dates = daily.index[-252:]
+    allocation = json.loads((ROOT / "configs/us_open2open_paper_book.json").read_text())["allocation_usd"]
+    evaluation = panel.loc[panel.timestamp.isin(dates)].copy()
+    evaluation[REPLAY_LABEL], archived_symbols = price_replay_fees(panel, dates, allocation, spec["cost_bps"])
+    groups = evaluation.groupby("timestamp")
     rng = np.random.default_rng(621)
     rows, simulations = [], []
     last_stock = last_market = None
@@ -99,7 +140,8 @@ def main():
         row = {"timestamp": date.isoformat(), "active": bool(active)}
         for name, basket in (("ranker", top), ("reversal", reversal)):
             for n in (1, 10):
-                row[f"{name}_{n}"] = float(basket[LABEL].iloc[:n].mean())
+                row[f"{name}_{n}"] = float(basket[REPLAY_LABEL].iloc[:n].mean())
+                row[f"{name}_{n}_legacy"] = float(basket[LABEL].iloc[:n].mean())
         rows.append(row)
         # Neighbor controls match the pre-open cross-sectional volatility and
         # turnover ranks of each selected stock, excluding the selected names.
@@ -111,6 +153,7 @@ def main():
             top[dimensions].to_numpy()[:, None, :] - pool[dimensions].to_numpy()[None, :, :]
         ).sum(axis=2)
         nearest = np.argsort(distance, axis=1, kind="stable")
+        pool_returns = pool[REPLAY_LABEL].to_numpy()
         draws = np.empty((10, 1000))
         for trial in range(draws.shape[1]):
             used = set()
@@ -118,7 +161,7 @@ def main():
                 choices = [index for index in neighbors[:30] if index not in used]
                 chosen = rng.choice(choices[:20])
                 used.add(chosen)
-                draws[slot, trial] = pool[LABEL].iloc[chosen]
+                draws[slot, trial] = pool_returns[chosen]
         simulations.append(np.stack([draws[0], draws.mean(axis=0)]) * active)
 
     frame = pd.DataFrame(rows)
@@ -126,6 +169,9 @@ def main():
     report = {
         "strategy_id": spec["id"], "sessions": len(frame),
         "historical_membership": "retrospective_current_snapshot_only",
+        "fee_model": FUTU_HK_US_FIXED, "allocation_usd_per_stock": allocation,
+        "training_label_cost_bps": spec["cost_bps"],
+        "archived_price_symbols": archived_symbols,
         "first_session": rows[0]["timestamp"], "last_session": rows[-1]["timestamp"],
         "traded_sessions": int(frame.active.sum()), "matched_trials": trials.shape[2],
         "results": {}, "daily": rows,
@@ -133,17 +179,23 @@ def main():
     for n, slot in ((1, 0), (10, 1)):
         active = frame.active
         values = frame[f"ranker_{n}"]
+        legacy = frame[f"ranker_{n}_legacy"]
         gated = values.where(active, 0)
         control_means = trials[:, slot].mean(axis=0) * 10_000
         report["results"][str(n)] = {
             "ranker": metrics(values),
             "gated": metrics(gated) | {"trade_win_rate": float((values[active] > 0).mean())},
+            "gated_legacy_cost": metrics(legacy.where(active, 0))
+            | {"trade_win_rate": float((legacy[active] > 0).mean())},
+            "mean_cost_bps_on_trade_days": float(
+                spec["cost_bps"] - (values[active] - legacy[active]).mean() * 10_000
+            ),
             "gated_last126": metrics(gated.iloc[-126:]),
             "reversal_gated": metrics(frame[f"reversal_{n}"].where(active, 0)),
             "matched_random_mean_bps_percentiles": np.percentile(control_means, [5, 50, 95]).tolist(),
             "fraction_of_matched_trials_beaten": float((control_means < gated.mean() * 1e4).mean()),
             "gated_cost_stress": {
-                str(bps): metrics(gated - active.astype(float) * (bps - 20) / 10_000)
+                str(bps): metrics((legacy - (bps - spec["cost_bps"]) / 10_000).where(active, 0))
                 for bps in (30, 50)
             },
         }

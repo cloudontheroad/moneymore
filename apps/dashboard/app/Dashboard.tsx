@@ -7,7 +7,7 @@ import StyleResearchReview, { type StyleResearchReviewData } from "./StyleResear
 import { candidateObservationLabel, candidateOptionLabel, candidateReviewReason, visibleStrategyAccounts, costExecutionLabel } from "./candidate-view";
 
 type Row = Record<string, unknown>;
-type Page = "overview" | "sectors" | "research" | "risk" | "challenger" | "data" | "operations" | "desktop";
+type Page = "challenger" | "risk" | "operations" | "desktop";
 type Bank = {
   latest_date: string; latest_scores: Row[]; latest_holdings: Row[];
   scheduler: { enabled: boolean; time: string; timezone: string; next_run?: string };
@@ -89,6 +89,8 @@ export type LeveragedEtfPaper = {
   version_segments?:Row[];
   research_gate?:string;
 };
+export type LeveragedEtfExperiment = Pick<LeveragedEtfPaper,
+  "account_id"|"strategy_id"|"equity"|"initial_cash"|"latest_signal"|"backtest_history">;
 type SecurityHistory = {
   symbol:string; name:string; bars:Row[]; fills:Row[];
   coverage: { start_date:string; end_date:string; trading_days:number; fill_count:number };
@@ -100,6 +102,7 @@ type MonthlyAcceptance = {
   evidence: Row; report_path?: string | null;
 };
 type Challenger = {
+  symbol_names?: Record<string,string>;
   diagnostics?: { as_of_date?:string; forward?:{ accounts?:Row[] }; style_attribution?:Row & { accounts?:(Row & { contributions?:Row; skipped_days?:Row[] })[] }; recommendations?:Row[] };
   style_research_review?: StyleResearchReviewData | null;
   mature_multifactor_pair?: Row & { accounts?:Row[]; historical_replay?:Row[] };
@@ -132,14 +135,24 @@ type Challenger = {
 
 const SecurityNavigationContext=createContext<(symbol:string,accountId?:string)=>void>(()=>{});
 const SecurityAccountContext=createContext<string>("multi_sector_shadow");
+const SecurityNamesOnlyContext=createContext<Record<string,string>|null>(null);
+function stockCode(value:unknown) {
+  const raw=String(value??"").trim().toUpperCase();
+  const suffix=raw.match(/^(\d{6})[.\s]?(SH|SZ|BJ)$/);
+  const prefix=raw.match(/^(SH|SZ|BJ)[.\s]?(\d{6})$/);
+  if(suffix)return `${suffix[1]}.${suffix[2]}`;
+  if(prefix)return `${prefix[2]}.${prefix[1]}`;
+  if(/^\d{6}$/.test(raw))return `${raw}.${/^[569]/.test(raw)?"SH":/^[48]|^92/.test(raw)?"BJ":"SZ"}`;
+  return null;
+}
+function stockName(value:unknown,names:Record<string,string>,row?:Row) {
+  return [names[stockCode(value)??""],names[String(value)],row?.symbol_name,row?.stock_name,row?.name]
+    .find(name=>typeof name==="string"&&name.trim()&&!/^(nan|null|未知证券|名称未收录)$/i.test(name.trim())&&!stockCode(name)) as string|undefined ?? "名称待核对";
+}
 
 const nav: { id: Page; label: string; note: string }[] = [
-  { id: "overview", label: "组合总览", note: "PORTFOLIO" },
-  { id: "sectors", label: "行业与个股", note: "SLEEVES" },
-  { id: "research", label: "策略研究", note: "MODELS" },
+  { id: "challenger", label: "多策略比较", note: "STRATEGY COMPARISON" },
   { id: "risk", label: "市场与仓位", note: "RISK" },
-  { id: "challenger", label: "Qlib挑战者", note: "AI LAB" },
-  { id: "data", label: "数据健康", note: "QUALITY" },
   { id: "operations", label: "运行与对账", note: "PAPER" },
   { id: "desktop", label: "券商工作台", note: "BROKER WORKSPACE" },
 ];
@@ -213,7 +226,9 @@ async function runWithConcurrency(tasks: (() => Promise<void>)[], limit = 3) {
 }
 
 export default function Dashboard() {
-  const [page, setPage] = useState<Page>("overview");
+  const [page, setPage] = useState<Page>("challenger");
+  const [baselineDetail, setBaselineDetail] = useState<"overview" | "sectors" | "research" | null>(null);
+  const [showQuality, setShowQuality] = useState(false);
   const [showArchivedCandidates,setShowArchivedCandidates]=useState(false);
   const [bank, setBank] = useState<Bank | null>(null);
   const [sectors, setSectors] = useState<Sectors | null>(null);
@@ -234,37 +249,57 @@ export default function Dashboard() {
   const [securityDetailError,setSecurityDetailError]=useState("");
   const [error, setError] = useState("");
   const [pageLoading,setPageLoading]=useState(false);
+  const [detailError,setDetailError]=useState("");
   const [busy, setBusy] = useState(false);
-  const refreshing = useRef(false);
+  const refreshing = useRef(new Set<string>());
   const refreshingLive = useRef(false);
   const refresh = useCallback(async () => {
-    if(refreshing.current)return;
-    refreshing.current=true;
+    const key = page;
+    if(refreshing.current.has(key))return;
+    refreshing.current.add(key);
     const failures:string[]=[];
     const load=<T,>(url:string,setter:(value:T)=>void)=>async()=>{
       try { setter(await json<T>(url)); }
       catch(reason) { failures.push(`${url}: ${reason instanceof Error ? reason.message : "服务暂不可用"}`); }
     };
-    const common=[
-      ...(!sectors?[load<Sectors>("/api/a-share-overview",setSectors)]:[]),
-    ];
     const pageTasks:Record<Page,(()=>Promise<void>)[]>={
-      overview:[], sectors:sectorsComplete?[]:[load<Sectors>("/api/sector-portfolio",value=>{setSectors(value);setSectorsComplete(true)})],
-      research:[...(sectorsComplete?[]:[load<Sectors>("/api/sector-portfolio",value=>{setSectors(value);setSectorsComplete(true)})]),load<ModelRegistry>("/api/model-registry",setModels)],
       risk:[load<MarketRisk>("/api/market-risk",setMarketRisk)],
       challenger:[load<Challenger>("/api/qlib-challenger",setChallenger)],
-      data:[load<DataQuality>("/api/data-quality",setQuality)],
       operations:[...(!bank?[load<Bank>("/api/bank-dashboard",setBank)]:[]),...(!execution?[load<Execution>("/api/multi-sector-execution",setExecution)]:[]),load<OperationsCenter>("/api/operations-center",setOperations),load<MonthlyAcceptance>("/api/monthly-acceptance",setAcceptance),load<IntradayExecution>("/api/intraday-execution",setIntraday)],
       desktop:[],
     };
-    const tasks=[...common,...pageTasks[page]];
+    const tasks=pageTasks[page];
     setPageLoading(tasks.length>0);
     try {
       await runWithConcurrency(tasks);
       setError(failures.length === tasks.length && tasks.length ? "服务暂不可用" : "");
     } catch (reason) { setError(reason instanceof Error ? reason.message : "服务暂不可用"); }
-    finally { refreshing.current=false;setPageLoading(false); }
-  }, [bank,sectors,sectorsComplete,execution,page]);
+    finally { refreshing.current.delete(key);setPageLoading(refreshing.current.size>0); }
+  }, [bank,execution,page]);
+  useEffect(() => {
+    if (!challenger && !marketRisk && !operations && page!=="desktop") return;
+    const controller=new AbortController();
+    json<Sectors>("/api/a-share-overview",{signal:AbortSignal.any([controller.signal,AbortSignal.timeout(30000)])})
+      .then(value=>setSectors(previous=>previous??value)).catch(()=>{});
+    return ()=>controller.abort();
+  }, [Boolean(challenger||marketRisk||operations),page==="desktop"]);
+  useEffect(()=>{
+    const controller=new AbortController();
+    const options={signal:AbortSignal.any([controller.signal,AbortSignal.timeout(90000)])};
+    const load=async()=>{
+      setDetailError("");
+      try {
+        if(page==="challenger"&&(baselineDetail==="sectors"||baselineDetail==="research")&&!sectorsComplete){
+          const value=await json<Sectors>("/api/sector-portfolio",options);
+          setSectors(value);setSectorsComplete(true);
+        }
+        if(page==="challenger"&&baselineDetail==="research"&&!models)setModels(await json<ModelRegistry>("/api/model-registry",options));
+        if(page==="operations"&&showQuality&&!quality)setQuality(await json<DataQuality>("/api/data-quality",options));
+      }catch {if(!controller.signal.aborted)setDetailError("详情加载失败，请收起后重试。");}
+    };
+    void load();
+    return ()=>controller.abort();
+  },[page,baselineDetail,showQuality,sectorsComplete,models,quality]);
   const refreshLive = useCallback(async () => {
     if(refreshingLive.current)return;
     refreshingLive.current=true;
@@ -283,11 +318,13 @@ export default function Dashboard() {
     const id = window.setInterval(refresh, 30_000);
     return () => { clearTimeout(initial); clearInterval(id); };
   }, [refresh]);
+  const pageReady=page==="challenger"?!!challenger:page==="risk"?!!marketRisk:page==="operations"?!!operations:false;
   useEffect(() => {
+    if(!pageReady)return;
     const initial = window.setTimeout(refreshLive, 2500);
-    const id = window.setInterval(refreshLive, 5_000);
+    const id = window.setInterval(refreshLive, 15_000);
     return () => { clearTimeout(initial); clearInterval(id); };
-  }, [refreshLive]);
+  }, [refreshLive,pageReady]);
   const run = async () => {
     setBusy(true);
     try { await json("/api/tasks/daily-run", { method: "POST" }); window.setTimeout(refresh, 1200); }
@@ -310,11 +347,11 @@ export default function Dashboard() {
     },10_000);
     return ()=>clearInterval(id);
   },[securityDetail?.symbol]);
-  if (!sectors) return <main className="loading"><span>M</span><b>MoneyMore · A股</b><p>{error || "正在装载轻量组合快照…"}</p><button onClick={() => void refresh()}>重新连接</button><Link href="/">返回总览</Link></main>;
+  const names=sectors?.symbol_names??{};
   const current = nav.find((item) => item.id === page)!;
   const liveBaseline=execution?live?.accounts[execution.account_id]:undefined;
   const displayedExecution=execution?(liveBaseline?{...execution,portfolio:liveBaseline.portfolio,positions:liveBaseline.positions,orders:liveBaseline.orders,fills:liveBaseline.fills}:execution):null;
-  return <SecurityNavigationContext.Provider value={(symbol,accountId)=>void openSecurity(symbol,accountId)}><div className="app-shell">
+  return <SecurityNamesOnlyContext.Provider value={names}><SecurityNavigationContext.Provider value={(symbol,accountId)=>void openSecurity(symbol,accountId)}><div className="app-shell">
     <aside>
       <Link className="brand" href="/"><span>M</span><div><b>MoneyMore</b><small>返回项目总览</small></div></Link>
       <div className="system-card"><i/><small>ACTIVE SYSTEM</small><b>全局横截面组合</b><span>统一候选池 · 行业仅作归因</span></div>
@@ -322,20 +359,24 @@ export default function Dashboard() {
       <div className="aside-foot"><i/> PAPER ONLY<br/><small>{bank?`${bank.scheduler.time} · ${bank.scheduler.timezone}`:"按栏目加载运行数据"}</small></div>
     </aside>
     <main className="workspace">
-      <header><div><small>MONEYMORE / {current.note}</small><h1>{current.label}</h1></div><div className="header-actions"><span><i/> {live&&["QMT_REALTIME","ALPHAFEED_REALTIME"].includes(live.quote_source)?(live.quote_source==="ALPHAFEED_REALTIME"?"AlphaFeed":"QMT")+" · "+live.observed_at.slice(11,19):"数据日 "+sectors.latest_date}</span><button onClick={() => { void refresh(); void refreshLive(); }}>刷新</button><button className="primary" disabled={busy} onClick={() => void run()}>{busy ? "恢复中…" : "恢复并重算"}</button></div></header>
+      <header><div><small>MONEYMORE / {current.note}</small><h1>{current.label}</h1></div><div className="header-actions"><span><i/> {live&&["QMT_REALTIME","ALPHAFEED_REALTIME"].includes(live.quote_source)?(live.quote_source==="ALPHAFEED_REALTIME"?"AlphaFeed":"QMT")+" · "+live.observed_at.slice(11,19):"数据日 "+(sectors?.latest_date??'—')}</span><button onClick={() => { void refresh(); void refreshLive(); }}>刷新</button><button className="primary" disabled={busy} onClick={() => void run()}>{busy ? "恢复中…" : "恢复并重算"}</button></div></header>
       {systemHealth&&<SystemHealthBar health={systemHealth}/>}
       {error && <div className="error">{error}</div>}
-      {pageLoading&&page!=="overview"&&<div className="section-loading"><i/><b>正在加载当前栏目…</b><span>只请求这个栏目需要的数据</span></div>}
-      {page === "overview" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Overview sectors={sectors}/></SecurityAccountContext.Provider>}
-      {page === "sectors" && sectorsComplete && <SecurityAccountContext.Provider value="multi_sector_shadow"><SectorPage sectors={sectors}/></SecurityAccountContext.Provider>}
-      {page === "research" && sectorsComplete && models && <SecurityAccountContext.Provider value="multi_sector_shadow"><Research sectors={sectors} models={models}/></SecurityAccountContext.Provider>}
-      {page === "risk" && marketRisk && <MarketRiskPage risk={marketRisk} live={live??undefined} names={sectors.symbol_names}/>}
-      {page === "challenger" && challenger && <SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={sectors.symbol_names} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/></SecurityAccountContext.Provider>}
-      {page === "data" && quality && <DataHealth quality={quality}/>}
-      {page === "desktop" && <DesktopExecution names={sectors.symbol_names}/>}
-      {page === "operations" && bank && displayedExecution && operations && acceptance && intraday && <SecurityAccountContext.Provider value="multi_sector_shadow"><Operations bank={bank} execution={displayedExecution} operations={operations} acceptance={acceptance} intraday={intraday} live={live} names={sectors.symbol_names} onRefresh={refresh}/></SecurityAccountContext.Provider>}
+      {detailError&&<div className="error">{detailError}</div>}
+      {pageLoading&&!pageReady&&<div className="section-loading"><i/><b>正在加载当前栏目…</b><span>只请求这个栏目需要的数据</span></div>}
+      {page === "risk" && marketRisk && <MarketRiskPage risk={marketRisk} live={live??undefined} names={names}/>}
+      {page === "challenger" && challenger && <SecurityNamesOnlyContext.Provider value={{...names,...challenger.symbol_names}}><SecurityAccountContext.Provider value="qlib_gru_shadow"><ChallengerPage challenger={challenger} names={{...names,...challenger.symbol_names}} live={live} showArchived={showArchivedCandidates} onShowArchived={setShowArchivedCandidates}/></SecurityAccountContext.Provider></SecurityNamesOnlyContext.Provider>}
+      {page === "challenger" && <SecurityAccountContext.Provider value="multi_sector_shadow"><Panel title="基线详情" subtitle="按需查看基础资料，不占用主导航">
+        <div className="preview-controls">{([["overview","组合概况"],["sectors","行业与个股"],["research","策略研究"]] as const).map(([id,label])=><button type="button" className="recover" aria-pressed={baselineDetail===id} key={id} onClick={()=>setBaselineDetail(baselineDetail===id?null:id)}>{label}</button>)}</div>
+        {baselineDetail==="overview"&&sectors&&<Overview sectors={sectors}/>}
+        {baselineDetail==="sectors"&&sectors&&sectorsComplete&&<SectorPage sectors={sectors}/>}
+        {baselineDetail==="research"&&sectors&&sectorsComplete&&models&&<Research sectors={sectors} models={models}/>}
+      </Panel></SecurityAccountContext.Provider>}
+      {page === "desktop" && <DesktopExecution names={names}/>}
+      {page === "operations" && bank && displayedExecution && operations && acceptance && intraday && <SecurityAccountContext.Provider value="multi_sector_shadow"><Operations bank={bank} execution={displayedExecution} operations={operations} acceptance={acceptance} intraday={intraday} live={live} names={names} onRefresh={refresh}/></SecurityAccountContext.Provider>}
+      {page === "operations" && <Panel title="数据健康"><button type="button" className="recover" aria-expanded={showQuality} onClick={()=>setShowQuality(!showQuality)}>{showQuality?"收起检查明细":"查看检查明细"}</button>{showQuality&&quality&&<DataHealth quality={quality}/>}</Panel>}
     </main>
-  </div>{(securityDetailLoading||securityDetailError||securityDetail)&&<SecurityHistoryModal detail={securityDetail} initialAccountId={securityDetailAccount} loading={securityDetailLoading} error={securityDetailError} onClose={()=>{setSecurityDetail(null);setSecurityDetailError("");}}/>}</SecurityNavigationContext.Provider>;
+  </div>{(securityDetailLoading||securityDetailError||securityDetail)&&<SecurityHistoryModal detail={securityDetail} initialAccountId={securityDetailAccount} loading={securityDetailLoading} error={securityDetailError} onClose={()=>{setSecurityDetail(null);setSecurityDetailError("");}}/>}</SecurityNavigationContext.Provider></SecurityNamesOnlyContext.Provider>;
 }
 
 type QuantMetrics={totalReturn:number;annualizedReturn:number;volatility:number;sharpe:number;maxDrawdown:number;calmar:number;winRate:number;averageExposure:number|null;fillCount:number|null;turnover:number|null;upCapture:number;downCapture:number};
@@ -359,35 +400,42 @@ function quantMetrics(rows:Row[],benchmark:Row[]):QuantMetrics {
 function StrategyQuantCard({name,version,color,metrics,target,status}:{name:string;version:string;color:string;metrics:QuantMetrics;target:number;status:string}){
   return <article className="quant-strategy-card" style={{"--strategy-color":color} as CSSProperties}><header><i/><div><small>{version}</small><h3>{name}</h3></div><b>{metrics.totalReturn>=0?"+":""}{pct(metrics.totalReturn)}</b></header><div className="quant-metric-grid"><span><small>夏普</small><b>{num(metrics.sharpe)}</b></span><span><small>最大回撤</small><b>{pct(metrics.maxDrawdown)}</b></span><span><small>年化波动</small><b>{pct(metrics.volatility)}</b></span><span><small>Calmar</small><b>{num(metrics.calmar)}</b></span><span><small>年化收益</small><b>{pct(metrics.annualizedReturn)}</b></span><span><small>日胜率</small><b>{pct(metrics.winRate)}</b></span></div><footer><span>平均仓位 <b>{optionalPct(metrics.averageExposure)}</b></span><span>当前仓位 <b>{pct(target)}</b></span><span>{status}</span></footer></article>;
 }
-export function LeveragedEtfPage({account,experiment}:{account:LeveragedEtfPaper;experiment:LeveragedEtfPaper}) {
-  const v2Signal=account.latest_signal,v3Signal=experiment.latest_signal;
+export function LeveragedEtfPage({account,experiment,v4}:{account:LeveragedEtfPaper;experiment:LeveragedEtfPaper;v4?:LeveragedEtfExperiment|null}) {
+  const v2Signal=account.latest_signal,v3Signal=experiment.latest_signal,v4Signal=v4?.latest_signal;
   const v2Indicators=v2Signal?.indicators??{},v3Indicators=v3Signal?.indicators??{};
   const allV2=account.backtest_history??[],allV3=experiment.backtest_history??[];
   const allBenchmark=experiment.comparison_benchmark??experiment.benchmark_history??[];
   const v2Dates=new Set(allV2.map(row=>row.trade_date)),v3Dates=new Set(allV3.map(row=>row.trade_date));
-  const benchmark=allBenchmark.filter(row=>v2Dates.has(row.trade_date)&&v3Dates.has(row.trade_date));
+  const v4Dates=new Set(v4?.backtest_history?.map(row=>row.trade_date));
+  const paperBenchmark=allBenchmark.filter(row=>v2Dates.has(row.trade_date)&&v3Dates.has(row.trade_date));
+  const v4Benchmark=paperBenchmark.filter(row=>v4Dates.has(row.trade_date));
+  const benchmark=v4Benchmark.length>=2?v4Benchmark:paperBenchmark;
   const commonDates=new Set(benchmark.map(row=>row.trade_date));
   const v2History=allV2.filter(row=>commonDates.has(row.trade_date));
   const v3History=allV3.filter(row=>commonDates.has(row.trade_date));
+  const v4History=v4?.backtest_history?.filter(row=>commonDates.has(row.trade_date))??[];
   const commonStart=text(benchmark[0]?.trade_date),commonEnd=text(benchmark.at(-1)?.trade_date);
   const v2Metrics=quantMetrics(v2History,benchmark),v3Metrics=quantMetrics(v3History,benchmark),holdMetrics=quantMetrics(benchmark,benchmark);
+  const strategies=[
+    {accountId:account.account_id,label:"Cycle V2",version:"STRATEGY V2",color:"#ef7655",rows:v2History,metrics:v2Metrics,target:Number(v2Signal?.tqqq??0),status:text(v2Signal?.regime)},
+    {accountId:experiment.account_id,label:"Momentum Dip V3",version:"STRATEGY V3",color:"#31a48d",rows:v3History,metrics:v3Metrics,target:Number(v3Signal?.tqqq??0),status:text(v3Signal?.regime)},
+    ...(v4&&v4History.length>=2?[{accountId:v4.account_id,label:"风控 V4",version:"V4 · RESEARCH REPLAY",color:"#8d59ae",rows:v4History,metrics:quantMetrics(v4History,benchmark),target:Number(v4Signal?.tqqq??0),status:text(v4Signal?.regime)}]:[]),
+    {accountId:"tqqq_buy_hold",label:"满仓 TQQQ",version:"PASSIVE BENCHMARK",color:"#6478d3",rows:benchmark,metrics:holdMetrics,target:1,status:"100% BUY & HOLD"},
+  ];
   const v3Gap=v3Metrics.totalReturn-holdMetrics.totalReturn;
   const v3Diagnosis="捕获率按满仓基准的上涨日和下跌日分组计算。仓位、择时与交易成本的贡献需分别用对照回放核验。";
   const versionRows=[account,experiment].flatMap(paper=>(paper.version_segments??[]).map(segment=>({
     ...segment, account:paper.strategy_id, version:segment.version??"旧信号（未标记）",
   })));
-  const performanceRows=[
-    {strategy:"Cycle v2",...v2Metrics,target:v2Signal?.tqqq},
-    {strategy:"Momentum Dip v3",...v3Metrics,target:v3Signal?.tqqq},
-    {strategy:"满仓 TQQQ",...holdMetrics,target:1},
-  ];
+  const performanceRows=strategies.map(({label,metrics,target})=>({strategy:label,...metrics,target}));
   if(benchmark.length<2)return <Panel title="年初策略比较" subtitle="等待至少一个共同的已完成交易日"><p className="empty">暂无可比较数据</p></Panel>;
   return <>
     <section className="portfolio-hero leveraged-hero quant-hero"><div><small>LEVERAGED ETF STRATEGY LAB</small><h2>TQQQ 策略评审台</h2><p>同一起点、同一行情、同一交易成本口径；不按版本先后排座次，只看收益是否补偿风险。</p></div><div className="exposure"><span>统一评估区间</span><b>{commonStart.slice(5)}<em> → </em>{commonEnd.slice(5)}</b><small>起点净值 100 · {Math.max(0,benchmark.length-1)} 个交易日</small></div></section>
-    <section className="quant-strategy-grid"><StrategyQuantCard name="Cycle v2" version="STRATEGY V2" color="#ef7655" metrics={v2Metrics} target={Number(v2Signal?.tqqq??0)} status={text(v2Signal?.regime)}/><StrategyQuantCard name="Momentum Dip v3" version="STRATEGY V3" color="#31a48d" metrics={v3Metrics} target={Number(v3Signal?.tqqq??0)} status={text(v3Signal?.regime)}/><StrategyQuantCard name="满仓 TQQQ" version="PASSIVE BENCHMARK" color="#6478d3" metrics={holdMetrics} target={1} status="100% BUY & HOLD"/></section>
-    <Panel title="净值与风险调整收益" subtitle={`统一拟合 ${commonStart} = 100；夏普按日收益、零无风险利率年化；回测不改动模拟盘账本`}>{v2History.length?<LineComparisonChart title="三策略累计净值" subtitle="收益领先不等于策略更优：必须同时观察回撤、波动与夏普" series={[{accountId:account.account_id,label:"Cycle v2",color:"#ef7655",rows:v2History},{accountId:experiment.account_id,label:"Momentum Dip v3",color:"#31a48d",rows:v3History},{accountId:"tqqq_buy_hold",label:"满仓 TQQQ",color:"#6478d3",rows:benchmark}]} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/>:<p className="empty">正在生成当年回测曲线</p>}</Panel>
+    <section className="quant-strategy-grid">{strategies.map(({accountId,label,...strategy})=><StrategyQuantCard key={accountId} name={label} {...strategy}/>)}</section>
+    <Panel title="净值与风险调整收益" subtitle={`统一拟合 ${commonStart} = 100；夏普按日收益、零无风险利率年化；回测不改动模拟盘账本`}><LineComparisonChart title="策略累计净值" subtitle="比较区间收益、回撤、波动与夏普" series={strategies} valueKey="normalized_nav" formatValue={(value)=>`${(value*100).toFixed(2)}`} selectedAccountIds={new Set()} onToggle={()=>{}}/></Panel>
     <Panel title="统一量化指标矩阵" subtitle="所有策略并列；收益率之外，长期优化优先看夏普、最大回撤和 Calmar"><Table rows={performanceRows} columns={[["strategy","策略"],["totalReturn","区间收益"],["annualizedReturn","年化收益"],["sharpe","夏普"],["volatility","年化波动"],["maxDrawdown","最大回撤"],["calmar","Calmar"],["winRate","日胜率"],["averageExposure","平均仓位"],["upCapture","上涨捕获"],["downCapture","下跌捕获"],["fillCount","成交笔数"],["turnover","累计单边换手"],["target","当前仓位"]]} format={{totalReturn:pct,annualizedReturn:pct,sharpe:num,volatility:pct,maxDrawdown:pct,calmar:num,winRate:pct,averageExposure:optionalPct,turnover:optionalPct,upCapture:pct,downCapture:pct,target:pct}}/></Panel>
     <Panel title="模拟盘版本分段" subtitle="各段收益由段首至段末收盘权益计算，继承持仓会影响后续表现"><Table rows={versionRows} columns={[["account","账户策略"],["version","信号版本"],["start","起始信号日"],["end","末次信号日"],["return","分段收益"]]} format={{return:optionalPct}}/></Panel>
+    <Panel title="风控 V4 实验状态" subtitle="急跌、信用和波动率确认，叠加领涨收窄。周线风险过滤回补。"><Table rows={v4Signal?[{...v4Signal,equity:v4?.equity}]:[]} columns={[["signal_date","信号日"],["regime","状态"],["tqqq","下一开盘 TQQQ 目标"],["cash","现金目标"],["equity","回放净值"]]} format={{tqqq:pct,cash:pct,equity:usd}}/>{!v4Signal&&<p className="empty">{v4===null?"V4 回放暂未就绪，页面会自动重试。":"正在加载 V4 回放…"}</p>}</Panel>
     <section className="quant-diagnosis"><div><small>V3 VS 满仓 TQQQ</small><b className={v3Gap>=0?"positive":"negative"}>{v3Gap>=0?"+":""}{pct(v3Gap)}</b><span>区间超额收益</span></div><div><small>上涨捕获率</small><b>{pct(v3Metrics.upCapture)}</b><span>越低越容易踏空反弹</span></div><div><small>下跌捕获率</small><b>{pct(v3Metrics.downCapture)}</b><span>越低代表下跌日表现越强</span></div><div><small>平均 TQQQ 仓位</small><b>{optionalPct(v3Metrics.averageExposure)}</b><span>满仓基准恒为 100%</span></div><p><strong>当前结论：</strong>{v3Diagnosis}</p></section>
     <div className="three-col quant-live-grid"><Panel title="Cycle v2 当前状态" subtitle={account.strategy_id}><Table rows={v2Signal?[{signal_date:v2Signal.signal_date,regime:v2Signal.regime,target:v2Signal.tqqq,cash:v2Signal.cash,raw:v2Indicators.base_tqqq,equity:account.equity}]:[]} columns={[["signal_date","信号日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["raw","原始目标"],["equity","模拟盘净值"]]} format={{target:pct,cash:pct,raw:pct,equity:usd}}/></Panel><Panel title="Momentum Dip v3 当前状态" subtitle={experiment.strategy_id}><Table rows={v3Signal?[{signal_date:v3Signal.signal_date,regime:v3Signal.regime,target:v3Signal.tqqq,cash:v3Signal.cash,momentum:v3Indicators.momentum,rsi:v3Indicators.rsi,equity:experiment.equity}]:[]} columns={[["signal_date","信号日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["momentum","动量"],["rsi","RSI"],["equity","模拟盘净值"]]} format={{target:pct,cash:pct,momentum:pct,rsi:num,equity:usd}}/></Panel><Panel title="满仓 TQQQ 当前状态" subtitle="被动参照系，不择时"><Table rows={[{signal_date:commonEnd,regime:"BUY_AND_HOLD",target:1,cash:0,equity:100000*(1+holdMetrics.totalReturn)}]} columns={[["signal_date","估值日"],["regime","状态"],["target","TQQQ目标"],["cash","现金"],["equity","拟合净值"]]} format={{target:pct,cash:pct,equity:usd}}/></Panel></div>
     <details className="quant-details"><summary><span>模拟盘执行与策略诊断</span><small>持仓、订单、成交、调度与底层信号</small></summary><div><Panel title="美股独立调度" subtitle="America/New_York · 服务启动自动补跑"><Table rows={account.scheduler?[account.scheduler]:[]} columns={[["running","运行中"],["last_startup_run","启动补跑"],["open_schedule","开盘执行"],["close_schedule","收盘计算"],["last_open_run","最近开盘任务"],["last_close_run","最近收盘任务"],["last_error","最近错误"]]} format={{running:(value)=>value?"是":"否"}}/></Panel><div className="two-col"><Panel title="v2持仓与订单" subtitle={`${account.execution_policy} · 与v3物理隔离`}><Table rows={account.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd}}/><Table rows={account.orders.slice(0,15)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"]]} format={{target_weight:pct}}/></Panel><Panel title="v3持仓与订单" subtitle={`${experiment.execution_policy} · 与v2物理隔离`}><Table rows={experiment.positions} columns={[["symbol","标的"],["quantity","股数"],["avg_cost","均价"],["mark_price","现价"],["market_value","市值"]]} format={{avg_cost:usd,mark_price:usd,market_value:usd}}/><Table rows={experiment.orders.slice(0,15)} columns={[["signal_date","信号日"],["execution_date","执行日"],["symbol","标的"],["side","方向"],["quantity","数量"],["target_weight","目标权重"],["status","状态"]]} format={{target_weight:pct}}/></Panel></div></div></details>
@@ -812,7 +860,7 @@ function Operations({ bank, execution, operations, acceptance, intraday, live, n
 }
 
 function Allocation({rows}:{rows:Row[]}){return <div className="allocation">{rows.map((row)=>{const m=sectorMeta(row.sector);return <div key={text(row.sector)}><div className="allocation-name"><i style={{background:m.color}}/><span><b>{m.label}</b><small>{m.thesis}</small></span></div><div className="bars"><span><i style={{width:`${Number(row.target_weight)*100}%`,background:`${m.color}55`}}/></span><span><i style={{width:`${Number(row.target_weight)*100}%`,background:m.color}}/></span></div><div className="values"><b>{pct(row.target_weight)}</b><small>全局选股后的行业暴露 · 非预算约束</small></div></div>})}</div>}
-function SectorCards({rows,names}:{rows:Row[];names:Record<string,string>}){return <div className="sector-cards">{rows.map((row)=>{const m=sectorMeta(row.sector);return <article key={text(row.sector)} style={{"--sector":m.color} as React.CSSProperties}><header><span>{m.label}</span><b>{pct(row.target_weight)}</b></header><p>{m.thesis}</p><div>{text(row.selected).split(",").map((s)=><small key={s}><b>{names[s]??"未知证券"}</b><span>{s}</span></small>)}</div><footer><span>实际目标暴露 {pct(row.target_weight)}</span><span>仅展示汇总</span></footer></article>})}</div>}
+function SectorCards({rows,names}:{rows:Row[];names:Record<string,string>}){return <div className="sector-cards">{rows.map((row)=>{const m=sectorMeta(row.sector);return <article key={text(row.sector)} style={{"--sector":m.color} as React.CSSProperties}><header><span>{m.label}</span><b>{pct(row.target_weight)}</b></header><p>{m.thesis}</p><div>{text(row.selected).split(",").map((s)=><small key={s}><b>{stockName(s,names)}</b></small>)}</div><footer><span>实际目标暴露 {pct(row.target_weight)}</span><span>仅展示汇总</span></footer></article>})}</div>}
 function UniverseCard({universe,names}:{universe:Universe;names:Record<string,string>}){const m=sectorMeta(universe.sector);const selectedCount=universe.ranking.filter((row)=>Boolean(row.selected)).length;return <article className="universe-card" style={{"--sector":m.color} as React.CSSProperties}><header><div><span>{m.label}</span><h3>{universe.name}</h3><small>{universe.fund_code} · {universe.style}</small></div><b>{selectedCount}<small>目标持仓</small></b></header><div className="factor-chips">{Object.entries(universe.factor_weights).map(([f,w])=><span key={f}>{factorLabels[f]??f}<b>{pct(w)}</b></span>)}</div><Table rows={universe.ranking.slice(0,universe.sector==="bank"?12:10)} columns={[["rank","排名"],["symbol","证券"],["score","模型分"],["selected","目标"]]} format={{symbol:(v)=>security(v,names),score:num,selected:(v)=>v?"持有":"—"}}/></article>}
 function Evidence({sectors}:{sectors:Sectors}){return <div className="evidence"><b>证据边界</b><p>{sectors.warning}</p><span>{sectors.evidence_status}</span></div>}
 function Intro({tag,title,children}:{tag:string;title:string;children:ReactNode}){return <section className="intro"><span>{tag}</span><h2>{title}</h2><p>{children}</p></section>}
@@ -866,4 +914,4 @@ function SystemHealthBar({health}:{health:SystemHealth}){
 
 function Panel({title,subtitle,children}:{title:string;subtitle?:string;children:ReactNode}){return <section className="panel"><header><div><h3>{title}</h3>{subtitle&&<p>{subtitle}</p>}</div><span>•••</span></header>{children}</section>}
 function Kpi({label,value,note,accent}:{label:string;value:string;note:string;accent?:boolean}){return <div className={`kpi ${accent?"accent":""}`}><small>{label}</small><b>{value}</b><span>{note}</span></div>}
-function Table({rows,columns,format={},strategyAccountId}:{rows:Row[];columns:[string,string][];format?:Record<string,(v:unknown)=>ReactNode>;strategyAccountId?:string}){const openSecurity=useContext(SecurityNavigationContext);const inheritedAccountId=useContext(SecurityAccountContext);if(!rows.length)return <p className="empty">暂无数据</p>;return <div className="table-wrap"><table><thead><tr>{columns.map(([,l])=><th key={l}>{l}</th>)}</tr></thead><tbody>{rows.map((row,i)=><tr key={i}>{columns.map(([k])=>{const value=row[k],content=format[k]?format[k](value):text(value);const isSecurity=(k==="symbol"||k==="instrument")&&/^\d{6}\.(SH|SZ|BJ)$/.test(text(value));const accountId=text(row.account_id)!=="—"?text(row.account_id):(strategyAccountId??inheritedAccountId);return <td key={k}>{isSecurity?<button className="security-link" onClick={()=>openSecurity(text(value),accountId)}>{content}</button>:content}</td>})}</tr>)}</tbody></table></div>}
+function Table({rows,columns,format={},strategyAccountId}:{rows:Row[];columns:[string,string][];format?:Record<string,(v:unknown)=>ReactNode>;strategyAccountId?:string}){const openSecurity=useContext(SecurityNavigationContext);const inheritedAccountId=useContext(SecurityAccountContext);const namesOnly=useContext(SecurityNamesOnlyContext);if(!rows.length)return <p className="empty">暂无数据</p>;return <div className="table-wrap"><table><thead><tr>{columns.map(([,l])=><th key={l}>{l}</th>)}</tr></thead><tbody>{rows.map((row,i)=><tr key={i}>{columns.map(([k])=>{const value=row[k];const code=stockCode(value);const isSecurity=(k==="symbol"||k==="instrument")&&Boolean(code);const content=isSecurity&&namesOnly?stockName(value,namesOnly,row):format[k]?format[k](value):text(value);const accountId=text(row.account_id)!=="—"?text(row.account_id):(strategyAccountId??inheritedAccountId);return <td key={k}>{isSecurity?<button className="security-link" onClick={()=>openSecurity(code!,accountId)}>{content}</button>:content}</td>})}</tr>)}</tbody></table></div>}

@@ -129,8 +129,8 @@ def frozen_reentry(history, context, alternate):
     return only_reentry(base, safe.astype(float)), safe, clock
 
 
-def episodes(prices, reference, candidate, base_frame, frame):
-    out = (reference > candidate).to_numpy()
+def episodes(prices, reference, candidate, base_frame, frame, *, added_exposure=False):
+    out = (candidate > reference if added_exposure else reference > candidate).to_numpy()
     starts = np.flatnonzero(out & ~np.r_[False, out[:-1]])
     ends = np.flatnonzero(~out & np.r_[False, out[:-1]])
     active = np.log(frame.nav / base_frame.nav)

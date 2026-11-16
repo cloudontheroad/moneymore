@@ -1,0 +1,4247 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-10",
+  "exit_session": "2026-11-11",
+  "feature_session": "2026-11-09",
+  "cutoff": "2026-11-10T14:25:00+00:00",
+  "prior_close_at": "2026-11-09T21:00:00+00:00",
+  "generated_at": "2026-11-10T14:21:03.794825+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -26.39272960369263,
+  "universe_snapshot": "top1000-2026-11-05T100515Z.parquet",
+  "universe_sha256": "911d267ba7df2139503128d60b5fb3520274841af621f7363a7385f6f275332a",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "REVIEW_ONLY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_status": "INSUFFICIENT_QUOTES",
+  "baseline_generated_at": "2026-11-10T10:17:05.851712+00:00",
+  "information_cutoff": "2026-11-10T14:20:00+00:00",
+  "added": [],
+  "removed": [],
+  "candidates": [],
+  "observations": [
+    {
+      "symbol": "US.SNDK",
+      "gap": -0.03201318592342106,
+      "news": [
+        {
+          "title": "Sandisk Stock Has Collapsed by 65%, but It's Still Undergoing an 8-for-1 Stock Split on Nov. 19. Here's Why I'm Still Not Buying Shares Amidst This Nasdaq Market Slump.",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sandisk-stock-collapsed-65-still-124000377.html",
+          "published_at": "2026-11-10T12:40:00+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        },
+        {
+          "title": "S&P 500: Just Three Of Nov. 5's 20 Biggest Losers Have Recovered Their Losses",
+          "url": "https://finance.yahoo.com/m/9a37b2c1-4285-3079-a1ca-57e262925bd6/s%26p-500%3A-just-three-of-nov..html",
+          "published_at": "2026-11-10T12:35:19+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        },
+        {
+          "title": "Sandisk Appears a Highly Lucrative Investment After Recent AI Meltdown",
+          "url": "https://finance.yahoo.com/technology/articles/sandisk-appears-highly-lucrative-investment-121800753.html",
+          "published_at": "2026-11-10T12:18:00+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        },
+        {
+          "title": "Social Buzz: Wallstreetbets Stocks Mixed Pre-Bell Tuesday; Rocket Lab, AMD to Open Lower",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/social-buzz-wallstreetbets-stocks-mixed-113659846.html",
+          "published_at": "2026-11-10T11:36:59+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        },
+        {
+          "title": "Sandisk And 2 Cash Flow Stocks To Watch",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sandisk-2-cash-flow-stocks-061328934.html",
+          "published_at": "2026-11-10T06:13:28+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        },
+        {
+          "title": "Seagate Dropped 15% in a Week: Morgan Stanley Says It Could Double in the Next 12 Months",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/seagate-dropped-15-week-morgan-045029866.html",
+          "published_at": "2026-11-10T04:50:29+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        },
+        {
+          "title": "Review & Preview: Dip Buyers Unite",
+          "url": "https://finance.yahoo.com/m/7e3b2b5c-9d1b-3605-b9e3-670584095571/review-%26-preview%3A-dip-buyers.html",
+          "published_at": "2026-11-10T00:55:00+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        },
+        {
+          "title": "Intel took 25 years to get back to its dot-com peak — and lost it in 6 months: Chart of the Day",
+          "url": "https://finance.yahoo.com/markets/article/intel-took-25-years-to-get-back-to-its-dot-com-peak--and-lost-it-in-6-months-chart-of-the-day-144715722.html",
+          "published_at": "2026-11-09T21:38:19+00:00",
+          "observed_at": "2026-11-10T14:20:59.981457+00:00"
+        }
+      ],
+      "after_hours_price": 882.483,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 858.13,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.387390+00:00"
+    },
+    {
+      "symbol": "US.IREN",
+      "gap": -0.03326015191384868,
+      "news": [
+        {
+          "title": "Despite CoreWeave Plummeting 55% Over 6 Months This Wall Street Team Maintains That a 400% Return Will Materialize",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/despite-coreweave-plummeting-55-over-121506680.html",
+          "published_at": "2026-11-10T12:15:06+00:00",
+          "observed_at": "2026-11-10T14:21:00.244325+00:00"
+        },
+        {
+          "title": "CoreWeave Has a Sentiment Problem Even Strong Earnings Can't Fix",
+          "url": "https://finance.yahoo.com/technology/ai/articles/coreweave-sentiment-problem-even-strong-092225958.html",
+          "published_at": "2026-11-10T09:22:25+00:00",
+          "observed_at": "2026-11-10T14:21:00.244325+00:00"
+        },
+        {
+          "title": "CRWV Rallies Ahead Of Quarterly Report: Wells Fargo Calls CoreWeave ‘Highest Quality’ Firm Among Neocloud Peers, Sees Upside",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/crwv-rallies-ahead-quarterly-report-055827759.html",
+          "published_at": "2026-11-10T05:58:27+00:00",
+          "observed_at": "2026-11-10T14:21:00.244325+00:00"
+        },
+        {
+          "title": "Could IREN Actually Climb 117%? Or Is Cantor Fitzgerald Totally Wrong?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/could-iren-actually-climb-117-210608212.html",
+          "published_at": "2026-11-09T21:06:08+00:00",
+          "observed_at": "2026-11-10T14:21:00.244325+00:00"
+        }
+      ],
+      "after_hours_price": 21.4999,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 20.6979,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.368960+00:00"
+    },
+    {
+      "symbol": "US.LITE",
+      "gap": -0.055102614439593856,
+      "news": [
+        {
+          "title": "“The Next Trillion Dollar Company”: Marvell Is Up 82% in 2026. Take Profits, or Buy More?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/next-trillion-dollar-company-marvell-133104348.html",
+          "published_at": "2026-11-10T13:31:04+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        },
+        {
+          "title": "UBS Adjusts Lumentum Price Target to $686 From $960, Maintains Neutral Rating",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ubs-adjusts-lumentum-price-target-133002160.html",
+          "published_at": "2026-11-10T13:30:02+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        },
+        {
+          "title": "Who Is Paying For AOI's Cash Burn?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/paying-aois-cash-burn-131123965.html",
+          "published_at": "2026-11-10T13:11:23+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        },
+        {
+          "title": "S&P 500: Just Three Of Nov. 5's 20 Biggest Losers Have Recovered Their Losses",
+          "url": "https://finance.yahoo.com/m/9a37b2c1-4285-3079-a1ca-57e262925bd6/s%26p-500%3A-just-three-of-nov..html",
+          "published_at": "2026-11-10T12:35:19+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        },
+        {
+          "title": "Bernstein Adjusts Price Target on Lumentum Holdings to $700 From $635",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/bernstein-adjusts-price-target-lumentum-104818932.html",
+          "published_at": "2026-11-10T10:48:18+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        },
+        {
+          "title": "A $28 Billion Fund Bought These 3 Stocks",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/28-billion-fund-bought-3-074644149.html",
+          "published_at": "2026-11-10T07:46:44+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        },
+        {
+          "title": "Even After a Cut, B. Riley’s $250 Target Says Marvell’s Selloff Went Too Far",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/even-cut-b-riley-250-061036234.html",
+          "published_at": "2026-11-10T06:10:36+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        },
+        {
+          "title": "Review & Preview: Dip Buyers Unite",
+          "url": "https://finance.yahoo.com/m/7e3b2b5c-9d1b-3605-b9e3-670584095571/review-%26-preview%3A-dip-buyers.html",
+          "published_at": "2026-11-10T00:55:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.154432+00:00"
+        }
+      ],
+      "after_hours_price": 601.5,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 563.31,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.375518+00:00"
+    },
+    {
+      "symbol": "US.SMCI",
+      "gap": -0.02167833472831171,
+      "news": [
+        {
+          "title": "Should You Buy, Sell or Hold HPE Stock at a P/E Multiple of 10.08X?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/buy-sell-hold-hpe-stock-124500626.html",
+          "published_at": "2026-11-10T12:45:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        },
+        {
+          "title": "Our Pick Of The Best Founder Led Stocks In November 2026",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/pick-best-founder-led-stocks-111010588.html",
+          "published_at": "2026-11-10T11:10:10+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        },
+        {
+          "title": "Moonshot Rents Nvidia's Top AI Chips in China, Documents Show",
+          "url": "https://finance.yahoo.com/technology/ai/articles/moonshot-rents-nvidia-top-ai-045437361.html",
+          "published_at": "2026-11-10T10:08:23+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        },
+        {
+          "title": "Market Chatter: Nvidia's Most Advanced Chips Accessed by China's Moonshot AI",
+          "url": "https://finance.yahoo.com/technology/ai/articles/market-chatter-nvidia-apos-most-093250675.html",
+          "published_at": "2026-11-10T09:32:50+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        },
+        {
+          "title": "Nvidia’s China Spy Fallout Deepens: Report Says Moonshot AI Accessed NVDA’s Advanced Chips Despite Export Controls",
+          "url": "https://finance.yahoo.com/technology/ai/articles/nvidia-china-spy-fallout-deepens-084856006.html",
+          "published_at": "2026-11-10T08:48:56+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        },
+        {
+          "title": "New Strong Buy Stocks for November 10th",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/strong-buy-stocks-november-10th-080100512.html",
+          "published_at": "2026-11-10T08:01:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        },
+        {
+          "title": "Best Value Stocks to Buy for November 10th",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/best-value-stocks-buy-november-063200018.html",
+          "published_at": "2026-11-10T06:32:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        },
+        {
+          "title": "Moonshot AI rents Nvidia’s top chips in China, Bloomberg reports",
+          "url": "https://finance.yahoo.com/technology/ai/articles/moonshot-ai-rents-nvidia-top-054313159.html",
+          "published_at": "2026-11-10T05:43:13+00:00",
+          "observed_at": "2026-11-10T14:21:00.343304+00:00"
+        }
+      ],
+      "after_hours_price": 28.7328,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 27.98,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.366723+00:00"
+    },
+    {
+      "symbol": "US.DDOG",
+      "gap": null,
+      "news": [
+        {
+          "title": "Cribl Acquires Tero to Lead Observability Into the AI Era",
+          "url": "https://finance.yahoo.com/technology/ai/articles/cribl-acquires-tero-lead-observability-140000378.html",
+          "published_at": "2026-11-10T14:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.173438+00:00"
+        },
+        {
+          "title": "Cloudflare Is Up 11% in a Week. Is Its “Even Higher Gear” Really That Good?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cloudflare-11-week-even-higher-133521616.html",
+          "published_at": "2026-11-10T13:35:21+00:00",
+          "observed_at": "2026-11-10T14:21:00.173438+00:00"
+        }
+      ],
+      "after_hours_price": 180.4663,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00"
+    },
+    {
+      "symbol": "US.QXO",
+      "gap": -0.020319284355968747,
+      "news": [
+        {
+          "title": "QXO Inc. (QXO) is Skyrocketing by Double Digits — Here’s What’s Next",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/qxo-inc-qxo-skyrocketing-double-033917798.html",
+          "published_at": "2026-11-10T03:39:17+00:00",
+          "observed_at": "2026-11-10T14:21:00.140221+00:00"
+        },
+        {
+          "title": "QXO (QXO) Stock May Still Look Like A Bargain After $1 Billion Platform Launch",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/qxo-qxo-stock-may-still-221000147.html",
+          "published_at": "2026-11-09T22:10:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.140221+00:00"
+        },
+        {
+          "title": "CKX Lands Soars on Brad Jacobs Investment. His Last Big Bet Hasn’t Panned Out.",
+          "url": "https://finance.yahoo.com/m/485662b7-ebf2-3bae-8b8a-449ec7406615/ckx-lands-soars-on-brad.html",
+          "published_at": "2026-11-09T21:38:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.140221+00:00"
+        },
+        {
+          "title": "QXO (QXO), Why Is It Getting Fresh Attention Today?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/qxo-qxo-why-getting-fresh-210716404.html",
+          "published_at": "2026-11-09T21:07:16+00:00",
+          "observed_at": "2026-11-10T14:21:00.140221+00:00"
+        }
+      ],
+      "after_hours_price": 13.8282,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 13.5,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.359244+00:00"
+    },
+    {
+      "symbol": "US.STX",
+      "gap": -0.03122972733025342,
+      "news": [
+        {
+          "title": "Capital Group Div Value (CGDV) Buys $69.5 Million More FTAI Aviation on Nov. 6",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/capital-group-div-value-cgdv-110522934.html",
+          "published_at": "2026-11-10T11:05:22+00:00",
+          "observed_at": "2026-11-10T14:21:00.341304+00:00"
+        },
+        {
+          "title": "Seagate Launches the FireCuda Forge, Powered by New Alkemi Intelligent Platform to Deliver Both SSD-Grade Responsiveness and HDD Capacity",
+          "url": "https://finance.yahoo.com/technology/articles/seagate-launches-firecuda-forge-powered-110100296.html",
+          "published_at": "2026-11-10T11:01:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.341304+00:00"
+        },
+        {
+          "title": "Seagate Dropped 15% in a Week: Morgan Stanley Says It Could Double in the Next 12 Months",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/seagate-dropped-15-week-morgan-045029866.html",
+          "published_at": "2026-11-10T04:50:29+00:00",
+          "observed_at": "2026-11-10T14:21:00.341304+00:00"
+        },
+        {
+          "title": "Review & Preview: Dip Buyers Unite",
+          "url": "https://finance.yahoo.com/m/7e3b2b5c-9d1b-3605-b9e3-670584095571/review-%26-preview%3A-dip-buyers.html",
+          "published_at": "2026-11-10T00:55:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.341304+00:00"
+        }
+      ],
+      "after_hours_price": 504.3071,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 490.3334,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.331300+00:00"
+    },
+    {
+      "symbol": "US.VSXY",
+      "gap": null,
+      "news": [
+        {
+          "title": "Victoria's Secret (VSXY) Stock Could Be 34% Overvalued As Cash Flow Stays Tight",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/victorias-secret-vsxy-stock-could-232302762.html",
+          "published_at": "2026-11-09T23:23:02+00:00",
+          "observed_at": "2026-11-10T14:21:00.155442+00:00"
+        }
+      ],
+      "after_hours_price": 113.35,
+      "after_hours_bar_end": "2026-11-09T23:05:00+00:00"
+    },
+    {
+      "symbol": "US.BBY",
+      "gap": -0.00733909285151324,
+      "news": [
+        {
+          "title": "What Moved Best Buy Stock?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/moved-best-buy-stock-131124350.html",
+          "published_at": "2026-11-10T13:11:24+00:00",
+          "observed_at": "2026-11-10T14:21:00.334305+00:00"
+        },
+        {
+          "title": "Best Buy (BBY) Stock Looks Cheap Based On Future Cash Flow",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/best-buy-bby-stock-looks-111053080.html",
+          "published_at": "2026-11-10T11:10:53+00:00",
+          "observed_at": "2026-11-10T14:21:00.334305+00:00"
+        },
+        {
+          "title": "Best Buy Stock Gets Fresh Analyst Support as Value Appeal Draws Investor Interest",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/best-buy-stock-gets-fresh-070657553.html",
+          "published_at": "2026-11-10T07:06:57+00:00",
+          "observed_at": "2026-11-10T14:21:00.334305+00:00"
+        },
+        {
+          "title": "Is Best Buy (BBY) Undervalued As Value Metrics And Earnings Views Draw Fresh Interest?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/best-buy-bby-undervalued-value-061158710.html",
+          "published_at": "2026-11-10T06:11:58+00:00",
+          "observed_at": "2026-11-10T14:21:00.334305+00:00"
+        }
+      ],
+      "after_hours_price": 106.5267,
+      "after_hours_bar_end": "2026-11-10T00:25:00+00:00",
+      "price": 105.5,
+      "bar_end": "2026-11-10T08:55:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.336321+00:00"
+    },
+    {
+      "symbol": "US.BRKR",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 66.5,
+      "after_hours_bar_end": "2026-11-09T22:25:00+00:00"
+    },
+    {
+      "symbol": "US.AAL",
+      "gap": -0.0028248480106689566,
+      "news": [],
+      "after_hours_price": 14.3,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 14.12,
+      "bar_end": "2026-11-10T09:15:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.381394+00:00"
+    },
+    {
+      "symbol": "US.UAL",
+      "gap": -0.0012460313741681217,
+      "news": [
+        {
+          "title": "United Airlines Named Title Sponsor of \"Somebody Feed Phil\" & Launches Airline Ticket Giveaway Tied to Season 9 Debut",
+          "url": "https://finance.yahoo.com/media-advertising/articles/united-airlines-named-title-sponsor-130000520.html",
+          "published_at": "2026-11-10T13:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:00.461175+00:00"
+        }
+      ],
+      "after_hours_price": 120.757,
+      "after_hours_bar_end": "2026-11-10T00:55:00+00:00",
+      "price": 120.23,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:20:59.371320+00:00"
+    },
+    {
+      "symbol": "US.NVMI",
+      "gap": null,
+      "news": [
+        {
+          "title": "Nova to Participate in Investor Conferences in November and December",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/nova-participate-investor-conferences-november-130000314.html",
+          "published_at": "2026-11-10T13:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.160507+00:00"
+        }
+      ],
+      "after_hours_price": 333.24,
+      "after_hours_bar_end": "2026-11-09T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.PCOR",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 75.85,
+      "after_hours_bar_end": "2026-11-09T23:05:00+00:00"
+    },
+    {
+      "symbol": "US.RKT",
+      "gap": -0.029624726321957562,
+      "news": [
+        {
+          "title": "October Marks the First Month in 3 Years With a Decline in U.S. Home-Sale Prices, According to Redfin",
+          "url": "https://finance.yahoo.com/real-estate/articles/october-marks-first-month-3-130000260.html",
+          "published_at": "2026-11-10T13:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.280906+00:00"
+        },
+        {
+          "title": "ETFs Are Buying Rocket Cos. (RKT) on Nov. 6",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/etfs-buying-rocket-cos-rkt-110123207.html",
+          "published_at": "2026-11-10T11:01:23+00:00",
+          "observed_at": "2026-11-10T14:21:01.280906+00:00"
+        },
+        {
+          "title": "How Earnings Beat Will Impact Rocket Companies (RKT) Investors",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/earnings-beat-impact-rocket-companies-001508522.html",
+          "published_at": "2026-11-10T00:15:08+00:00",
+          "observed_at": "2026-11-10T14:21:01.280906+00:00"
+        }
+      ],
+      "after_hours_price": 15.2,
+      "after_hours_bar_end": "2026-11-10T00:45:00+00:00",
+      "price": 14.74,
+      "bar_end": "2026-11-10T09:15:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:00.636567+00:00"
+    },
+    {
+      "symbol": "US.LVS",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 40.38,
+      "after_hours_bar_end": "2026-11-10T00:00:00+00:00"
+    },
+    {
+      "symbol": "US.FLS",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 85.85,
+      "after_hours_bar_end": "2026-11-09T22:10:00+00:00"
+    },
+    {
+      "symbol": "US.ALGN",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 174.26,
+      "after_hours_bar_end": "2026-11-09T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.DB",
+      "gap": 0.025061534395645957,
+      "news": [
+        {
+          "title": "Deutsche Bank cuts Hugo Boss on falling sales, distribution reset",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/deutsche-bank-cuts-hugo-boss-121553197.html",
+          "published_at": "2026-11-10T12:15:53+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        },
+        {
+          "title": "FRN Variable Rate Fix",
+          "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-070000898.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        },
+        {
+          "title": "FRN Variable Rate Fix",
+          "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-070000618.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        },
+        {
+          "title": "FRN Variable Rate Fix",
+          "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-070000359.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        },
+        {
+          "title": "FRN Variable Rate Fix",
+          "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-070000834.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        },
+        {
+          "title": "FRN Variable Rate Fix",
+          "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-070000195.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        },
+        {
+          "title": "FRN Variable Rate Fix",
+          "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-070000133.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        },
+        {
+          "title": "FRN Variable Rate Fix",
+          "url": "https://finance.yahoo.com/markets/options/articles/frn-variable-rate-fix-070000252.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.313160+00:00"
+        }
+      ],
+      "after_hours_price": 36.66,
+      "after_hours_bar_end": "2026-11-09T23:15:00+00:00",
+      "price": 37.4865,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:00.677437+00:00"
+    },
+    {
+      "symbol": "US.ASX",
+      "gap": 0.04743886381383344,
+      "news": [
+        {
+          "title": "Sector Update: Tech Stocks Fall Pre-Bell Tuesday",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sector-tech-stocks-fall-pre-140818006.html",
+          "published_at": "2026-11-10T14:08:18+00:00",
+          "observed_at": "2026-11-10T14:21:01.349747+00:00"
+        },
+        {
+          "title": "ASE Technology October Revenue Increases",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ase-technology-october-revenue-increases-090919831.html",
+          "published_at": "2026-11-10T09:09:19+00:00",
+          "observed_at": "2026-11-10T14:21:01.349747+00:00"
+        },
+        {
+          "title": "Why Is TSM Stock Rising Overnight?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-tsm-stock-rising-overnight-070208918.html",
+          "published_at": "2026-11-10T07:02:08+00:00",
+          "observed_at": "2026-11-10T14:21:01.349747+00:00"
+        },
+        {
+          "title": "ASE Technology Holding Co., Ltd. Announces Monthly Net Revenues*",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ase-technology-holding-co-ltd-070000383.html",
+          "published_at": "2026-11-10T07:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.349747+00:00"
+        }
+      ],
+      "after_hours_price": 34.5,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 35.99,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:00.696669+00:00"
+    },
+    {
+      "symbol": "US.GDDY",
+      "gap": null,
+      "news": [
+        {
+          "title": "Baird Adjusts Price Target on GoDaddy to $140 From $120",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/baird-adjusts-price-target-godaddy-112809115.html",
+          "published_at": "2026-11-10T11:28:09+00:00",
+          "observed_at": "2026-11-10T14:21:01.764629+00:00"
+        }
+      ],
+      "after_hours_price": 111.71,
+      "after_hours_bar_end": "2026-11-09T21:10:00+00:00"
+    },
+    {
+      "symbol": "US.ARXS",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 50.26,
+      "after_hours_bar_end": "2026-11-09T21:45:00+00:00"
+    },
+    {
+      "symbol": "US.RMBS",
+      "gap": -0.029725017677713406,
+      "news": [],
+      "after_hours_price": 81.4,
+      "after_hours_bar_end": "2026-11-10T00:30:00+00:00",
+      "price": 78.34,
+      "bar_end": "2026-11-10T09:00:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:00.700670+00:00"
+    },
+    {
+      "symbol": "US.DRS",
+      "gap": null,
+      "news": [
+        {
+          "title": "Leonardo DRS Awarded NAVAIR Contract to Produce DAIRCM Aircraft Survivability System",
+          "url": "https://finance.yahoo.com/technology/articles/leonardo-drs-awarded-navair-contract-133000270.html",
+          "published_at": "2026-11-10T13:30:00+00:00",
+          "observed_at": "2026-11-10T14:21:01.443556+00:00"
+        }
+      ],
+      "after_hours_price": 36.3535,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00"
+    },
+    {
+      "symbol": "US.NCLH",
+      "gap": 0.0002658542983646761,
+      "news": [],
+      "after_hours_price": 18.4143,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 18.4349,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:00.900836+00:00"
+    },
+    {
+      "symbol": "US.FISV",
+      "gap": -0.0003148686658667188,
+      "news": [
+        {
+          "title": "Keefe Bruyette & Woods Adjusts Fiserv Price Target to $70 From $60",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/keefe-bruyette-woods-adjusts-fiserv-140744247.html",
+          "published_at": "2026-11-10T14:07:44+00:00",
+          "observed_at": "2026-11-10T14:21:02.254416+00:00"
+        },
+        {
+          "title": "Clover Helps Small Businesses Get Discovered and Sell Anywhere in the Age of AI Shopping",
+          "url": "https://finance.yahoo.com/small-business/articles/clover-helps-small-businesses-discovered-133000912.html",
+          "published_at": "2026-11-10T13:30:00+00:00",
+          "observed_at": "2026-11-10T14:21:02.254416+00:00"
+        }
+      ],
+      "after_hours_price": 63.2016,
+      "after_hours_bar_end": "2026-11-10T00:10:00+00:00",
+      "price": 63.5,
+      "bar_end": "2026-11-10T08:50:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:01.419617+00:00"
+    },
+    {
+      "symbol": "US.FROG",
+      "gap": -0.018302831388555818,
+      "news": [
+        {
+          "title": "What iShares Russell 2000 Index Fund (IWM) Sold: Glaukos Leads on Nov. 6",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ishares-russell-2000-index-fund-110441849.html",
+          "published_at": "2026-11-10T11:04:41+00:00",
+          "observed_at": "2026-11-10T14:21:02.424251+00:00"
+        },
+        {
+          "title": "Why JFrog (FROG) stock is up today",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-jfrog-frog-stock-today-002136331.html",
+          "published_at": "2026-11-10T00:21:36+00:00",
+          "observed_at": "2026-11-10T14:21:02.424251+00:00"
+        }
+      ],
+      "after_hours_price": 108.0703,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 106.2,
+      "bar_end": "2026-11-10T08:55:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:01.507464+00:00"
+    },
+    {
+      "symbol": "US.DD",
+      "gap": null,
+      "news": [
+        {
+          "title": "Dupont De Nemours Insider Sold Shares Worth $349,308, According to a Recent SEC Filing",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/dupont-nemours-insider-sold-shares-224847184.html",
+          "published_at": "2026-11-09T22:48:47+00:00",
+          "observed_at": "2026-11-10T14:21:02.856596+00:00"
+        },
+        {
+          "title": "Dupont De Nemours Insider Sold Shares Worth $633,896, According to a Recent SEC Filing",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/dupont-nemours-insider-sold-shares-224821449.html",
+          "published_at": "2026-11-09T22:48:21+00:00",
+          "observed_at": "2026-11-10T14:21:02.856596+00:00"
+        },
+        {
+          "title": "Dupont De Nemours Insider Sold Shares Worth $13,154,206, According to a Recent SEC Filing",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/dupont-nemours-insider-sold-shares-223055039.html",
+          "published_at": "2026-11-09T22:30:55+00:00",
+          "observed_at": "2026-11-10T14:21:02.856596+00:00"
+        }
+      ],
+      "after_hours_price": 154.18,
+      "after_hours_bar_end": "2026-11-09T21:40:00+00:00"
+    },
+    {
+      "symbol": "US.CBOE",
+      "gap": null,
+      "news": [
+        {
+          "title": "Keefe, Bruyette & Woods Adjusts Price Target on Cboe Global Markets to $320 From $350",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/keefe-bruyette-woods-adjusts-price-114138339.html",
+          "published_at": "2026-11-10T11:41:38+00:00",
+          "observed_at": "2026-11-10T14:21:02.319551+00:00"
+        }
+      ],
+      "after_hours_price": 348.7325,
+      "after_hours_bar_end": "2026-11-10T00:55:00+00:00"
+    },
+    {
+      "symbol": "US.INTC",
+      "gap": -0.033687029945782654,
+      "news": [
+        {
+          "title": "AMD vs. Intel: Which Is the Better Artificial Intelligence (AI) Chip Stock to Buy Right Now?",
+          "url": "https://finance.yahoo.com/technology/ai/articles/amd-vs-intel-better-artificial-141202096.html",
+          "published_at": "2026-11-10T14:12:02+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        },
+        {
+          "title": "DataKrypto Collaborates with Intel to Make Encrypted Execution a Standard Property of AI Infrastructure",
+          "url": "https://finance.yahoo.com/technology/ai/articles/datakrypto-collaborates-intel-encrypted-execution-140000872.html",
+          "published_at": "2026-11-10T14:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        },
+        {
+          "title": "Intel Can Catch Taiwan Semiconductor on Physics, Not Economics",
+          "url": "https://finance.yahoo.com/technology/articles/intel-catch-taiwan-semiconductor-physics-134534156.html",
+          "published_at": "2026-11-10T13:45:34+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        },
+        {
+          "title": "What Sent Intel Stock Higher?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sent-intel-stock-higher-131127348.html",
+          "published_at": "2026-11-10T13:11:27+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        },
+        {
+          "title": "AMD Just Guided to More Revenue Than Intel. A Decade Ago Intel Was 12x Its Size",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/amd-just-guided-more-revenue-122822825.html",
+          "published_at": "2026-11-10T12:28:22+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        },
+        {
+          "title": "Chip Stocks and Nvidia Trade Places as Normal Service Resumes",
+          "url": "https://finance.yahoo.com/m/923499dc-8e00-3f3b-bf12-512d15457c26/chip-stocks-and-nvidia-trade.html",
+          "published_at": "2026-11-10T11:50:00+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        },
+        {
+          "title": "SoftBank Logs $7 Billion Loss After US Data Center Costs Swell",
+          "url": "https://finance.yahoo.com/technology/ai/articles/softbank-logs-7-billion-loss-065612363.html",
+          "published_at": "2026-11-10T11:20:17+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        },
+        {
+          "title": "What Goldman Sachs Nasdaq-100 Premium Income (GPIQ) Bought: Honeywell Leads on Nov. 6",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/goldman-sachs-nasdaq-100-premium-110552738.html",
+          "published_at": "2026-11-10T11:05:52+00:00",
+          "observed_at": "2026-11-10T14:21:02.329558+00:00"
+        }
+      ],
+      "after_hours_price": 59.1324,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 57.37,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:01.553914+00:00"
+    },
+    {
+      "symbol": "US.ALSN",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 124.05,
+      "after_hours_bar_end": "2026-11-09T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.JHX",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 29.6,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00"
+    },
+    {
+      "symbol": "US.BDX",
+      "gap": null,
+      "news": [
+        {
+          "title": "Can Cardinal Health Stock Repeat Its Last Five Years?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cardinal-health-stock-repeat-last-131129617.html",
+          "published_at": "2026-11-10T13:11:29+00:00",
+          "observed_at": "2026-11-10T14:21:02.593596+00:00"
+        }
+      ],
+      "after_hours_price": 218.3887,
+      "after_hours_bar_end": "2026-11-09T22:20:00+00:00"
+    },
+    {
+      "symbol": "US.TEM",
+      "gap": -0.03304124065292646,
+      "news": [
+        {
+          "title": "SOTERIA Collaborates with Tempus to Advance Precision Oncology for U.S. Military and Veterans Battling Cancer",
+          "url": "https://finance.yahoo.com/healthcare/articles/soteria-collaborates-tempus-advance-precision-213900561.html",
+          "published_at": "2026-11-09T21:39:00+00:00",
+          "observed_at": "2026-11-10T14:21:02.530581+00:00"
+        }
+      ],
+      "after_hours_price": 83.25,
+      "after_hours_bar_end": "2026-11-10T00:55:00+00:00",
+      "price": 81.65,
+      "bar_end": "2026-11-10T09:15:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:01.769626+00:00"
+    },
+    {
+      "symbol": "US.XPEV",
+      "gap": -2.6125243857144653e-08,
+      "news": [],
+      "after_hours_price": 10.17,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 10.22,
+      "bar_end": "2026-11-10T09:15:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:01.964662+00:00"
+    },
+    {
+      "symbol": "US.SAIL",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 20.2912,
+      "after_hours_bar_end": "2026-11-09T22:55:00+00:00"
+    },
+    {
+      "symbol": "US.NTSK",
+      "gap": -0.012894609784418698,
+      "news": [
+        {
+          "title": "Netskope Appoints Carrie Francey as Global Channel Chief",
+          "url": "https://finance.yahoo.com/technology/ai/articles/netskope-appoints-carrie-francey-global-140000535.html",
+          "published_at": "2026-11-10T14:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:02.928256+00:00"
+        },
+        {
+          "title": "PubMatic, Inc. (PUBM) Q3 Earnings and Revenues Surpass Estimates",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/pubmatic-inc-pubm-q3-earnings-223507696.html",
+          "published_at": "2026-11-09T22:35:07+00:00",
+          "observed_at": "2026-11-10T14:21:02.928256+00:00"
+        }
+      ],
+      "after_hours_price": 22.8302,
+      "after_hours_bar_end": "2026-11-10T00:20:00+00:00",
+      "price": 22.2,
+      "bar_end": "2026-11-10T09:10:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.115398+00:00"
+    },
+    {
+      "symbol": "US.LOW",
+      "gap": -0.004739362665115432,
+      "news": [
+        {
+          "title": "BofA Securities Adjusts Lowe's Companies PT to $251 From $252, Maintains Neutral Rating",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/bofa-securities-adjusts-lowe-apos-131056721.html",
+          "published_at": "2026-11-10T13:10:56+00:00",
+          "observed_at": "2026-11-10T14:21:03.027582+00:00"
+        },
+        {
+          "title": "Lowe's Becomes Exclusive Home Improvement Partner of Bilt, Making Homeownership More Rewarding Through Bilt Neighborhood OS",
+          "url": "https://finance.yahoo.com/real-estate/articles/lowes-becomes-exclusive-home-improvement-130000930.html",
+          "published_at": "2026-11-10T13:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:03.027582+00:00"
+        },
+        {
+          "title": "Bilt Introduces the Operating System for Neighborhoods, Bilt Neighborhood OS™, Connecting Businesses and Communities to Power Local Commerce",
+          "url": "https://finance.yahoo.com/small-business/articles/bilt-introduces-operating-system-neighborhoods-113000855.html",
+          "published_at": "2026-11-10T11:30:00+00:00",
+          "observed_at": "2026-11-10T14:21:03.027582+00:00"
+        },
+        {
+          "title": "Bernstein Adjusts Price Target on Lowe's Companies to $270 From $254",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/bernstein-adjusts-price-target-lowe-104824676.html",
+          "published_at": "2026-11-10T10:48:24+00:00",
+          "observed_at": "2026-11-10T14:21:03.027582+00:00"
+        }
+      ],
+      "after_hours_price": 232.1,
+      "after_hours_bar_end": "2026-11-09T21:25:00+00:00",
+      "price": 231.0,
+      "bar_end": "2026-11-10T09:00:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.334944+00:00"
+    },
+    {
+      "symbol": "US.RCL",
+      "gap": 0.0005044483594218718,
+      "news": [
+        {
+          "title": "3 Consumer Stocks Trading Under 17 Times Earnings",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/3-consumer-stocks-trading-under-102500126.html",
+          "published_at": "2026-11-10T10:25:00+00:00",
+          "observed_at": "2026-11-10T14:21:03.308893+00:00"
+        }
+      ],
+      "after_hours_price": 337.1962,
+      "after_hours_bar_end": "2026-11-10T01:00:00+00:00",
+      "price": 337.15,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.685555+00:00"
+    },
+    {
+      "symbol": "US.SWK",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 118.1,
+      "after_hours_bar_end": "2026-11-09T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.CLX",
+      "gap": 0.00018953113741448924,
+      "news": [],
+      "after_hours_price": 104.65,
+      "after_hours_bar_end": "2026-11-09T23:10:00+00:00",
+      "price": 105.55,
+      "bar_end": "2026-11-10T09:05:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.702361+00:00"
+    },
+    {
+      "symbol": "US.IBN",
+      "gap": 0.0014513566325911054,
+      "news": [],
+      "after_hours_price": 34.45,
+      "after_hours_bar_end": "2026-11-09T21:10:00+00:00",
+      "price": 34.5,
+      "bar_end": "2026-11-10T08:50:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.663483+00:00"
+    },
+    {
+      "symbol": "US.PHG",
+      "gap": -0.0071452065267476605,
+      "news": [],
+      "after_hours_price": 30.79,
+      "after_hours_bar_end": "2026-11-09T21:05:00+00:00",
+      "price": 30.57,
+      "bar_end": "2026-11-10T09:10:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.773332+00:00"
+    },
+    {
+      "symbol": "US.CNH",
+      "gap": -0.011700444490715722,
+      "news": [
+        {
+          "title": "CNH Industrial NV (CNH) Q3 2026 Earnings Call Highlights: Construction JV With Kobelco, Margin ...",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cnh-industrial-nv-cnh-q3-130155205.html",
+          "published_at": "2026-11-10T13:01:55+00:00",
+          "observed_at": "2026-11-10T14:21:03.378179+00:00"
+        },
+        {
+          "title": "Is CNH Industrials Stock Worth Buying After Q3 2026 Results?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cnh-industrials-stock-worth-buying-124600663.html",
+          "published_at": "2026-11-10T12:46:00+00:00",
+          "observed_at": "2026-11-10T14:21:03.378179+00:00"
+        },
+        {
+          "title": "CNH to sell 70% stake in construction equipment business to Kobelco",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cnh-sell-70-stake-construction-103032086.html",
+          "published_at": "2026-11-10T10:30:32+00:00",
+          "observed_at": "2026-11-10T14:21:03.378179+00:00"
+        },
+        {
+          "title": "Truist Securities Adjusts Price Target on CNH Industrial to $16 From $17, Keeps Buy Rating",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/truist-securities-adjusts-price-target-101531600.html",
+          "published_at": "2026-11-10T10:15:31+00:00",
+          "observed_at": "2026-11-10T14:21:03.378179+00:00"
+        },
+        {
+          "title": "CNH Industrial N.V. Q3 2026 Earnings Call Summary",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cnh-industrial-n-v-q3-214449900.html",
+          "published_at": "2026-11-09T21:44:49+00:00",
+          "observed_at": "2026-11-10T14:21:03.378179+00:00"
+        },
+        {
+          "title": "CNH Industrial (CNH) Q3 2026 Earnings Call Transcript",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cnh-industrial-cnh-q3-2026-211443763.html",
+          "published_at": "2026-11-09T21:14:43+00:00",
+          "observed_at": "2026-11-10T14:21:03.378179+00:00"
+        }
+      ],
+      "after_hours_price": 12.6634,
+      "after_hours_bar_end": "2026-11-10T00:35:00+00:00",
+      "price": 12.67,
+      "bar_end": "2026-11-10T08:50:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.776340+00:00"
+    },
+    {
+      "symbol": "US.TECK",
+      "gap": null,
+      "news": [
+        {
+          "title": "Galantas Gold Appoints Senior Vice President of Operations",
+          "url": "https://finance.yahoo.com/markets/commodities/articles/galantas-gold-appoints-senior-vice-133000726.html",
+          "published_at": "2026-11-10T13:30:00+00:00",
+          "observed_at": "2026-11-10T14:21:03.521205+00:00"
+        }
+      ],
+      "after_hours_price": 64.67,
+      "after_hours_bar_end": "2026-11-09T23:45:00+00:00"
+    },
+    {
+      "symbol": "US.U",
+      "gap": -0.014777373141939387,
+      "news": [
+        {
+          "title": "Digital Turbine Plunges 23% Despite Revenue Beat as Margins Shrink and Profit Outlook Stays Put; Unity Slides 2%, AppLovin Dips",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/digital-turbine-plunges-23-despite-135202311.html",
+          "published_at": "2026-11-10T13:52:02+00:00",
+          "observed_at": "2026-11-10T14:21:03.494616+00:00"
+        },
+        {
+          "title": "Why Did U, MRNA, ABNB Stocks Surge To 52-Week Highs Today?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-did-u-mrna-abnb-043430252.html",
+          "published_at": "2026-11-10T04:34:30+00:00",
+          "observed_at": "2026-11-10T14:21:03.494616+00:00"
+        },
+        {
+          "title": "Unity (U) stock trades up, here is why",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/unity-u-stock-trades-why-014136492.html",
+          "published_at": "2026-11-10T01:41:36+00:00",
+          "observed_at": "2026-11-10T14:21:03.494616+00:00"
+        }
+      ],
+      "after_hours_price": 51.26,
+      "after_hours_bar_end": "2026-11-10T00:55:00+00:00",
+      "price": 50.67,
+      "bar_end": "2026-11-10T09:20:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:02.931256+00:00"
+    },
+    {
+      "symbol": "US.CCL",
+      "gap": 0.004219426691126182,
+      "news": [],
+      "after_hours_price": 30.8866,
+      "after_hours_bar_end": "2026-11-10T00:50:00+00:00",
+      "price": 30.94,
+      "bar_end": "2026-11-10T09:15:00-05:00",
+      "quote_observed_at": "2026-11-10T14:21:03.122797+00:00"
+    },
+    {
+      "symbol": "US.PHM",
+      "gap": null,
+      "news": [
+        {
+          "title": "Beyond Sunshine: New PulteGroup Survey Highlights What Matters Most to Homebuyers in Their Next Chapter",
+          "url": "https://finance.yahoo.com/real-estate/articles/beyond-sunshine-pultegroup-survey-highlights-120000108.html",
+          "published_at": "2026-11-10T12:00:00+00:00",
+          "observed_at": "2026-11-10T14:21:03.792825+00:00"
+        }
+      ],
+      "after_hours_price": 135.88,
+      "after_hours_bar_end": "2026-11-09T21:25:00+00:00"
+    },
+    {
+      "symbol": "US.FERG",
+      "gap": null,
+      "news": [
+        {
+          "title": "UBS Adjusts Price Target on Ferguson Enterprises to $270 From $256, Maintains Neutral Rating",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ubs-adjusts-price-target-ferguson-134159844.html",
+          "published_at": "2026-11-10T13:41:59+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        },
+        {
+          "title": "Deutsche Bank Adjusts Ferguson Enterprises Price Target to $273 From $235, Maintains Hold Rating",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/deutsche-bank-adjusts-ferguson-enterprises-123854169.html",
+          "published_at": "2026-11-10T12:38:54+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        },
+        {
+          "title": "RBC Lifts Price Target on Ferguson Enterprises to $288 From $286, Keeps Outperform Rating",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/rbc-lifts-price-target-ferguson-120020165.html",
+          "published_at": "2026-11-10T12:00:20+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        },
+        {
+          "title": "Jefferies Adjusts Price Target on Ferguson Enterprises to $305 From $292",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/jefferies-adjusts-price-target-ferguson-104242920.html",
+          "published_at": "2026-11-10T10:42:42+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        },
+        {
+          "title": "Baird Adjusts Price Target on Ferguson Enterprises to $300 From $288",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/baird-adjusts-price-target-ferguson-104126354.html",
+          "published_at": "2026-11-10T10:41:26+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        },
+        {
+          "title": "Jefferies Adjusts Price Target on Ferguson Enterprises to $305 From $292",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/jefferies-adjusts-price-target-ferguson-103411170.html",
+          "published_at": "2026-11-10T10:34:11+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        },
+        {
+          "title": "Baird Adjusts Price Target on Ferguson Enterprises to $300 From $288",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/baird-adjusts-price-target-ferguson-103347835.html",
+          "published_at": "2026-11-10T10:33:47+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        },
+        {
+          "title": "Ferguson plc Q3 2026 Earnings Call Summary",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ferguson-plc-q3-2026-earnings-215315292.html",
+          "published_at": "2026-11-09T21:53:15+00:00",
+          "observed_at": "2026-11-10T14:21:03.698211+00:00"
+        }
+      ],
+      "after_hours_price": 260.8603,
+      "after_hours_bar_end": "2026-11-10T00:40:00+00:00"
+    },
+    {
+      "symbol": "US.CSL",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 388.68,
+      "after_hours_bar_end": "2026-11-09T23:50:00+00:00"
+    }
+  ],
+  "events": {
+    "status": "OK",
+    "earnings": [
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T11:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T00:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T00:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T11:45:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T06:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T20:55:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T22:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T07:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T20:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:10:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T13:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T15:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T00:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T23:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T00:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T05:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:15:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T07:46:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T12:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T16:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T05:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T13:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T05:12:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:05:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T11:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-09T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T08:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-11T00:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T08:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T20:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T20:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T06:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T08:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T20:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T12:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T06:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T20:55:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T13:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T12:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T12:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T17:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T07:46:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:20:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T17:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T14:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-11T00:30:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      },
+      {
+        "security": null,
+        "eps_actual": null,
+        "eps_predict": null,
+        "revenue_actual": null,
+        "revenue_predict": null,
+        "published_at": "2026-11-10T21:00:00.000Z",
+        "observed_at": "2026-11-10T14:20:59.995Z"
+      }
+    ],
+    "economic": [
+      {
+        "title": "美国NFIB小型企业信心指数",
+        "actual": "97.8",
+        "consensus": "",
+        "previous": "97.9",
+        "published_at": "2026-11-10T11:00:00.000Z",
+        "observed_at": "2026-11-10T14:21:00.531Z"
+      },
+      {
+        "title": "美国当周ADP就业人数周度变动",
+        "actual": "1.975",
+        "consensus": "",
+        "previous": "1.675",
+        "published_at": "2026-11-10T13:15:00.000Z",
+        "observed_at": "2026-11-10T14:21:00.531Z"
+      },
+      {
+        "title": "美国季调后CPI月率",
+        "actual": "0.4",
+        "consensus": "0.30",
+        "previous": "0.60",
+        "published_at": "2026-11-10T13:30:00.000Z",
+        "observed_at": "2026-11-10T14:21:00.531Z"
+      },
+      {
+        "title": "美国季调后核心CPI月率",
+        "actual": "0.3",
+        "consensus": "0.20",
+        "previous": "0.30",
+        "published_at": "2026-11-10T13:30:00.000Z",
+        "observed_at": "2026-11-10T14:21:00.531Z"
+      },
+      {
+        "title": "美国未季调CPI",
+        "actual": "337.511",
+        "consensus": "337.023",
+        "previous": "336.94",
+        "published_at": "2026-11-10T13:30:00.000Z",
+        "observed_at": "2026-11-10T14:21:00.531Z"
+      },
+      {
+        "title": "美国实际收入月率",
+        "actual": "0",
+        "consensus": "",
+        "previous": "-0.5",
+        "published_at": "2026-11-10T13:30:00.000Z",
+        "observed_at": "2026-11-10T14:21:00.531Z"
+      },
+      {
+        "title": "美国当周红皮书商业零售销售年率",
+        "actual": "10.1",
+        "consensus": "",
+        "previous": "10.4",
+        "published_at": "2026-11-10T13:55:00.000Z",
+        "observed_at": "2026-11-10T14:21:00.531Z"
+      }
+    ]
+  },
+  "quote_count": 28
+}

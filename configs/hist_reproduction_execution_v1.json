@@ -1,0 +1,12 @@
+{
+  "frozen_before_test_predictions": true,
+  "reason": "Author label predicts next close/current close; next-close-only execution misses its target horizon. No author trading source is available.",
+  "lanes": ["next_open_top30_targets", "paper_top30_targets", "qlib_top30_dropout30"],
+  "primary_live_timing_reconstruction": "next_open_top30_targets",
+  "paper_execution_identity_certified": false,
+  "signal_timestamp": "t close, complete Alpha360 available",
+  "next_open_top30_targets": "Orders sized using t close; fill t+1 open; 100% equal-weight targets, opening-price-based 9.5% guard, no close-based limit filtering at open",
+  "paper_top30_targets": "Previously frozen t+1 close equal-weight target reconstruction retained, not renamed or dropped",
+  "qlib_top30_dropout30": "Previously frozen Qlib-native t+1 close, top30/drop30, risk_degree 0.95",
+  "not_live_certified": "Public dataset and author DK_L membership limitations remain; no market impact or historical limit-rule completeness certificate"
+}

@@ -1,0 +1,105 @@
+{
+  "positions": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0097959771,
+      "prior_close": 886.5100097656,
+      "rank": 1,
+      "entry_open": 861.3400268554688,
+      "allocation_usd": 10000,
+      "shares": 11.609816899497208
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0067170584,
+      "prior_close": 21.4099998474,
+      "rank": 2,
+      "entry_open": 20.799999237060547,
+      "allocation_usd": 10000,
+      "shares": 480.7692484037417
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.0063584096,
+      "prior_close": 596.1599731445,
+      "rank": 3,
+      "entry_open": 575.030029296875,
+      "allocation_usd": 10000,
+      "shares": 17.39039613675067
+    },
+    {
+      "symbol": "US.SMCI",
+      "name": "超微电脑",
+      "score": 0.0044805147,
+      "prior_close": 28.6000003815,
+      "rank": 4,
+      "entry_open": 27.96500015258789,
+      "allocation_usd": 10000,
+      "shares": 357.58984249726876
+    },
+    {
+      "symbol": "US.DDOG",
+      "name": "Datadog",
+      "score": 0.0043526372,
+      "prior_close": 179.6199951172,
+      "rank": 5,
+      "entry_open": 177.8300018310547,
+      "allocation_usd": 10000,
+      "shares": 56.233480835817474
+    },
+    {
+      "symbol": "US.QXO",
+      "name": "QXO Inc",
+      "score": 0.004082395,
+      "prior_close": 13.779999733,
+      "rank": 6,
+      "entry_open": 12.649999618530273,
+      "allocation_usd": 10000,
+      "shares": 790.5138578306012
+    },
+    {
+      "symbol": "US.STX",
+      "name": "希捷科技",
+      "score": 0.0037556708,
+      "prior_close": 506.1400146484,
+      "rank": 7,
+      "entry_open": 493.7650146484375,
+      "allocation_usd": 10000,
+      "shares": 20.25254868881311
+    },
+    {
+      "symbol": "US.VSXY",
+      "name": "维多利亚的秘密",
+      "score": 0.0030089171,
+      "prior_close": 113.5199966431,
+      "rank": 8,
+      "entry_open": 111.0,
+      "allocation_usd": 10000,
+      "shares": 90.09009009009009
+    },
+    {
+      "symbol": "US.BBY",
+      "name": "百思买",
+      "score": 0.0026242208,
+      "prior_close": 106.2799987793,
+      "rank": 9,
+      "entry_open": 100.99500274658203,
+      "allocation_usd": 10000,
+      "shares": 99.01480002027556
+    },
+    {
+      "symbol": "US.BRKR",
+      "name": "布鲁克",
+      "score": 0.0024960732,
+      "prior_close": 66.5400009155,
+      "rank": 10,
+      "entry_open": 66.51000213623047,
+      "allocation_usd": 10000,
+      "shares": 150.3533254970778
+    }
+  ],
+  "recorded_at": "2026-11-10T14:32:08.963304+00:00"
+}

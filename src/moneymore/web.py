@@ -61,6 +61,7 @@ from .intraday_execution import (
 )
 from .leveraged_etf import LeveragedEtfPaper, LeveragedEtfScheduler
 from .leveraged_etf_v3 import LeveragedEtfV3Paper
+from .leveraged_etf_v4 import LeveragedEtfV4Experiment
 from .long_term_review import evaluate_long_term_review
 from .market_risk import build_market_risk_snapshot
 from .model_registry import ModelRegistry
@@ -126,6 +127,7 @@ leveraged_etf_v3_paper_service = LeveragedEtfV3Paper(
     LEVERAGED_ETF_V3_DATABASE, LEVERAGED_ETF_V3_CACHE
 )
 leveraged_etf_v3_scheduler = LeveragedEtfScheduler(leveraged_etf_v3_paper_service)
+leveraged_etf_v4_experiment = LeveragedEtfV4Experiment(STATE / "tqqq_v4_experiment.json")
 SYMBOL = "600036.SH"
 ACCOUNT = "default"
 SHANGHAI = ZoneInfo("Asia/Shanghai")
@@ -1234,8 +1236,10 @@ class TaskService:
                 try:
                     load_dotenv(ROOT / ".env")
                     _require_trading_gate()
-                    intraday_results = [run_baseline_intraday_once(root=ROOT, now=now)]
-                    intraday_results.append(run_baseline_intraday_once(
+                    from .execution.isolation import isolated_execution_call
+                    intraday_results = [isolated_execution_call(INTRADAY_ACCOUNT,
+                        lambda: run_baseline_intraday_once(root=ROOT, now=now))]
+                    intraday_results.append(isolated_execution_call(EXPOSURE_INTRADAY_ACCOUNT, lambda: run_baseline_intraday_once(
                         root=ROOT,
                         now=now,
                         source_account=BASELINE_EXPOSURE_ACCOUNT,
@@ -1244,8 +1248,13 @@ class TaskService:
                         tick_table="baseline_pysystemtrade_intraday_account_ticks",
                         daily_table="baseline_pysystemtrade_intraday_account_daily",
                         audit_subdirectory="baseline-pysystemtrade-intraday-execution",
-                    ))
+                    )))
                     for result in intraday_results:
+                        if result.get("status") == "EXECUTION_ERROR":
+                            self._notify("ERROR", "INTRADAY_EXECUTION_FAILED", "日内分支执行失败",
+                                f"{result['account_id']}: {result.get('error', '')}; 其他分支继续",
+                                trade_date=trade_date,
+                                dedupe_key=f"{minute_key}:{result['account_id']}:intraday-execution-failed")
                         if result.get("status") in {"QMT_QUOTES_EMPTY", "REALTIME_QUOTES_EMPTY", "PARTIAL_COMPENSATION"}:
                             self._notify(
                                 "ERROR" if result["status"] in {"QMT_QUOTES_EMPTY", "REALTIME_QUOTES_EMPTY"} else "WARN",
@@ -2018,6 +2027,7 @@ async def lifespan(_: FastAPI):
     finrl_training_service.start()
     leveraged_etf_scheduler.start()
     leveraged_etf_v3_scheduler.start()
+    leveraged_etf_v4_experiment.start()
     us_open2open_scheduler.start()
     if task_service.config().get("enabled"):
         try:
@@ -2028,6 +2038,7 @@ async def lifespan(_: FastAPI):
     yield
     us_open2open_scheduler.stop()
     leveraged_etf_v3_scheduler.stop()
+    leveraged_etf_v4_experiment.stop()
     leveraged_etf_scheduler.stop()
     finrl_training_service.stop()
     weekly_training_service.stop()
@@ -2092,6 +2103,14 @@ def leveraged_etf_v3_paper() -> dict[str, object]:
     payload = leveraged_etf_v3_paper_service.snapshot()
     payload["scheduler"] = leveraged_etf_v3_scheduler.status()
     payload["research_gate"] = "FAILED_HISTORICAL_GATE_EXPERIMENT_ONLY"
+    return payload
+
+
+@app.get("/api/leveraged-etf-v4-experiment")
+def leveraged_etf_v4_snapshot() -> dict[str, object]:
+    payload = leveraged_etf_v4_experiment.snapshot()
+    if payload is None:
+        raise HTTPException(status_code=503, detail="V4 replay is warming up")
     return payload
 
 

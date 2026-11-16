@@ -51,42 +51,49 @@ class OpenToOpenScheduler:
             try:
                 now = pd.Timestamp.now(tz="UTC")
                 day = now.tz_convert("America/New_York").date()
-                if cal.is_session(day):
-                    opening = cal.session_open(day)
-                    if now >= opening + pd.Timedelta(minutes=2):
-                        due = False
-                        for path in (book / "plans").glob("*.json"):
-                            if path.stem > str(day) or (book / "settled" / path.name).is_file():
-                                continue
-                            plan = read_record(path)
-                            if plan.get("status") in {"READY", "CASH"} and (
-                                plan["exit_session"] <= str(day) or not (book / "entries" / path.name).is_file()
-                            ):
-                                due = True
-                                break
-                        if due:
-                            self.command("run_us_open2open.py", "settle", timeout=240)
-                    elif (opening - pd.Timedelta(hours=3) <= now < opening - pd.Timedelta(minutes=12)
-                          and (last_attempt is None or now - last_attempt >= pd.Timedelta(minutes=20))):
-                        last_attempt = now
-                        plan = read_record(book / "plans" / f"{day}.json")
-                        if plan.get("status") in {"READY", "CASH"}:
-                            self.stop_event.wait(120)
-                            continue
-                        if last_refresh != day:
-                            universe = self.root / "data/us_overnight_paper_only/universe"
-                            snapshots = sorted(universe.glob("top1000-*.parquet"))
-                            captured = pd.to_datetime(
-                                snapshots[-1].stem.removeprefix("top1000-"),
-                                format="%Y-%m-%dT%H%M%SZ", utc=True,
-                            ) if snapshots else None
-                            if captured is None or now - captured >= pd.Timedelta(days=5):
-                                if not self.command("sync_us_top1000.py", timeout=180):
-                                    log.warning("Could not refresh the US market-cap snapshot")
-                            self.command("sync_us_yahoo_adjusted_history.py", "--refresh", "--workers", "16")
-                            if self.command("sync_us_yahoo_adjusted_history.py", "--context-only"):
-                                last_refresh = day
-                        self.command("run_us_open2open.py", "score", timeout=480)
+                next_session = cal.date_to_session(day, direction="next")
+                opening = cal.session_open(next_session)
+                if opening - pd.Timedelta(minutes=10) <= now < opening - pd.Timedelta(minutes=5):
+                    if not (book / "premarket" / "plans" / f"{day}.json").is_file():
+                        self.command("run_us_open2open.py", "review", timeout=210)
+                if cal.is_session(day) and now >= opening + pd.Timedelta(minutes=2):
+                    if self.settlement_due(book, day) or self.settlement_due(book / "premarket", day):
+                        self.command("run_us_open2open.py", "settle", timeout=240)
+                if now >= opening:
+                    next_session = cal.next_session(next_session)
+                    opening = cal.session_open(next_session)
+                prior_close = cal.session_close(cal.previous_session(next_session))
+                plan = read_record(book / "plans" / f"{next_session.date()}.json")
+                if (prior_close + pd.Timedelta(minutes=2) <= now < opening - pd.Timedelta(minutes=25)
+                        and plan.get("status") not in {"READY", "CASH"}
+                        and (last_attempt is None or now - last_attempt >= pd.Timedelta(minutes=20))):
+                    last_attempt = now
+                    if last_refresh != next_session or plan.get("status") == "DATA_PENDING":
+                        universe = self.root / "data/us_overnight_paper_only/universe"
+                        snapshots = sorted(universe.glob("top1000-*.parquet"))
+                        captured = pd.to_datetime(
+                            snapshots[-1].stem.removeprefix("top1000-"),
+                            format="%Y-%m-%dT%H%M%SZ", utc=True,
+                        ) if snapshots else None
+                        if captured is None or now - captured >= pd.Timedelta(days=5):
+                            if not self.command("sync_us_top1000.py", timeout=180):
+                                log.warning("Could not refresh the US market-cap snapshot")
+                        self.command("sync_us_yahoo_adjusted_history.py", "--refresh", "--workers", "16")
+                        if self.command("sync_us_yahoo_adjusted_history.py", "--context-only"):
+                            last_refresh = next_session
+                    self.command("run_us_open2open.py", "score", timeout=480)
             except Exception:
                 log.exception("US paper book scheduler tick failed")
-            self.stop_event.wait(120)
+            self.stop_event.wait(60)
+
+    @staticmethod
+    def settlement_due(book, day):
+        for path in (book / "plans").glob("*.json"):
+            if path.stem > str(day) or (book / "settled" / path.name).is_file():
+                continue
+            plan = read_record(path)
+            if plan.get("status") in {"READY", "CASH"} and (
+                plan["exit_session"] <= str(day) or not (book / "entries" / path.name).is_file()
+            ):
+                return True
+        return False

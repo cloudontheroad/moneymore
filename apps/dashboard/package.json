@@ -7,7 +7,7 @@
   },
   "scripts": {
     "postinstall": "node scripts/patch-vinext-windows.mjs",
-    "prebuild": "node scripts/patch-vinext-windows.mjs",
+    "prebuild": "node scripts/guard-live-build.mjs && node scripts/patch-vinext-windows.mjs",
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",

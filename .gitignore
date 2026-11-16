@@ -20,6 +20,7 @@ state/
 mlruns/
 external_research/easyths-upstream/
 external_research/us_overnight/
+external_research/HIST-upstream/
 
 # Locally generated US Overnight research panels
 /data/us_overnight_corrected/features/historical_panel_61_lag1.parquet

@@ -125,7 +125,16 @@ def prepare_portfolio_candidate(
     if set(held) - set(marks):
         raise ValueError("HELD_MARK_MISSING")
     scores = score_frame.set_index("instrument").score
-    risk, size, styles = risk_snapshot(store, scores, trade_date)
+    from .strategy_universe import active_strategy_universe
+    members = set(active_strategy_universe(store, trade_date).symbol) if held else set(scores.index)
+    exits = set(held) - members
+    if (set(held) & members) - set(scores.index):
+        raise ValueError("HELD_SCORE_MISSING_NOT_EXIT")
+    # An exited constituent still needs observed prices and risk history until
+    # liquidated. Its absent forecast is not absent market data or a new alpha.
+    risk_scores = scores.reindex(sorted(set(scores.index) | set(held)))
+    risk_scores.loc[list(exits)] = 0.
+    risk, size, styles = risk_snapshot(store, risk_scores, trade_date)
     if set(held) - set(styles.index):
         raise ValueError("HELD_RISK_MISSING")
     budget = json.loads(budget_path.read_text(encoding="utf-8")) if budget_path.exists() else None
@@ -135,7 +144,7 @@ def prepare_portfolio_candidate(
         current = pd.Series({s: q * marks[s] for s, q in held.items()})
         current /= current.sum()
         solved = optimize_snapshot(
-            scores,
+            risk_scores,
             risk,
             size,
             current,
@@ -143,6 +152,7 @@ def prepare_portfolio_candidate(
             style_controls=styles,
             style_limits=budget["limits"],
             solver_max_iters=1000,
+            forced_sell_symbols=exits,
         )
         if solved["status"] != "PASS_OFFLINE_ONLY":
             raise ValueError("FIXED_BUDGET_OPTIMIZER_BLOCKED:" + ",".join(solved["failures"]))

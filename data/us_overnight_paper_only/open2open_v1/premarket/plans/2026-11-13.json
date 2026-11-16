@@ -1,0 +1,957 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-13",
+  "exit_session": "2026-11-16",
+  "feature_session": "2026-11-12",
+  "cutoff": "2026-11-13T14:25:00+00:00",
+  "prior_close_at": "2026-11-12T21:00:00+00:00",
+  "generated_at": "2026-11-13T14:21:07.560710+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -13.518430168494582,
+  "universe_snapshot": "top1000-2026-11-10T210227Z.parquet",
+  "universe_sha256": "f686105da089e4d5564f4c42ac704562a49e9f79d864ef866230b510e0575a10",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "REVIEW_ONLY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_status": "INSUFFICIENT_QUOTES",
+  "baseline_generated_at": "2026-11-12T21:09:46.954641+00:00",
+  "information_cutoff": "2026-11-13T14:20:00+00:00",
+  "added": [],
+  "removed": [],
+  "candidates": [],
+  "observations": [
+    {
+      "symbol": "US.BMNR",
+      "gap": -0.013001034474672268,
+      "news": [
+        {
+          "title": "Tom Lee Says ‘Buy The Dip’ In NVDA After Huang Exit Even As Bitcoin Plunges Below $70,000: ‘Best Risk/Reward In AI’",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/tom-lee-says-buy-dip-080041466.html",
+          "published_at": "2026-11-13T08:00:41+00:00",
+          "observed_at": "2026-11-13T14:21:05.021816+00:00"
+        },
+        {
+          "title": "Bitcoin Slips Below $69K For First Time Since August: Is This A Buying Opportunity Or A Deeper Crypto Rout?",
+          "url": "https://finance.yahoo.com/markets/crypto/articles/bitcoin-slips-below-69k-first-065341025.html",
+          "published_at": "2026-11-13T06:53:41+00:00",
+          "observed_at": "2026-11-13T14:21:05.021816+00:00"
+        }
+      ],
+      "after_hours_price": 18.4034,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 18.22,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.539442+00:00"
+    },
+    {
+      "symbol": "US.TEAM",
+      "gap": 0.01825469063274121,
+      "news": [],
+      "after_hours_price": 153.5,
+      "after_hours_bar_end": "2026-11-13T00:20:00+00:00",
+      "price": 155.07,
+      "bar_end": "2026-11-13T08:50:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.511918+00:00"
+    },
+    {
+      "symbol": "US.MRNA",
+      "gap": -0.01002812207604642,
+      "news": [
+        {
+          "title": "While AI hogged the headlines, 1 overlooked sector beat the S&P 500 — and its top stock is up 700%+ this year",
+          "url": "https://finance.yahoo.com/healthcare/articles/while-ai-hogged-headlines-1-120000682.html",
+          "published_at": "2026-11-13T12:00:00+00:00",
+          "observed_at": "2026-11-13T14:21:04.970288+00:00"
+        },
+        {
+          "title": "What Invesco S&P 500 Equal Weight ETF (RSP) Sold: Moderna Leads on Nov. 11",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/invesco-p-500-equal-weight-110446427.html",
+          "published_at": "2026-11-13T11:04:46+00:00",
+          "observed_at": "2026-11-13T14:21:04.970288+00:00"
+        },
+        {
+          "title": "GSK (LSE:GSK) Settles Key Vaccine Patent Case And Wins Broad Europe Injunction",
+          "url": "https://finance.yahoo.com/healthcare/articles/gsk-lse-gsk-settles-key-011833121.html",
+          "published_at": "2026-11-13T01:18:33+00:00",
+          "observed_at": "2026-11-13T14:21:04.970288+00:00"
+        },
+        {
+          "title": "BioNTech May Be the Next Moderna. Even if it Isn’t, the Stock Is a Buy.",
+          "url": "https://finance.yahoo.com/m/fc45c58a-4252-3372-875d-f16083e354e8/biontech-may-be-the-next.html",
+          "published_at": "2026-11-13T01:02:00+00:00",
+          "observed_at": "2026-11-13T14:21:04.970288+00:00"
+        },
+        {
+          "title": "Moderna Targets 2027 Cancer Therapy Launch, Raises 2026 Revenue Growth Outlook",
+          "url": "https://finance.yahoo.com/healthcare/articles/moderna-targets-2027-cancer-therapy-221448230.html",
+          "published_at": "2026-11-12T22:14:48+00:00",
+          "observed_at": "2026-11-13T14:21:04.970288+00:00"
+        },
+        {
+          "title": "Moderna Needs a Post-Covid Hit. Its Cancer-Drug Spending Plan Ups the Stakes.",
+          "url": "https://finance.yahoo.com/m/de21e165-70de-341f-afd1-3672f935c4cb/moderna-needs-a-post-covid.html",
+          "published_at": "2026-11-12T21:29:00+00:00",
+          "observed_at": "2026-11-13T14:21:04.970288+00:00"
+        }
+      ],
+      "after_hours_price": 230.82,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 229.03,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.491879+00:00"
+    },
+    {
+      "symbol": "US.VSXY",
+      "gap": 0.004016046677626894,
+      "news": [
+        {
+          "title": "Looking For Stocks To Buy In The IBD 50? You May Be Disappointed.",
+          "url": "https://finance.yahoo.com/m/6b542b66-ffdb-3b8c-be99-d687bd411ff5/looking-for-stocks-to-buy-in.html",
+          "published_at": "2026-11-13T13:00:15+00:00",
+          "observed_at": "2026-11-13T14:21:05.023814+00:00"
+        }
+      ],
+      "after_hours_price": 104.1973,
+      "after_hours_bar_end": "2026-11-13T00:25:00+00:00",
+      "price": 105.0,
+      "bar_end": "2026-11-13T08:50:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.506890+00:00"
+    },
+    {
+      "symbol": "US.CBOE",
+      "gap": 0.007527327576812404,
+      "news": [
+        {
+          "title": "Wall Street panics, Cboe profits: Why the stock jumped 10% this month",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-panics-cboe-profits-072950401.html",
+          "published_at": "2026-11-13T07:29:50+00:00",
+          "observed_at": "2026-11-13T14:21:05.066821+00:00"
+        }
+      ],
+      "after_hours_price": 370.52,
+      "after_hours_bar_end": "2026-11-13T00:00:00+00:00",
+      "price": 372.1,
+      "bar_end": "2026-11-13T08:50:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.504890+00:00"
+    },
+    {
+      "symbol": "US.GPN",
+      "gap": null,
+      "news": [
+        {
+          "title": "What Could Go Wrong With Mastercard Stock?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/could-wrong-mastercard-stock-121251022.html",
+          "published_at": "2026-11-13T12:12:51+00:00",
+          "observed_at": "2026-11-13T14:21:04.933776+00:00"
+        },
+        {
+          "title": "CD&R, GTCR put Global Payments takeover talks on hold- report",
+          "url": "https://finance.yahoo.com/news/cd-r-gtcr-put-global-083642798.html",
+          "published_at": "2026-11-13T08:36:42+00:00",
+          "observed_at": "2026-11-13T14:21:04.933776+00:00"
+        },
+        {
+          "title": "Global Payments (GPN) Sheds Double Digits. These 2 Firms May Hold the Reason",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/global-payments-gpn-sheds-double-005130571.html",
+          "published_at": "2026-11-13T00:51:30+00:00",
+          "observed_at": "2026-11-13T14:21:04.933776+00:00"
+        },
+        {
+          "title": "Global Payments Sinks 12% as CD&R and GTCR Walk Away From Buyout Talks",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/global-payments-sinks-12-cd-210558807.html",
+          "published_at": "2026-11-12T21:05:58+00:00",
+          "observed_at": "2026-11-13T14:21:04.933776+00:00"
+        }
+      ],
+      "after_hours_price": 87.0,
+      "after_hours_bar_end": "2026-11-13T00:10:00+00:00"
+    },
+    {
+      "symbol": "US.ILMN",
+      "gap": null,
+      "news": [
+        {
+          "title": "Illumina (ILMN) Stock Sees Modest Fair Value Lift As Analysts Debate Growth Outlook",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/illumina-ilmn-stock-sees-modest-051332622.html",
+          "published_at": "2026-11-13T05:13:32+00:00",
+          "observed_at": "2026-11-13T14:21:04.917258+00:00"
+        },
+        {
+          "title": "Illumina Insider Sold Shares Worth $61,093,041, According to a Recent SEC Filing",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/illumina-insider-sold-shares-worth-222710931.html",
+          "published_at": "2026-11-12T22:27:10+00:00",
+          "observed_at": "2026-11-13T14:21:04.917258+00:00"
+        }
+      ],
+      "after_hours_price": 208.85,
+      "after_hours_bar_end": "2026-11-12T22:35:00+00:00"
+    },
+    {
+      "symbol": "US.IREN",
+      "gap": -0.0020533646375785475,
+      "news": [
+        {
+          "title": "J.P. Morgan’s $55 Target Says IREN’s Selloff Went Too Far",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/j-p-morgan-55-target-132600042.html",
+          "published_at": "2026-11-13T13:26:00+00:00",
+          "observed_at": "2026-11-13T14:21:04.957781+00:00"
+        },
+        {
+          "title": "Applied Digital Soars 20% in a Week. Jim Chanos Calls the Wait for Profits a “Nonsensical Narrative”",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/applied-digital-soars-20-week-120517763.html",
+          "published_at": "2026-11-13T12:05:17+00:00",
+          "observed_at": "2026-11-13T14:21:04.957781+00:00"
+        },
+        {
+          "title": "CRWV vs IREN vs NBIS: Which Neocloud Stock To Bet On After Q3 Reports Allay Durability Fears",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/crwv-vs-iren-vs-nbis-083340683.html",
+          "published_at": "2026-11-13T08:33:40+00:00",
+          "observed_at": "2026-11-13T14:21:04.957781+00:00"
+        },
+        {
+          "title": "Zacks Investment Ideas feature highlights: Nebius, CoreWeave, IREN and NVIDIA",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/zacks-investment-ideas-feature-highlights-065200630.html",
+          "published_at": "2026-11-13T06:52:00+00:00",
+          "observed_at": "2026-11-13T14:21:04.957781+00:00"
+        },
+        {
+          "title": "Stock Market Today, Nov. 12: Nebius Group Sinks Nearly 17% After Lowering 2026 Outlook",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/stock-market-today-nov-12-224840461.html",
+          "published_at": "2026-11-12T22:48:40+00:00",
+          "observed_at": "2026-11-13T14:21:04.957781+00:00"
+        }
+      ],
+      "after_hours_price": 19.77,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 19.44,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.542444+00:00"
+    },
+    {
+      "symbol": "US.AEIS",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 228.78,
+      "after_hours_bar_end": "2026-11-12T21:50:00+00:00"
+    },
+    {
+      "symbol": "US.SMMT",
+      "gap": 0.01293533619680054,
+      "news": [],
+      "after_hours_price": 15.25,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 15.27,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.488882+00:00"
+    },
+    {
+      "symbol": "US.HL",
+      "gap": 0.002622685073041975,
+      "news": [],
+      "after_hours_price": 13.51,
+      "after_hours_bar_end": "2026-11-13T00:55:00+00:00",
+      "price": 13.38,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.516927+00:00"
+    },
+    {
+      "symbol": "US.MTSI",
+      "gap": 0.000976584873716435,
+      "news": [],
+      "after_hours_price": 249.48,
+      "after_hours_bar_end": "2026-11-13T00:00:00+00:00",
+      "price": 246.0,
+      "bar_end": "2026-11-13T09:00:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:04.513927+00:00"
+    },
+    {
+      "symbol": "US.KYMR",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 127.17,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.TXG",
+      "gap": 0.015228452608072818,
+      "news": [],
+      "after_hours_price": 59.46,
+      "after_hours_bar_end": "2026-11-12T23:55:00+00:00",
+      "price": 60.0,
+      "bar_end": "2026-11-13T08:50:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.163875+00:00"
+    },
+    {
+      "symbol": "US.UAL",
+      "gap": 0.003959550561797753,
+      "news": [
+        {
+          "title": "United Airlines Blocks AI Agents From Booking Flights as Analyst Says Carrier Wants to Avoid Another Google-Like Intermediary",
+          "url": "https://finance.yahoo.com/technology/ai/articles/united-airlines-blocks-ai-agents-130010387.html",
+          "published_at": "2026-11-13T13:00:10+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        },
+        {
+          "title": "One Reason United Airlines Stock Looks Better Than Its Price",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/one-reason-united-airlines-stock-121251644.html",
+          "published_at": "2026-11-13T12:12:51+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        },
+        {
+          "title": "Loyalty members seek rewards of all sizes",
+          "url": "https://finance.yahoo.com/small-business/articles/loyalty-members-seek-rewards-sizes-120000020.html",
+          "published_at": "2026-11-13T12:00:00+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        },
+        {
+          "title": "What’s Behind United Airlines Holdings (UAL) Latest Move?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/behind-united-airlines-holdings-ual-091008865.html",
+          "published_at": "2026-11-13T09:10:08+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        },
+        {
+          "title": "United Airlines (UAL) Opens 14 Gate Concourse E At Dulles After Two Decades",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/united-airlines-ual-opens-14-081151494.html",
+          "published_at": "2026-11-13T08:11:51+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        },
+        {
+          "title": "Soaring fuel prices will lead to 'a reckoning' for airlines: United Airlines CEO Scott Kirby",
+          "url": "https://finance.yahoo.com/markets/article/soaring-fuel-prices-will-lead-to-a-reckoning-for-airlines-united-airlines-ceo-scott-kirby-222614063.html",
+          "published_at": "2026-11-12T22:26:14+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        },
+        {
+          "title": "United Airlines CEO is still open to buying rival American Airlines. He just needs a 'willing partner.'",
+          "url": "https://finance.yahoo.com/markets/stocks/article/united-airlines-ceo-is-still-open-to-buying-rival-american-airlines-he-just-needs-a-willing-partner-222451664.html",
+          "published_at": "2026-11-12T22:24:51+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        },
+        {
+          "title": "United Airlines bets on AI-driven travel alerts and gate-side food delivery",
+          "url": "https://finance.yahoo.com/markets/article/united-airlines-bets-on-ai-driven-travel-alerts-and-gate-side-food-delivery-215428503.html",
+          "published_at": "2026-11-12T21:54:28+00:00",
+          "observed_at": "2026-11-13T14:21:05.723272+00:00"
+        }
+      ],
+      "after_hours_price": 112.14,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 111.6905,
+      "bar_end": "2026-11-13T09:15:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.161875+00:00"
+    },
+    {
+      "symbol": "US.VTRS",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 20.938,
+      "after_hours_bar_end": "2026-11-12T23:05:00+00:00"
+    },
+    {
+      "symbol": "US.TBBB",
+      "gap": 0.014708077182223667,
+      "news": [],
+      "after_hours_price": 68.26,
+      "after_hours_bar_end": "2026-11-12T22:45:00+00:00",
+      "price": 68.99,
+      "bar_end": "2026-11-13T09:05:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.159875+00:00"
+    },
+    {
+      "symbol": "US.NVMI",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 327.64,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.RCL",
+      "gap": 0.009092011481212525,
+      "news": [],
+      "after_hours_price": 323.29,
+      "after_hours_bar_end": "2026-11-13T00:35:00+00:00",
+      "price": 324.968,
+      "bar_end": "2026-11-13T09:05:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.213904+00:00"
+    },
+    {
+      "symbol": "US.CHTR",
+      "gap": null,
+      "news": [
+        {
+          "title": "How Much Could You Lose In AT&T Stock After CPI?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/much-could-lose-t-stock-121251589.html",
+          "published_at": "2026-11-13T12:12:51+00:00",
+          "observed_at": "2026-11-13T14:21:05.988944+00:00"
+        },
+        {
+          "title": "First Pacific Advisors Exits Liberty Broadband Corp: A -1.94% Portfolio Impact in Q3 2026",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/first-pacific-advisors-exits-liberty-230228298.html",
+          "published_at": "2026-11-12T23:02:28+00:00",
+          "observed_at": "2026-11-13T14:21:05.988944+00:00"
+        }
+      ],
+      "after_hours_price": 132.66,
+      "after_hours_bar_end": "2026-11-12T21:35:00+00:00"
+    },
+    {
+      "symbol": "US.ASTS",
+      "gap": 0.006086956521739184,
+      "news": [
+        {
+          "title": "SpaceX vs. AST SpaceMobile: Which Space Stock Has the Edge Now?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/spacex-vs-ast-spacemobile-space-123400980.html",
+          "published_at": "2026-11-13T12:34:00+00:00",
+          "observed_at": "2026-11-13T14:21:05.746788+00:00"
+        },
+        {
+          "title": "AST SpaceMobile Soars 14% in a Week on Rakuten Deal and Its Own Rocket: “The Springboard”",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ast-spacemobile-soars-14-week-115454647.html",
+          "published_at": "2026-11-13T11:54:54+00:00",
+          "observed_at": "2026-11-13T14:21:05.746788+00:00"
+        },
+        {
+          "title": "Space Stocks Had A Stellar Week, But SpaceX Rivals Flew Higher — What Powered LUNR, FLY, RKLB And ASTS Ahead?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/space-stocks-had-stellar-week-075154983.html",
+          "published_at": "2026-11-13T07:51:54+00:00",
+          "observed_at": "2026-11-13T14:21:05.746788+00:00"
+        },
+        {
+          "title": "The Honeymoon Is Over Between Rocket Lab and Its Investors",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/honeymoon-over-between-rocket-lab-222134960.html",
+          "published_at": "2026-11-12T22:21:34+00:00",
+          "observed_at": "2026-11-13T14:21:05.746788+00:00"
+        }
+      ],
+      "after_hours_price": 34.9499,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 34.71,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.230509+00:00"
+    },
+    {
+      "symbol": "US.BTSG",
+      "gap": -0.007697648309190619,
+      "news": [
+        {
+          "title": "What iShares Russell 2000 Index Fund (IWM) Bought: LifeStance Leads on Nov. 11",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ishares-russell-2000-index-fund-110412446.html",
+          "published_at": "2026-11-13T11:04:12+00:00",
+          "observed_at": "2026-11-13T14:21:05.815343+00:00"
+        }
+      ],
+      "after_hours_price": 71.45,
+      "after_hours_bar_end": "2026-11-12T22:35:00+00:00",
+      "price": 70.9,
+      "bar_end": "2026-11-13T08:55:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.236509+00:00"
+    },
+    {
+      "symbol": "US.TW",
+      "gap": null,
+      "news": [
+        {
+          "title": "Why Fed rate hike fears are a gold mine for this bond monopoly",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-fed-rate-hike-fears-124159381.html",
+          "published_at": "2026-11-13T12:41:59+00:00",
+          "observed_at": "2026-11-13T14:21:05.770796+00:00"
+        },
+        {
+          "title": "Robinhood vs. Tradeweb: Which Fintech Stock is a Smarter Buy?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/robinhood-vs-tradeweb-fintech-stock-121500313.html",
+          "published_at": "2026-11-13T12:15:00+00:00",
+          "observed_at": "2026-11-13T14:21:05.770796+00:00"
+        },
+        {
+          "title": "Two-Year Treasury Stabilizes as Eurozone, U.S. Bond Yields Rise",
+          "url": "https://finance.yahoo.com/economy/policy/articles/two-treasury-stabilizes-eurozone-u-100500351.html",
+          "published_at": "2026-11-13T10:05:00+00:00",
+          "observed_at": "2026-11-13T14:21:05.770796+00:00"
+        },
+        {
+          "title": "Two-Year Treasury Stabilizes as Eurozone, U.S. Bond Yields Rise",
+          "url": "https://finance.yahoo.com/m/7fa4d32e-d446-3b8a-a738-7648573097e5/two-year-treasury-stabilizes.html",
+          "published_at": "2026-11-13T10:05:00+00:00",
+          "observed_at": "2026-11-13T14:21:05.770796+00:00"
+        },
+        {
+          "title": "Eurozone Bond Yields Rise; Italy Might Get Ratings Upgrade",
+          "url": "https://finance.yahoo.com/m/602ac64c-aec7-3b13-873f-d09cd2eddd97/eurozone-bond-yields-rise%3B.html",
+          "published_at": "2026-11-13T08:55:00+00:00",
+          "observed_at": "2026-11-13T14:21:05.770796+00:00"
+        },
+        {
+          "title": "Bonds Take Another Beating As Inflation Fears Rise",
+          "url": "https://finance.yahoo.com/m/2ccc72ca-ae91-33e7-8cdf-5abed4a3cc3a/bonds-take-another-beating-as.html",
+          "published_at": "2026-11-12T21:04:01+00:00",
+          "observed_at": "2026-11-13T14:21:05.770796+00:00"
+        }
+      ],
+      "after_hours_price": 131.64,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.ONTO",
+      "gap": -0.01998188942065049,
+      "news": [],
+      "after_hours_price": 217.53,
+      "after_hours_bar_end": "2026-11-13T00:55:00+00:00",
+      "price": 205.5,
+      "bar_end": "2026-11-13T09:00:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.329558+00:00"
+    },
+    {
+      "symbol": "US.SN",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 218.91,
+      "after_hours_bar_end": "2026-11-12T21:50:00+00:00"
+    },
+    {
+      "symbol": "US.ROIV",
+      "gap": null,
+      "news": [
+        {
+          "title": "Roivant Sciences Insider Sold Shares Worth $12,473,272, According to a Recent SEC Filing",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/roivant-sciences-insider-sold-shares-093415858.html",
+          "published_at": "2026-11-13T09:34:15+00:00",
+          "observed_at": "2026-11-13T14:21:06.385193+00:00"
+        }
+      ],
+      "after_hours_price": 40.0,
+      "after_hours_bar_end": "2026-11-12T22:30:00+00:00"
+    },
+    {
+      "symbol": "US.IAG",
+      "gap": null,
+      "news": [
+        {
+          "title": "What Franco-Nevada (FNV) Said on Its Q3 Earnings Call",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/franco-nevada-fnv-said-q3-071447817.html",
+          "published_at": "2026-11-13T07:14:47+00:00",
+          "observed_at": "2026-11-13T14:21:06.560250+00:00"
+        }
+      ],
+      "after_hours_price": 17.28,
+      "after_hours_bar_end": "2026-11-13T00:15:00+00:00"
+    },
+    {
+      "symbol": "US.HAS",
+      "gap": null,
+      "news": [
+        {
+          "title": "What Invesco S&P 500 Equal Weight ETF (RSP) Sold: Moderna Leads on Nov. 11",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/invesco-p-500-equal-weight-110446427.html",
+          "published_at": "2026-11-13T11:04:46+00:00",
+          "observed_at": "2026-11-13T14:21:06.570250+00:00"
+        },
+        {
+          "title": "Best Growth Stocks to Buy for November 13th",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/best-growth-stocks-buy-november-072500357.html",
+          "published_at": "2026-11-13T07:25:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.570250+00:00"
+        }
+      ],
+      "after_hours_price": 121.5,
+      "after_hours_bar_end": "2026-11-13T00:50:00+00:00"
+    },
+    {
+      "symbol": "US.UMC",
+      "gap": -0.008248745368772847,
+      "news": [],
+      "after_hours_price": 15.95,
+      "after_hours_bar_end": "2026-11-13T00:55:00+00:00",
+      "price": 15.63,
+      "bar_end": "2026-11-13T09:00:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:06.010944+00:00"
+    },
+    {
+      "symbol": "US.SUZ",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 9.82,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.SNY",
+      "gap": 0.003301711071455049,
+      "news": [
+        {
+          "title": "Health Care Roundup: Market Talk",
+          "url": "https://finance.yahoo.com/m/9eef2bcf-ddc7-3ed7-a0f5-4f09e576af58/health-care-roundup%3A-market.html",
+          "published_at": "2026-11-13T11:51:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.594802+00:00"
+        },
+        {
+          "title": "Germany’s Merck Raises Guidance Again on Growth Across Units",
+          "url": "https://finance.yahoo.com/m/aaed0f67-9477-348d-9831-7757f123629c/germany%E2%80%99s-merck-raises.html",
+          "published_at": "2026-11-13T06:54:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.594802+00:00"
+        },
+        {
+          "title": "Why Is Sanofi (ENXTPA:SAN) Expanding Its R And D Bets In Vaccines And Gene Editing?",
+          "url": "https://finance.yahoo.com/healthcare/articles/why-sanofi-enxtpa-san-expanding-061513119.html",
+          "published_at": "2026-11-13T06:15:13+00:00",
+          "observed_at": "2026-11-13T14:21:06.594802+00:00"
+        },
+        {
+          "title": "Arrowhead Pharmaceuticals Inc (ARWR) (Q4 2026) Earnings Call Highlights: REDEMPLO Launch Gains ...",
+          "url": "https://finance.yahoo.com/healthcare/articles/arrowhead-pharmaceuticals-inc-arwr-q4-050513655.html",
+          "published_at": "2026-11-13T05:05:13+00:00",
+          "observed_at": "2026-11-13T14:21:06.594802+00:00"
+        },
+        {
+          "title": "Windward prices $175M IPO to advance China-licensed lung drugs",
+          "url": "https://finance.yahoo.com/healthcare/articles/windward-prices-175m-ipo-advance-012200131.html",
+          "published_at": "2026-11-13T01:22:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.594802+00:00"
+        },
+        {
+          "title": "Scribe Therapeutics Reports Third Quarter 2026 Financial Results and Recent Corporate Highlights",
+          "url": "https://finance.yahoo.com/healthcare/articles/scribe-therapeutics-reports-third-quarter-210500516.html",
+          "published_at": "2026-11-12T21:05:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.594802+00:00"
+        }
+      ],
+      "after_hours_price": 48.2,
+      "after_hours_bar_end": "2026-11-12T22:10:00+00:00",
+      "price": 48.62,
+      "bar_end": "2026-11-13T08:55:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:06.024944+00:00"
+    },
+    {
+      "symbol": "US.ACM",
+      "gap": null,
+      "news": [
+        {
+          "title": "AECOM and Jacobs joint venture appointed to Iarnród Éireann’s (Irish Rail’s) new consultancy framework",
+          "url": "https://finance.yahoo.com/technology/articles/aecom-jacobs-joint-venture-appointed-104500205.html",
+          "published_at": "2026-11-13T10:45:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.488719+00:00"
+        },
+        {
+          "title": "Shimmick Corporation (SHIM) Tops Q3 Earnings Estimates",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/shimmick-corporation-shim-tops-q3-220505338.html",
+          "published_at": "2026-11-12T22:05:05+00:00",
+          "observed_at": "2026-11-13T14:21:06.488719+00:00"
+        }
+      ],
+      "after_hours_price": 70.11,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.PCVX",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 64.69,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.TGTX",
+      "gap": -0.0032527504111101724,
+      "news": [],
+      "after_hours_price": 64.2057,
+      "after_hours_bar_end": "2026-11-12T23:00:00+00:00",
+      "price": 64.35,
+      "bar_end": "2026-11-13T09:05:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:05.991944+00:00"
+    },
+    {
+      "symbol": "US.GMED",
+      "gap": null,
+      "news": [
+        {
+          "title": "Globus Medical Insider Sold Shares Worth $3,131,547, According to a Recent SEC Filing",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/globus-medical-insider-sold-shares-094213911.html",
+          "published_at": "2026-11-13T09:42:13+00:00",
+          "observed_at": "2026-11-13T14:21:06.689370+00:00"
+        }
+      ],
+      "after_hours_price": 72.3,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.APP",
+      "gap": 0.0003556373877380281,
+      "news": [
+        {
+          "title": "This AI Advertising Stock Is Having Its Best Day Ever. Analysts Say Price Could Double.",
+          "url": "https://finance.yahoo.com/m/f6c2f436-9b9c-31a6-8bf1-a2c59702b481/this-ai-advertising-stock-is.html",
+          "published_at": "2026-11-13T13:23:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.795948+00:00"
+        },
+        {
+          "title": "Daiwa Securities Adjusts Price Target on AppLovin to $455 From $345",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/daiwa-securities-adjusts-price-target-111921777.html",
+          "published_at": "2026-11-13T11:19:21+00:00",
+          "observed_at": "2026-11-13T14:21:06.795948+00:00"
+        },
+        {
+          "title": "State Street Comm Services SPDR (XLC) Adds Meta and Alphabet on Nov. 11",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/state-street-comm-services-spdr-110501441.html",
+          "published_at": "2026-11-13T11:05:01+00:00",
+          "observed_at": "2026-11-13T14:21:06.795948+00:00"
+        },
+        {
+          "title": "ETFs Are Net Sellers of AppLovin (APP) on Nov. 11",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/etfs-net-sellers-applovin-app-110235473.html",
+          "published_at": "2026-11-13T11:02:35+00:00",
+          "observed_at": "2026-11-13T14:21:06.795948+00:00"
+        },
+        {
+          "title": "CoreWeave And 2 Other Top Insider Owned Growth Stocks",
+          "url": "https://finance.yahoo.com/technology/ai/articles/coreweave-2-other-top-insider-081026284.html",
+          "published_at": "2026-11-13T08:10:26+00:00",
+          "observed_at": "2026-11-13T14:21:06.795948+00:00"
+        },
+        {
+          "title": "3 Top Picks With At Least 10% Revenue Growth",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/3-top-picks-least-10-031709106.html",
+          "published_at": "2026-11-13T03:17:09+00:00",
+          "observed_at": "2026-11-13T14:21:06.795948+00:00"
+        }
+      ],
+      "after_hours_price": 394.3916,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 393.82,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:06.237050+00:00"
+    },
+    {
+      "symbol": "US.KR",
+      "gap": null,
+      "news": [
+        {
+          "title": "Global-E Online's Q3 Earnings Coming Up: Factors to Watch for GLBE",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/global-e-onlines-q3-earnings-130600533.html",
+          "published_at": "2026-11-13T13:06:00+00:00",
+          "observed_at": "2026-11-13T14:21:06.943783+00:00"
+        },
+        {
+          "title": "Tyson Stock At $59: Is Immigration Raising Your Grocery Bill?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/tyson-stock-59-immigration-raising-121251150.html",
+          "published_at": "2026-11-13T12:12:51+00:00",
+          "observed_at": "2026-11-13T14:21:06.943783+00:00"
+        },
+        {
+          "title": "Impinj Sees Unprecedented Food Industry Interest as Kroger Expands RFID Deployment",
+          "url": "https://finance.yahoo.com/technology/articles/impinj-sees-unprecedented-food-industry-091456974.html",
+          "published_at": "2026-11-13T09:14:56+00:00",
+          "observed_at": "2026-11-13T14:21:06.943783+00:00"
+        },
+        {
+          "title": "Is Kroger (KR) Pricey On Soft Sales And Cost Savings Questions?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/kroger-kr-pricey-soft-sales-081442850.html",
+          "published_at": "2026-11-13T08:14:42+00:00",
+          "observed_at": "2026-11-13T14:21:06.943783+00:00"
+        },
+        {
+          "title": "What Digimarc (DMRC) Said on Its Q3 Earnings Call",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/digimarc-dmrc-said-q3-earnings-001432382.html",
+          "published_at": "2026-11-13T00:14:32+00:00",
+          "observed_at": "2026-11-13T14:21:06.943783+00:00"
+        }
+      ],
+      "after_hours_price": 69.7,
+      "after_hours_bar_end": "2026-11-13T00:20:00+00:00"
+    },
+    {
+      "symbol": "US.FIX",
+      "gap": 0.01224276918549605,
+      "news": [
+        {
+          "title": "JPMorgan Names Top Engineering Stocks Amid Infrastructure Boom",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/jpmorgan-names-top-engineering-stocks-133539228.html",
+          "published_at": "2026-11-13T13:35:39+00:00",
+          "observed_at": "2026-11-13T14:21:07.002821+00:00"
+        },
+        {
+          "title": "JPMorgan Active Growth ETF (JGRO) Buys $12.6 Million More Tesla on Nov. 11",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/jpmorgan-active-growth-etf-jgro-110403405.html",
+          "published_at": "2026-11-13T11:04:03+00:00",
+          "observed_at": "2026-11-13T14:21:07.002821+00:00"
+        }
+      ],
+      "after_hours_price": 1140.0,
+      "after_hours_bar_end": "2026-11-12T23:30:00+00:00",
+      "price": 1141.0,
+      "bar_end": "2026-11-13T09:05:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:06.476719+00:00"
+    },
+    {
+      "symbol": "US.TIGO",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 80.83,
+      "after_hours_bar_end": "2026-11-12T22:25:00+00:00"
+    },
+    {
+      "symbol": "US.MAIR",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 23.76,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.BRKR",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 60.33,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.RKLB",
+      "gap": 0.00920868281583398,
+      "news": [
+        {
+          "title": "Rocket Lab CEO Takes a Swipe at Elon Musk, Explains Why Neutron Gives Company an Edge Over SpaceX: ‘First Priority Is…’",
+          "url": "https://finance.yahoo.com/technology/articles/rocket-lab-ceo-takes-swipe-115948505.html",
+          "published_at": "2026-11-13T11:59:48+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        },
+        {
+          "title": "Rocket Lab Is Up 28% in a Year, Down 57% From May’s High: Take Profits, or Load Up?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/rocket-lab-28-down-57-115552868.html",
+          "published_at": "2026-11-13T11:55:52+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        },
+        {
+          "title": "Can LUNR Convert Its Record Backlog Into Sustained Growth?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/lunr-convert-record-backlog-sustained-112300807.html",
+          "published_at": "2026-11-13T11:23:00+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        },
+        {
+          "title": "Space Stocks Had A Stellar Week, But SpaceX Rivals Flew Higher — What Powered LUNR, FLY, RKLB And ASTS Ahead?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/space-stocks-had-stellar-week-075154983.html",
+          "published_at": "2026-11-13T07:51:54+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        },
+        {
+          "title": "What Does Rocket Lab (RKLB) Reaching Mars Bound Orbit Mean For Investors?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/does-rocket-lab-rklb-reaching-011516224.html",
+          "published_at": "2026-11-13T01:15:16+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        },
+        {
+          "title": "Rocket Lab Plans to Launch 100th Electron Rocket This Week",
+          "url": "https://finance.yahoo.com/technology/articles/rocket-lab-plans-launch-100th-225345347.html",
+          "published_at": "2026-11-12T22:53:45+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        },
+        {
+          "title": "ACHR, RKLB: Cathie Wood Buys More of Archer Aviation and Rocket Lab Stocks",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/achr-rklb-cathie-wood-buys-224241070.html",
+          "published_at": "2026-11-12T22:42:41+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        },
+        {
+          "title": "The Honeymoon Is Over Between Rocket Lab and Its Investors",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/honeymoon-over-between-rocket-lab-222134960.html",
+          "published_at": "2026-11-12T22:21:34+00:00",
+          "observed_at": "2026-11-13T14:21:07.194949+00:00"
+        }
+      ],
+      "after_hours_price": 64.8,
+      "after_hours_bar_end": "2026-11-13T01:00:00+00:00",
+      "price": 64.66,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:06.777421+00:00"
+    },
+    {
+      "symbol": "US.CG",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 39.36,
+      "after_hours_bar_end": "2026-11-12T22:25:00+00:00"
+    },
+    {
+      "symbol": "US.DLTR",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 141.27,
+      "after_hours_bar_end": "2026-11-12T21:25:00+00:00"
+    },
+    {
+      "symbol": "US.EMBJ",
+      "gap": -0.006916457071401649,
+      "news": [],
+      "after_hours_price": 80.1,
+      "after_hours_bar_end": "2026-11-12T22:35:00+00:00",
+      "price": 78.97,
+      "bar_end": "2026-11-13T09:15:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:06.793948+00:00"
+    },
+    {
+      "symbol": "US.NCLH",
+      "gap": 0.003883698939771474,
+      "news": [],
+      "after_hours_price": 18.1263,
+      "after_hours_bar_end": "2026-11-13T00:55:00+00:00",
+      "price": 18.1201,
+      "bar_end": "2026-11-13T09:20:00-05:00",
+      "quote_observed_at": "2026-11-13T14:21:06.905267+00:00"
+    },
+    {
+      "symbol": "US.FLUT",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 81.97,
+      "after_hours_bar_end": "2026-11-12T23:00:00+00:00"
+    },
+    {
+      "symbol": "US.MANH",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 256.37,
+      "after_hours_bar_end": "2026-11-12T21:05:00+00:00"
+    },
+    {
+      "symbol": "US.WYNN",
+      "gap": null,
+      "news": [
+        {
+          "title": "They Were the Indispensable CEOs—Until They Weren’t",
+          "url": "https://finance.yahoo.com/m/07eb3230-328c-3de1-862b-34205f3114e0/they-were-the-indispensable.html",
+          "published_at": "2026-11-13T03:00:00+00:00",
+          "observed_at": "2026-11-13T14:21:07.486639+00:00"
+        }
+      ],
+      "after_hours_price": 83.1183,
+      "after_hours_bar_end": "2026-11-12T23:05:00+00:00"
+    },
+    {
+      "symbol": "US.NTSK",
+      "gap": null,
+      "news": [
+        {
+          "title": "Morgan Stanley Downgrades Netskope to Equalweight From Overweight, Price Target is $24",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/morgan-stanley-downgrades-netskope-equalweight-101347656.html",
+          "published_at": "2026-11-13T10:13:47+00:00",
+          "observed_at": "2026-11-13T14:21:07.559710+00:00"
+        },
+        {
+          "title": "MultiSensor AI Holdings, Inc. (MSAI) Reports Q3 Loss, Lags Revenue Estimates",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/multisensor-ai-holdings-inc-msai-220504641.html",
+          "published_at": "2026-11-12T22:05:04+00:00",
+          "observed_at": "2026-11-13T14:21:07.559710+00:00"
+        }
+      ],
+      "after_hours_price": 22.2872,
+      "after_hours_bar_end": "2026-11-13T00:40:00+00:00"
+    }
+  ],
+  "events": {
+    "status": "OPEND_UNAVAILABLE",
+    "earnings": [],
+    "economic": []
+  },
+  "quote_count": 24
+}

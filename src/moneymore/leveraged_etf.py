@@ -64,7 +64,7 @@ class YahooDailyClient:
     def __init__(self, timeout: int = 20) -> None:
         self.timeout = timeout
 
-    def history(self, symbol: str, start: str, end: str) -> pd.DataFrame:
+    def history(self, symbol: str, start: str, end: str, *, adjusted: bool = False) -> pd.DataFrame:
         period1 = int(pd.Timestamp(start, tz="UTC").timestamp())
         period2 = int((pd.Timestamp(end, tz="UTC") + pd.Timedelta(days=1)).timestamp())
         encoded = urllib.parse.quote(symbol, safe="")
@@ -89,6 +89,10 @@ class YahooDailyClient:
                 "volume": quote["volume"],
             }
         )
+        if adjusted:
+            factor = pd.Series(result["indicators"]["adjclose"][0]["adjclose"]) / frame["close"]
+            columns = ["open", "high", "low", "close"]
+            frame[columns] = frame[columns].mul(factor, axis=0)
         return frame.dropna(subset=["open", "close"]).drop_duplicates("trade_date", keep="last")
 
 

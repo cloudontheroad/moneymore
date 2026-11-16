@@ -1,0 +1,447 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-12",
+  "exit_session": "2026-11-13",
+  "feature_session": "2026-11-11",
+  "cutoff": "2026-11-12T14:25:00+00:00",
+  "prior_close_at": "2026-11-11T21:00:00+00:00",
+  "generated_at": "2026-11-11T21:09:54.110881+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.IT",
+      "name": "加特纳",
+      "score": 0.003939761,
+      "prior_close": 192.9100036621,
+      "rank": 1
+    },
+    {
+      "symbol": "US.OSCR",
+      "name": "Oscar Health",
+      "score": 0.0035494999,
+      "prior_close": 32.1100006104,
+      "rank": 2
+    },
+    {
+      "symbol": "US.NTSK",
+      "name": "Netskope",
+      "score": 0.0033066133,
+      "prior_close": 22.3700008392,
+      "rank": 3
+    },
+    {
+      "symbol": "US.NOW",
+      "name": "ServiceNow",
+      "score": 0.0028539682,
+      "prior_close": 102.7399978638,
+      "rank": 4
+    },
+    {
+      "symbol": "US.NTRA",
+      "name": "Natera",
+      "score": 0.0027771939,
+      "prior_close": 319.8200073242,
+      "rank": 5
+    },
+    {
+      "symbol": "US.MPC",
+      "name": "马拉松原油",
+      "score": 0.0026171965,
+      "prior_close": 402.7749938965,
+      "rank": 6
+    },
+    {
+      "symbol": "US.SMMT",
+      "name": "Summit Therapeutics",
+      "score": 0.002606501,
+      "prior_close": 16.6399993896,
+      "rank": 7
+    },
+    {
+      "symbol": "US.DINO",
+      "name": "HF Sinclair",
+      "score": 0.0025574179,
+      "prior_close": 101.7149963379,
+      "rank": 8
+    },
+    {
+      "symbol": "US.CSGP",
+      "name": "科斯塔",
+      "score": 0.0024640152,
+      "prior_close": 30.2649993896,
+      "rank": 9
+    },
+    {
+      "symbol": "US.FRO",
+      "name": "Frontline",
+      "score": 0.0023185547,
+      "prior_close": 45.5400009155,
+      "rank": 10
+    }
+  ],
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -5.748657207476061,
+  "universe_snapshot": "top1000-2026-11-10T210227Z.parquet",
+  "universe_sha256": "f686105da089e4d5564f4c42ac704562a49e9f79d864ef866230b510e0575a10",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "READY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_pool": [
+    {
+      "symbol": "US.IT",
+      "name": "加特纳",
+      "score": 0.003939761,
+      "prior_close": 192.9100036621,
+      "rank": 1
+    },
+    {
+      "symbol": "US.OSCR",
+      "name": "Oscar Health",
+      "score": 0.0035494999,
+      "prior_close": 32.1100006104,
+      "rank": 2
+    },
+    {
+      "symbol": "US.NTSK",
+      "name": "Netskope",
+      "score": 0.0033066133,
+      "prior_close": 22.3700008392,
+      "rank": 3
+    },
+    {
+      "symbol": "US.NOW",
+      "name": "ServiceNow",
+      "score": 0.0028539682,
+      "prior_close": 102.7399978638,
+      "rank": 4
+    },
+    {
+      "symbol": "US.NTRA",
+      "name": "Natera",
+      "score": 0.0027771939,
+      "prior_close": 319.8200073242,
+      "rank": 5
+    },
+    {
+      "symbol": "US.MPC",
+      "name": "马拉松原油",
+      "score": 0.0026171965,
+      "prior_close": 402.7749938965,
+      "rank": 6
+    },
+    {
+      "symbol": "US.SMMT",
+      "name": "Summit Therapeutics",
+      "score": 0.002606501,
+      "prior_close": 16.6399993896,
+      "rank": 7
+    },
+    {
+      "symbol": "US.DINO",
+      "name": "HF Sinclair",
+      "score": 0.0025574179,
+      "prior_close": 101.7149963379,
+      "rank": 8
+    },
+    {
+      "symbol": "US.CSGP",
+      "name": "科斯塔",
+      "score": 0.0024640152,
+      "prior_close": 30.2649993896,
+      "rank": 9
+    },
+    {
+      "symbol": "US.FRO",
+      "name": "Frontline",
+      "score": 0.0023185547,
+      "prior_close": 45.5400009155,
+      "rank": 10
+    },
+    {
+      "symbol": "US.SNAP",
+      "name": "Snap Inc",
+      "score": 0.0022466582,
+      "prior_close": 5.3499999046,
+      "rank": 11
+    },
+    {
+      "symbol": "US.TBBB",
+      "name": "BBB Foods",
+      "score": 0.0021609662,
+      "prior_close": 67.4800033569,
+      "rank": 12
+    },
+    {
+      "symbol": "US.PSX",
+      "name": "Phillips 66",
+      "score": 0.0019997637,
+      "prior_close": 258.5199890137,
+      "rank": 13
+    },
+    {
+      "symbol": "US.BSY",
+      "name": "Bentley Systems",
+      "score": 0.0019869324,
+      "prior_close": 44.4399986267,
+      "rank": 14
+    },
+    {
+      "symbol": "US.ARXS",
+      "name": "Arxis",
+      "score": 0.0017867203,
+      "prior_close": 54.3699989319,
+      "rank": 15
+    },
+    {
+      "symbol": "US.CLX",
+      "name": "高乐氏",
+      "score": 0.0017753402,
+      "prior_close": 106.9199981689,
+      "rank": 16
+    },
+    {
+      "symbol": "US.PAYC",
+      "name": "Paycom Software",
+      "score": 0.0016784594,
+      "prior_close": 242.7100067139,
+      "rank": 17
+    },
+    {
+      "symbol": "US.STX",
+      "name": "希捷科技",
+      "score": 0.0016308355,
+      "prior_close": 551.7199707031,
+      "rank": 18
+    },
+    {
+      "symbol": "US.CCL",
+      "name": "嘉年华邮轮",
+      "score": 0.0016185404,
+      "prior_close": 30.6797008514,
+      "rank": 19
+    },
+    {
+      "symbol": "US.SN",
+      "name": "SharkNinja",
+      "score": 0.0016065816,
+      "prior_close": 226.9400024414,
+      "rank": 20
+    },
+    {
+      "symbol": "US.CRL",
+      "name": "查尔斯河实验室",
+      "score": 0.0016048042,
+      "prior_close": 342.7900085449,
+      "rank": 21
+    },
+    {
+      "symbol": "US.DVA",
+      "name": "德维特",
+      "score": 0.001591381,
+      "prior_close": 183.3999938965,
+      "rank": 22
+    },
+    {
+      "symbol": "US.LYB",
+      "name": "利安德巴塞尔",
+      "score": 0.0014766239,
+      "prior_close": 62.5750007629,
+      "rank": 23
+    },
+    {
+      "symbol": "US.VLO",
+      "name": "瓦莱罗能源",
+      "score": 0.0014733894,
+      "prior_close": 363.6400146484,
+      "rank": 24
+    },
+    {
+      "symbol": "US.CDW",
+      "name": "CDW Corp",
+      "score": 0.0014480335,
+      "prior_close": 173.0800018311,
+      "rank": 25
+    },
+    {
+      "symbol": "US.SMCI",
+      "name": "超微电脑",
+      "score": 0.0013938296,
+      "prior_close": 30.4300003052,
+      "rank": 26
+    },
+    {
+      "symbol": "US.TEM",
+      "name": "Tempus AI",
+      "score": 0.0013139651,
+      "prior_close": 79.4300003052,
+      "rank": 27
+    },
+    {
+      "symbol": "US.HNGE",
+      "name": "Hinge Health",
+      "score": 0.0012905437,
+      "prior_close": 121.75,
+      "rank": 28
+    },
+    {
+      "symbol": "US.SWKS",
+      "name": "思佳讯",
+      "score": 0.0012543243,
+      "prior_close": 87.6399993896,
+      "rank": 29
+    },
+    {
+      "symbol": "US.TLN",
+      "name": "Talen Energy",
+      "score": 0.0012440381,
+      "prior_close": 378.7099914551,
+      "rank": 30
+    },
+    {
+      "symbol": "US.HALO",
+      "name": "奥洛兹美医疗",
+      "score": 0.0012294875,
+      "prior_close": 101.6800003052,
+      "rank": 31
+    },
+    {
+      "symbol": "US.W",
+      "name": "Wayfair",
+      "score": 0.0012200948,
+      "prior_close": 114.3949966431,
+      "rank": 32
+    },
+    {
+      "symbol": "US.MDLN",
+      "name": "Medline",
+      "score": 0.0010980593,
+      "prior_close": 42.1599998474,
+      "rank": 33
+    },
+    {
+      "symbol": "US.PCVX",
+      "name": "Vaxcyte",
+      "score": 0.0010893708,
+      "prior_close": 68.6200027466,
+      "rank": 34
+    },
+    {
+      "symbol": "US.ROIV",
+      "name": "Roivant Sciences",
+      "score": 0.0010744281,
+      "prior_close": 41.8499984741,
+      "rank": 35
+    },
+    {
+      "symbol": "US.BF.B",
+      "name": "百富门-B",
+      "score": 0.0010514813,
+      "prior_close": 30.0799999237,
+      "rank": 36
+    },
+    {
+      "symbol": "US.PBR.A",
+      "name": "巴西石油公司-Prefer",
+      "score": 0.0010101729,
+      "prior_close": 15.7100000381,
+      "rank": 37
+    },
+    {
+      "symbol": "US.BRO",
+      "name": "Brown & Brown",
+      "score": 0.000972552,
+      "prior_close": 71.3700027466,
+      "rank": 38
+    },
+    {
+      "symbol": "US.NXPI",
+      "name": "恩智浦",
+      "score": 0.0009707287,
+      "prior_close": 269.5100097656,
+      "rank": 39
+    },
+    {
+      "symbol": "US.ESTC",
+      "name": "Elastic",
+      "score": 0.000962701,
+      "prior_close": 87.3099975586,
+      "rank": 40
+    },
+    {
+      "symbol": "US.CNC",
+      "name": "康西哥",
+      "score": 0.0009585625,
+      "prior_close": 70.4400024414,
+      "rank": 41
+    },
+    {
+      "symbol": "US.RCL",
+      "name": "皇家加勒比邮轮",
+      "score": 0.0009434786,
+      "prior_close": 335.2099914551,
+      "rank": 42
+    },
+    {
+      "symbol": "US.SSL",
+      "name": "南非萨索尔",
+      "score": 0.0009288549,
+      "prior_close": 14.0799999237,
+      "rank": 43
+    },
+    {
+      "symbol": "US.CHRW",
+      "name": "罗宾逊物流",
+      "score": 0.0009246578,
+      "prior_close": 133.7599945068,
+      "rank": 44
+    },
+    {
+      "symbol": "US.TSCO",
+      "name": "拖拉机供应公司",
+      "score": 0.0009084936,
+      "prior_close": 36.7400016785,
+      "rank": 45
+    },
+    {
+      "symbol": "US.DB",
+      "name": "德意志银行",
+      "score": 0.0009056003,
+      "prior_close": 37.3100013733,
+      "rank": 46
+    },
+    {
+      "symbol": "US.ADI",
+      "name": "亚德诺",
+      "score": 0.0009027892,
+      "prior_close": 409.0799865723,
+      "rank": 47
+    },
+    {
+      "symbol": "US.TXN",
+      "name": "德州仪器",
+      "score": 0.0008894396,
+      "prior_close": 309.8099975586,
+      "rank": 48
+    },
+    {
+      "symbol": "US.GEHC",
+      "name": "GE HealthCare Technologies",
+      "score": 0.0008310122,
+      "prior_close": 82.5999984741,
+      "rank": 49
+    },
+    {
+      "symbol": "US.FLUT",
+      "name": "Flutter Entertainment",
+      "score": 0.0008113618,
+      "prior_close": 85.4300003052,
+      "rank": 50
+    }
+  ]
+}

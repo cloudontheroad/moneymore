@@ -1,0 +1,627 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-10",
+  "exit_session": "2026-11-11",
+  "feature_session": "2026-11-09",
+  "cutoff": "2026-11-10T14:25:00+00:00",
+  "prior_close_at": "2026-11-09T21:00:00+00:00",
+  "generated_at": "2026-11-10T10:17:05.851712+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0097959771,
+      "prior_close": 886.5100097656,
+      "rank": 1
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0067170584,
+      "prior_close": 21.4099998474,
+      "rank": 2
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.0063584096,
+      "prior_close": 596.1599731445,
+      "rank": 3
+    },
+    {
+      "symbol": "US.SMCI",
+      "name": "超微电脑",
+      "score": 0.0044805147,
+      "prior_close": 28.6000003815,
+      "rank": 4
+    },
+    {
+      "symbol": "US.DDOG",
+      "name": "Datadog",
+      "score": 0.0043526372,
+      "prior_close": 179.6199951172,
+      "rank": 5
+    },
+    {
+      "symbol": "US.QXO",
+      "name": "QXO Inc",
+      "score": 0.004082395,
+      "prior_close": 13.779999733,
+      "rank": 6
+    },
+    {
+      "symbol": "US.STX",
+      "name": "希捷科技",
+      "score": 0.0037556708,
+      "prior_close": 506.1400146484,
+      "rank": 7
+    },
+    {
+      "symbol": "US.VSXY",
+      "name": "维多利亚的秘密",
+      "score": 0.0030089171,
+      "prior_close": 113.5199966431,
+      "rank": 8
+    },
+    {
+      "symbol": "US.BBY",
+      "name": "百思买",
+      "score": 0.0026242208,
+      "prior_close": 106.2799987793,
+      "rank": 9
+    },
+    {
+      "symbol": "US.BRKR",
+      "name": "布鲁克",
+      "score": 0.0024960732,
+      "prior_close": 66.5400009155,
+      "rank": 10
+    }
+  ],
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -26.39272960369263,
+  "universe_snapshot": "top1000-2026-11-05T100515Z.parquet",
+  "universe_sha256": "911d267ba7df2139503128d60b5fb3520274841af621f7363a7385f6f275332a",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "READY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_pool": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0097959771,
+      "prior_close": 886.5100097656,
+      "rank": 1
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0067170584,
+      "prior_close": 21.4099998474,
+      "rank": 2
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.0063584096,
+      "prior_close": 596.1599731445,
+      "rank": 3
+    },
+    {
+      "symbol": "US.SMCI",
+      "name": "超微电脑",
+      "score": 0.0044805147,
+      "prior_close": 28.6000003815,
+      "rank": 4
+    },
+    {
+      "symbol": "US.DDOG",
+      "name": "Datadog",
+      "score": 0.0043526372,
+      "prior_close": 179.6199951172,
+      "rank": 5
+    },
+    {
+      "symbol": "US.QXO",
+      "name": "QXO Inc",
+      "score": 0.004082395,
+      "prior_close": 13.779999733,
+      "rank": 6
+    },
+    {
+      "symbol": "US.STX",
+      "name": "希捷科技",
+      "score": 0.0037556708,
+      "prior_close": 506.1400146484,
+      "rank": 7
+    },
+    {
+      "symbol": "US.VSXY",
+      "name": "维多利亚的秘密",
+      "score": 0.0030089171,
+      "prior_close": 113.5199966431,
+      "rank": 8
+    },
+    {
+      "symbol": "US.BBY",
+      "name": "百思买",
+      "score": 0.0026242208,
+      "prior_close": 106.2799987793,
+      "rank": 9
+    },
+    {
+      "symbol": "US.BRKR",
+      "name": "布鲁克",
+      "score": 0.0024960732,
+      "prior_close": 66.5400009155,
+      "rank": 10
+    },
+    {
+      "symbol": "US.AAL",
+      "name": "美国航空",
+      "score": 0.0023694826,
+      "prior_close": 14.1599998474,
+      "rank": 11
+    },
+    {
+      "symbol": "US.UAL",
+      "name": "联合大陆航空",
+      "score": 0.0022691765,
+      "prior_close": 120.3799972534,
+      "rank": 12
+    },
+    {
+      "symbol": "US.NVMI",
+      "name": "Nova",
+      "score": 0.0021370221,
+      "prior_close": 333.2399902344,
+      "rank": 13
+    },
+    {
+      "symbol": "US.PCOR",
+      "name": "Procore Technologies",
+      "score": 0.002033198,
+      "prior_close": 76.4599990845,
+      "rank": 14
+    },
+    {
+      "symbol": "US.RKT",
+      "name": "Rocket",
+      "score": 0.0020258539,
+      "prior_close": 15.1899995804,
+      "rank": 15
+    },
+    {
+      "symbol": "US.LVS",
+      "name": "金沙集团",
+      "score": 0.0020061495,
+      "prior_close": 40.1800003052,
+      "rank": 16
+    },
+    {
+      "symbol": "US.FLS",
+      "name": "福斯",
+      "score": 0.0019862096,
+      "prior_close": 85.8300018311,
+      "rank": 17
+    },
+    {
+      "symbol": "US.ALGN",
+      "name": "艾利科技",
+      "score": 0.0019587319,
+      "prior_close": 174.2599945068,
+      "rank": 18
+    },
+    {
+      "symbol": "US.DB",
+      "name": "德意志银行",
+      "score": 0.001917852,
+      "prior_close": 36.5699996948,
+      "rank": 19
+    },
+    {
+      "symbol": "US.ASX",
+      "name": "日月光半导体",
+      "score": 0.0019129068,
+      "prior_close": 34.3600006104,
+      "rank": 20
+    },
+    {
+      "symbol": "US.GDDY",
+      "name": "GoDaddy",
+      "score": 0.0018637074,
+      "prior_close": 111.7099990845,
+      "rank": 21
+    },
+    {
+      "symbol": "US.ARXS",
+      "name": "Arxis",
+      "score": 0.0018406549,
+      "prior_close": 50.2599983215,
+      "rank": 22
+    },
+    {
+      "symbol": "US.RMBS",
+      "name": "Rambus",
+      "score": 0.0017896328,
+      "prior_close": 80.7399978638,
+      "rank": 23
+    },
+    {
+      "symbol": "US.DRS",
+      "name": "Leonardo DRS, Inc.",
+      "score": 0.0017701592,
+      "prior_close": 36.4099998474,
+      "rank": 24
+    },
+    {
+      "symbol": "US.NCLH",
+      "name": "挪威邮轮",
+      "score": 0.0017445343,
+      "prior_close": 18.4300003052,
+      "rank": 25
+    },
+    {
+      "symbol": "US.FISV",
+      "name": "费哲金融服务",
+      "score": 0.0017030726,
+      "prior_close": 63.5200004578,
+      "rank": 26
+    },
+    {
+      "symbol": "US.FROG",
+      "name": "JFrog",
+      "score": 0.0016987779,
+      "prior_close": 108.1800003052,
+      "rank": 27
+    },
+    {
+      "symbol": "US.DD",
+      "name": "杜邦",
+      "score": 0.0016586833,
+      "prior_close": 155.1399993896,
+      "rank": 28
+    },
+    {
+      "symbol": "US.CBOE",
+      "name": "芝加哥期权交易所",
+      "score": 0.0016384643,
+      "prior_close": 352.7799987793,
+      "rank": 29
+    },
+    {
+      "symbol": "US.INTC",
+      "name": "英特尔",
+      "score": 0.0016339228,
+      "prior_close": 59.3699989319,
+      "rank": 30
+    },
+    {
+      "symbol": "US.ALSN",
+      "name": "艾里逊变速箱",
+      "score": 0.0016210228,
+      "prior_close": 124.0500030518,
+      "rank": 31
+    },
+    {
+      "symbol": "US.JHX",
+      "name": "詹姆斯哈迪",
+      "score": 0.0015806678,
+      "prior_close": 29.9400005341,
+      "rank": 32
+    },
+    {
+      "symbol": "US.BDX",
+      "name": "碧迪医疗",
+      "score": 0.001544944,
+      "prior_close": 215.25,
+      "rank": 33
+    },
+    {
+      "symbol": "US.TEM",
+      "name": "Tempus AI",
+      "score": 0.0015408024,
+      "prior_close": 84.4400024414,
+      "rank": 34
+    },
+    {
+      "symbol": "US.XPEV",
+      "name": "小鹏集团",
+      "score": 0.0014807986,
+      "prior_close": 10.220000267,
+      "rank": 35
+    },
+    {
+      "symbol": "US.SAIL",
+      "name": "SailPoint",
+      "score": 0.0014505044,
+      "prior_close": 20.3600006104,
+      "rank": 36
+    },
+    {
+      "symbol": "US.NTSK",
+      "name": "Netskope",
+      "score": 0.0014376362,
+      "prior_close": 22.4899997711,
+      "rank": 37
+    },
+    {
+      "symbol": "US.LOW",
+      "name": "劳氏",
+      "score": 0.0014312069,
+      "prior_close": 232.1000061035,
+      "rank": 38
+    },
+    {
+      "symbol": "US.RCL",
+      "name": "皇家加勒比邮轮",
+      "score": 0.0014289186,
+      "prior_close": 336.9800109863,
+      "rank": 39
+    },
+    {
+      "symbol": "US.SWK",
+      "name": "美国史丹利公司",
+      "score": 0.0014054068,
+      "prior_close": 118.0999984741,
+      "rank": 40
+    },
+    {
+      "symbol": "US.CLX",
+      "name": "高乐氏",
+      "score": 0.0013985584,
+      "prior_close": 105.5299987793,
+      "rank": 41
+    },
+    {
+      "symbol": "US.IBN",
+      "name": "印度工业信贷投资银行",
+      "score": 0.0013972144,
+      "prior_close": 34.4500007629,
+      "rank": 42
+    },
+    {
+      "symbol": "US.PHG",
+      "name": "飞利浦",
+      "score": 0.0013914231,
+      "prior_close": 30.7900009155,
+      "rank": 43
+    },
+    {
+      "symbol": "US.CNH",
+      "name": "凯斯纽",
+      "score": 0.0013862118,
+      "prior_close": 12.8199996948,
+      "rank": 44
+    },
+    {
+      "symbol": "US.TECK",
+      "name": "泰克资源有限公司",
+      "score": 0.0013521595,
+      "prior_close": 64.6699981689,
+      "rank": 45
+    },
+    {
+      "symbol": "US.U",
+      "name": "Unity Software",
+      "score": 0.0013463938,
+      "prior_close": 51.4300003052,
+      "rank": 46
+    },
+    {
+      "symbol": "US.CCL",
+      "name": "嘉年华邮轮",
+      "score": 0.0013397415,
+      "prior_close": 30.8099994659,
+      "rank": 47
+    },
+    {
+      "symbol": "US.PHM",
+      "name": "普得集团",
+      "score": 0.0013299995,
+      "prior_close": 135.8800048828,
+      "rank": 48
+    },
+    {
+      "symbol": "US.FERG",
+      "name": "Ferguson",
+      "score": 0.0013236652,
+      "prior_close": 259.9299926758,
+      "rank": 49
+    },
+    {
+      "symbol": "US.CSL",
+      "name": "卡莱尔伙伴",
+      "score": 0.0013192427,
+      "prior_close": 396.6099853516,
+      "rank": 50
+    }
+  ],
+  "settled_at": "2026-11-11T14:32:40.597291+00:00",
+  "realized": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0097959771,
+      "prior_close": 886.5100097656,
+      "rank": 1,
+      "entry_open": 861.969970703125,
+      "allocation_usd": 10000,
+      "shares": 11.601332227203708,
+      "exit_open": 928.239990234375,
+      "dividend_per_share": 0.0,
+      "net_return": 0.07645505132853098,
+      "pnl_usd": 764.5505132853098,
+      "cost_usd": 4.27,
+      "buy_fee_usd": 2.02,
+      "sell_fee_usd": 2.25
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0067170584,
+      "prior_close": 21.4099998474,
+      "rank": 2,
+      "entry_open": 20.850000381469727,
+      "allocation_usd": 10000,
+      "shares": 479.61629817941974,
+      "exit_open": 20.959999084472656,
+      "dividend_per_share": 0.0,
+      "net_return": 0.004007717073880256,
+      "pnl_usd": 40.07717073880256,
+      "cost_usd": 12.68,
+      "buy_fee_usd": 6.19,
+      "sell_fee_usd": 6.49
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.0063584096,
+      "prior_close": 596.1599731445,
+      "rank": 3,
+      "entry_open": 575.0599975585938,
+      "allocation_usd": 10000,
+      "shares": 17.38948986619624,
+      "exit_open": 642.5961303710938,
+      "dividend_per_share": 0.0,
+      "net_return": 0.11700988971450522,
+      "pnl_usd": 1170.0988971450522,
+      "cost_usd": 4.32,
+      "buy_fee_usd": 2.04,
+      "sell_fee_usd": 2.28
+    },
+    {
+      "symbol": "US.SMCI",
+      "name": "超微电脑",
+      "score": 0.0044805147,
+      "prior_close": 28.6000003815,
+      "rank": 4,
+      "entry_open": 27.969999313354492,
+      "allocation_usd": 10000,
+      "shares": 357.5259294062772,
+      "exit_open": 29.6200008392334,
+      "dividend_per_share": 0.0,
+      "net_return": 0.05804083290616315,
+      "pnl_usd": 580.4083290616315,
+      "cost_usd": 9.51,
+      "buy_fee_usd": 4.61,
+      "sell_fee_usd": 4.9
+    },
+    {
+      "symbol": "US.DDOG",
+      "name": "Datadog",
+      "score": 0.0043526372,
+      "prior_close": 179.6199951172,
+      "rank": 5,
+      "entry_open": 176.92999267578125,
+      "allocation_usd": 10000,
+      "shares": 56.5195298364404,
+      "exit_open": 185.14999389648438,
+      "dividend_per_share": 0.0,
+      "net_return": 0.046004060424910675,
+      "pnl_usd": 460.04060424910676,
+      "cost_usd": 4.55,
+      "buy_fee_usd": 2.16,
+      "sell_fee_usd": 2.39
+    },
+    {
+      "symbol": "US.QXO",
+      "name": "QXO Inc",
+      "score": 0.004082395,
+      "prior_close": 13.779999733,
+      "rank": 6,
+      "entry_open": 13.569999694824219,
+      "allocation_usd": 10000,
+      "shares": 736.9196923279325,
+      "exit_open": 13.569999694824219,
+      "dividend_per_share": 0.0,
+      "net_return": -0.001935,
+      "pnl_usd": -19.35,
+      "cost_usd": 19.35,
+      "buy_fee_usd": 9.5,
+      "sell_fee_usd": 9.85
+    },
+    {
+      "symbol": "US.STX",
+      "name": "希捷科技",
+      "score": 0.0037556708,
+      "prior_close": 506.1400146484,
+      "rank": 7,
+      "entry_open": 493.7699890136719,
+      "allocation_usd": 10000,
+      "shares": 20.25234465945461,
+      "exit_open": 541.6799926757812,
+      "dividend_per_share": 0.0,
+      "net_return": 0.09659499068007717,
+      "pnl_usd": 965.9499068007716,
+      "cost_usd": 4.34,
+      "buy_fee_usd": 2.05,
+      "sell_fee_usd": 2.29
+    },
+    {
+      "symbol": "US.VSXY",
+      "name": "维多利亚的秘密",
+      "score": 0.0030089171,
+      "prior_close": 113.5199966431,
+      "rank": 8,
+      "entry_open": 113.37000274658203,
+      "allocation_usd": 10000,
+      "shares": 88.20675450059903,
+      "exit_open": 113.37000274658203,
+      "dividend_per_share": 0.0,
+      "net_return": -0.00047300000000000006,
+      "pnl_usd": -4.73,
+      "cost_usd": 4.73,
+      "buy_fee_usd": 2.25,
+      "sell_fee_usd": 2.48
+    },
+    {
+      "symbol": "US.BBY",
+      "name": "百思买",
+      "score": 0.0026242208,
+      "prior_close": 106.2799987793,
+      "rank": 9,
+      "entry_open": 104.0,
+      "allocation_usd": 10000,
+      "shares": 96.15384615384616,
+      "exit_open": 104.0,
+      "dividend_per_share": 0.0,
+      "net_return": -0.000479,
+      "pnl_usd": -4.79,
+      "cost_usd": 4.79,
+      "buy_fee_usd": 2.28,
+      "sell_fee_usd": 2.51
+    },
+    {
+      "symbol": "US.BRKR",
+      "name": "布鲁克",
+      "score": 0.0024960732,
+      "prior_close": 66.5400009155,
+      "rank": 10,
+      "entry_open": 65.51000213623047,
+      "allocation_usd": 10000,
+      "shares": 152.6484456404784,
+      "exit_open": 62.900001525878906,
+      "dividend_per_share": 0.0,
+      "net_return": -0.040354253629086595,
+      "pnl_usd": -403.54253629086594,
+      "cost_usd": 5.13,
+      "buy_fee_usd": 2.45,
+      "sell_fee_usd": 2.68
+    }
+  ],
+  "fee_model": "futu_hk_us_fixed",
+  "cost_usd": 73.67,
+  "capital_usd": 100000,
+  "pnl_usd": 3548.7128849898086,
+  "daily_return": 0.03548712884989809,
+  "top1_net_return": 0.07645505132853098,
+  "top10_net_return": 0.03548712884989809
+}

@@ -1,0 +1,283 @@
+{
+  "status": "READY",
+  "trade_session": "2026-11-10",
+  "exit_session": "2026-11-11",
+  "generated_at": "2026-11-10T14:21:00+00:00",
+  "prior_close_at": "2026-11-09T21:00:00Z",
+  "cost_bps": 20,
+  "review_status": "CHANGED",
+  "baseline_generated_at": "2026-11-09T22:00:00Z",
+  "information_cutoff": "2026-11-10T14:20:00+00:00",
+  "added": [
+    "US.TEST10"
+  ],
+  "removed": [
+    "US.TEST9"
+  ],
+  "candidates": [
+    {
+      "symbol": "US.TEST0",
+      "score": 50,
+      "rank": 1,
+      "review_score": 0.996
+    },
+    {
+      "symbol": "US.TEST1",
+      "score": 49,
+      "rank": 2,
+      "review_score": 0.976
+    },
+    {
+      "symbol": "US.TEST2",
+      "score": 48,
+      "rank": 3,
+      "review_score": 0.956
+    },
+    {
+      "symbol": "US.TEST3",
+      "score": 47,
+      "rank": 4,
+      "review_score": 0.936
+    },
+    {
+      "symbol": "US.TEST4",
+      "score": 46,
+      "rank": 5,
+      "review_score": 0.9160000000000001
+    },
+    {
+      "symbol": "US.TEST5",
+      "score": 45,
+      "rank": 6,
+      "review_score": 0.8960000000000001
+    },
+    {
+      "symbol": "US.TEST6",
+      "score": 44,
+      "rank": 7,
+      "review_score": 0.8760000000000001
+    },
+    {
+      "symbol": "US.TEST7",
+      "score": 43,
+      "rank": 8,
+      "review_score": 0.8560000000000001
+    },
+    {
+      "symbol": "US.TEST10",
+      "score": 40,
+      "rank": 9,
+      "review_score": 0.8400000000000001
+    },
+    {
+      "symbol": "US.TEST8",
+      "score": 42,
+      "rank": 10,
+      "review_score": 0.8360000000000001
+    }
+  ],
+  "observations": [
+    {
+      "symbol": "US.TEST0",
+      "gap": 50
+    },
+    {
+      "symbol": "US.TEST1",
+      "gap": 49
+    },
+    {
+      "symbol": "US.TEST2",
+      "gap": 48
+    },
+    {
+      "symbol": "US.TEST3",
+      "gap": 47
+    },
+    {
+      "symbol": "US.TEST4",
+      "gap": 46
+    },
+    {
+      "symbol": "US.TEST5",
+      "gap": 45
+    },
+    {
+      "symbol": "US.TEST6",
+      "gap": 44
+    },
+    {
+      "symbol": "US.TEST7",
+      "gap": 43
+    },
+    {
+      "symbol": "US.TEST8",
+      "gap": 42
+    },
+    {
+      "symbol": "US.TEST9",
+      "gap": 41
+    },
+    {
+      "symbol": "US.TEST10",
+      "gap": 100
+    },
+    {
+      "symbol": "US.TEST11",
+      "gap": 39
+    },
+    {
+      "symbol": "US.TEST12",
+      "gap": 38
+    },
+    {
+      "symbol": "US.TEST13",
+      "gap": 37
+    },
+    {
+      "symbol": "US.TEST14",
+      "gap": 36
+    },
+    {
+      "symbol": "US.TEST15",
+      "gap": 35
+    },
+    {
+      "symbol": "US.TEST16",
+      "gap": 34
+    },
+    {
+      "symbol": "US.TEST17",
+      "gap": 33
+    },
+    {
+      "symbol": "US.TEST18",
+      "gap": 32
+    },
+    {
+      "symbol": "US.TEST19",
+      "gap": 31
+    },
+    {
+      "symbol": "US.TEST20",
+      "gap": 30
+    },
+    {
+      "symbol": "US.TEST21",
+      "gap": 29
+    },
+    {
+      "symbol": "US.TEST22",
+      "gap": 28
+    },
+    {
+      "symbol": "US.TEST23",
+      "gap": 27
+    },
+    {
+      "symbol": "US.TEST24",
+      "gap": 26
+    },
+    {
+      "symbol": "US.TEST25",
+      "gap": 25
+    },
+    {
+      "symbol": "US.TEST26",
+      "gap": 24
+    },
+    {
+      "symbol": "US.TEST27",
+      "gap": 23
+    },
+    {
+      "symbol": "US.TEST28",
+      "gap": 22
+    },
+    {
+      "symbol": "US.TEST29",
+      "gap": 21
+    },
+    {
+      "symbol": "US.TEST30",
+      "gap": 20
+    },
+    {
+      "symbol": "US.TEST31",
+      "gap": 19
+    },
+    {
+      "symbol": "US.TEST32",
+      "gap": 18
+    },
+    {
+      "symbol": "US.TEST33",
+      "gap": 17
+    },
+    {
+      "symbol": "US.TEST34",
+      "gap": 16
+    },
+    {
+      "symbol": "US.TEST35",
+      "gap": 15
+    },
+    {
+      "symbol": "US.TEST36",
+      "gap": 14
+    },
+    {
+      "symbol": "US.TEST37",
+      "gap": 13
+    },
+    {
+      "symbol": "US.TEST38",
+      "gap": 12
+    },
+    {
+      "symbol": "US.TEST39",
+      "gap": 11
+    },
+    {
+      "symbol": "US.TEST40",
+      "gap": 10
+    },
+    {
+      "symbol": "US.TEST41",
+      "gap": 9
+    },
+    {
+      "symbol": "US.TEST42",
+      "gap": 8
+    },
+    {
+      "symbol": "US.TEST43",
+      "gap": 7
+    },
+    {
+      "symbol": "US.TEST44",
+      "gap": 6
+    },
+    {
+      "symbol": "US.TEST45",
+      "gap": 5
+    },
+    {
+      "symbol": "US.TEST46",
+      "gap": 4
+    },
+    {
+      "symbol": "US.TEST47",
+      "gap": 3
+    },
+    {
+      "symbol": "US.TEST48",
+      "gap": 2
+    },
+    {
+      "symbol": "US.TEST49",
+      "gap": 1
+    }
+  ],
+  "events": {},
+  "quote_count": 50
+}

@@ -1,0 +1,447 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-13",
+  "exit_session": "2026-11-16",
+  "feature_session": "2026-11-12",
+  "cutoff": "2026-11-13T14:25:00+00:00",
+  "prior_close_at": "2026-11-12T21:00:00+00:00",
+  "generated_at": "2026-11-12T21:09:46.954641+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "candidates": [
+    {
+      "symbol": "US.BMNR",
+      "name": "Bitmine Immersion Technologies",
+      "score": 0.0067345965,
+      "prior_close": 18.4599990845,
+      "rank": 1
+    },
+    {
+      "symbol": "US.TEAM",
+      "name": "Atlassian",
+      "score": 0.0042604352,
+      "prior_close": 152.2899932861,
+      "rank": 2
+    },
+    {
+      "symbol": "US.MRNA",
+      "name": "Moderna",
+      "score": 0.0040923231,
+      "prior_close": 231.3500061035,
+      "rank": 3
+    },
+    {
+      "symbol": "US.VSXY",
+      "name": "维多利亚的秘密",
+      "score": 0.0038604517,
+      "prior_close": 104.5800018311,
+      "rank": 4
+    },
+    {
+      "symbol": "US.CBOE",
+      "name": "芝加哥期权交易所",
+      "score": 0.003428187,
+      "prior_close": 369.3200073242,
+      "rank": 5
+    },
+    {
+      "symbol": "US.GPN",
+      "name": "环汇有限公司",
+      "score": 0.0033495862,
+      "prior_close": 88.1750030518,
+      "rank": 6
+    },
+    {
+      "symbol": "US.ILMN",
+      "name": "Illumina",
+      "score": 0.0031167074,
+      "prior_close": 209.5500030518,
+      "rank": 7
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0031028987,
+      "prior_close": 19.4799995422,
+      "rank": 8
+    },
+    {
+      "symbol": "US.AEIS",
+      "name": "先进能源工业",
+      "score": 0.0030042822,
+      "prior_close": 228.7799987793,
+      "rank": 9
+    },
+    {
+      "symbol": "US.SMMT",
+      "name": "Summit Therapeutics",
+      "score": 0.0030035898,
+      "prior_close": 15.0749998093,
+      "rank": 10
+    }
+  ],
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -13.518430168494582,
+  "universe_snapshot": "top1000-2026-11-10T210227Z.parquet",
+  "universe_sha256": "f686105da089e4d5564f4c42ac704562a49e9f79d864ef866230b510e0575a10",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "READY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_pool": [
+    {
+      "symbol": "US.BMNR",
+      "name": "Bitmine Immersion Technologies",
+      "score": 0.0067345965,
+      "prior_close": 18.4599990845,
+      "rank": 1
+    },
+    {
+      "symbol": "US.TEAM",
+      "name": "Atlassian",
+      "score": 0.0042604352,
+      "prior_close": 152.2899932861,
+      "rank": 2
+    },
+    {
+      "symbol": "US.MRNA",
+      "name": "Moderna",
+      "score": 0.0040923231,
+      "prior_close": 231.3500061035,
+      "rank": 3
+    },
+    {
+      "symbol": "US.VSXY",
+      "name": "维多利亚的秘密",
+      "score": 0.0038604517,
+      "prior_close": 104.5800018311,
+      "rank": 4
+    },
+    {
+      "symbol": "US.CBOE",
+      "name": "芝加哥期权交易所",
+      "score": 0.003428187,
+      "prior_close": 369.3200073242,
+      "rank": 5
+    },
+    {
+      "symbol": "US.GPN",
+      "name": "环汇有限公司",
+      "score": 0.0033495862,
+      "prior_close": 88.1750030518,
+      "rank": 6
+    },
+    {
+      "symbol": "US.ILMN",
+      "name": "Illumina",
+      "score": 0.0031167074,
+      "prior_close": 209.5500030518,
+      "rank": 7
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0031028987,
+      "prior_close": 19.4799995422,
+      "rank": 8
+    },
+    {
+      "symbol": "US.AEIS",
+      "name": "先进能源工业",
+      "score": 0.0030042822,
+      "prior_close": 228.7799987793,
+      "rank": 9
+    },
+    {
+      "symbol": "US.SMMT",
+      "name": "Summit Therapeutics",
+      "score": 0.0030035898,
+      "prior_close": 15.0749998093,
+      "rank": 10
+    },
+    {
+      "symbol": "US.HL",
+      "name": "赫克拉矿业",
+      "score": 0.0029314039,
+      "prior_close": 13.345000267,
+      "rank": 11
+    },
+    {
+      "symbol": "US.MTSI",
+      "name": "MACOM Technology Solutions",
+      "score": 0.0029290401,
+      "prior_close": 245.7599945068,
+      "rank": 12
+    },
+    {
+      "symbol": "US.KYMR",
+      "name": "Kymera Therapeutics",
+      "score": 0.0028655834,
+      "prior_close": 127.1699981689,
+      "rank": 13
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0028392076,
+      "prior_close": 59.0999984741,
+      "rank": 14
+    },
+    {
+      "symbol": "US.UAL",
+      "name": "联合大陆航空",
+      "score": 0.0025958308,
+      "prior_close": 111.25,
+      "rank": 15
+    },
+    {
+      "symbol": "US.VTRS",
+      "name": "Viatris",
+      "score": 0.0025750855,
+      "prior_close": 20.6700000763,
+      "rank": 16
+    },
+    {
+      "symbol": "US.TBBB",
+      "name": "BBB Foods",
+      "score": 0.0025567391,
+      "prior_close": 67.9899978638,
+      "rank": 17
+    },
+    {
+      "symbol": "US.NVMI",
+      "name": "Nova",
+      "score": 0.0025519378,
+      "prior_close": 327.6400146484,
+      "rank": 18
+    },
+    {
+      "symbol": "US.RCL",
+      "name": "皇家加勒比邮轮",
+      "score": 0.002548374,
+      "prior_close": 322.0400085449,
+      "rank": 19
+    },
+    {
+      "symbol": "US.CHTR",
+      "name": "特许通讯",
+      "score": 0.0025459595,
+      "prior_close": 132.6600036621,
+      "rank": 20
+    },
+    {
+      "symbol": "US.ASTS",
+      "name": "AST SpaceMobile",
+      "score": 0.0025443862,
+      "prior_close": 34.5,
+      "rank": 21
+    },
+    {
+      "symbol": "US.BTSG",
+      "name": "BrightSpring Health Services",
+      "score": 0.0025029864,
+      "prior_close": 71.4499969482,
+      "rank": 22
+    },
+    {
+      "symbol": "US.TW",
+      "name": "Tradeweb Markets",
+      "score": 0.0024494239,
+      "prior_close": 131.6399993896,
+      "rank": 23
+    },
+    {
+      "symbol": "US.ONTO",
+      "name": "Onto Innovation",
+      "score": 0.0024123338,
+      "prior_close": 209.6900024414,
+      "rank": 24
+    },
+    {
+      "symbol": "US.SN",
+      "name": "SharkNinja",
+      "score": 0.0024097193,
+      "prior_close": 220.2649993896,
+      "rank": 25
+    },
+    {
+      "symbol": "US.ROIV",
+      "name": "Roivant Sciences",
+      "score": 0.0023783727,
+      "prior_close": 39.9900016785,
+      "rank": 26
+    },
+    {
+      "symbol": "US.IAG",
+      "name": "Iamgold",
+      "score": 0.002344589,
+      "prior_close": 17.1299991608,
+      "rank": 27
+    },
+    {
+      "symbol": "US.HAS",
+      "name": "孩之宝",
+      "score": 0.0022511879,
+      "prior_close": 121.4800033569,
+      "rank": 28
+    },
+    {
+      "symbol": "US.UMC",
+      "name": "联电",
+      "score": 0.0021704591,
+      "prior_close": 15.7600002289,
+      "rank": 29
+    },
+    {
+      "symbol": "US.SUZ",
+      "name": "Suzano",
+      "score": 0.0020558564,
+      "prior_close": 9.8400001526,
+      "rank": 30
+    },
+    {
+      "symbol": "US.SNY",
+      "name": "赛诺菲安万特",
+      "score": 0.0020246751,
+      "prior_close": 48.4599990845,
+      "rank": 31
+    },
+    {
+      "symbol": "US.ACM",
+      "name": "AECOM Technology",
+      "score": 0.0020138975,
+      "prior_close": 70.1200027466,
+      "rank": 32
+    },
+    {
+      "symbol": "US.PCVX",
+      "name": "Vaxcyte",
+      "score": 0.0019698085,
+      "prior_close": 64.6900024414,
+      "rank": 33
+    },
+    {
+      "symbol": "US.TGTX",
+      "name": "TG Therapeutics",
+      "score": 0.0019059066,
+      "prior_close": 64.5599975586,
+      "rank": 34
+    },
+    {
+      "symbol": "US.GMED",
+      "name": "Globus Medical",
+      "score": 0.0018857438,
+      "prior_close": 72.2949981689,
+      "rank": 35
+    },
+    {
+      "symbol": "US.APP",
+      "name": "Applovin",
+      "score": 0.0018649066,
+      "prior_close": 393.6799926758,
+      "rank": 36
+    },
+    {
+      "symbol": "US.KR",
+      "name": "克罗格",
+      "score": 0.0017830313,
+      "prior_close": 69.8050003052,
+      "rank": 37
+    },
+    {
+      "symbol": "US.FIX",
+      "name": "美国舒适系统",
+      "score": 0.0017508517,
+      "prior_close": 1127.1999511719,
+      "rank": 38
+    },
+    {
+      "symbol": "US.TIGO",
+      "name": "Millicom International Cellular",
+      "score": 0.0017391013,
+      "prior_close": 80.8300018311,
+      "rank": 39
+    },
+    {
+      "symbol": "US.MAIR",
+      "name": "Madison Air Solutions Corp",
+      "score": 0.0017329084,
+      "prior_close": 23.7700004578,
+      "rank": 40
+    },
+    {
+      "symbol": "US.BRKR",
+      "name": "布鲁克",
+      "score": 0.001726389,
+      "prior_close": 60.3300018311,
+      "rank": 41
+    },
+    {
+      "symbol": "US.RKLB",
+      "name": "Rocket Lab",
+      "score": 0.0017112462,
+      "prior_close": 64.0699996948,
+      "rank": 42
+    },
+    {
+      "symbol": "US.CG",
+      "name": "凯雷",
+      "score": 0.0016955918,
+      "prior_close": 39.3600006104,
+      "rank": 43
+    },
+    {
+      "symbol": "US.DLTR",
+      "name": "美元树公司",
+      "score": 0.0016795716,
+      "prior_close": 141.2700042725,
+      "rank": 44
+    },
+    {
+      "symbol": "US.EMBJ",
+      "name": "巴西航空工业",
+      "score": 0.0016026513,
+      "prior_close": 79.5199966431,
+      "rank": 45
+    },
+    {
+      "symbol": "US.NCLH",
+      "name": "挪威邮轮",
+      "score": 0.0015823286,
+      "prior_close": 18.0499992371,
+      "rank": 46
+    },
+    {
+      "symbol": "US.FLUT",
+      "name": "Flutter Entertainment",
+      "score": 0.0015517365,
+      "prior_close": 81.9300003052,
+      "rank": 47
+    },
+    {
+      "symbol": "US.MANH",
+      "name": "Manhattan Associates",
+      "score": 0.0015384134,
+      "prior_close": 256.3699951172,
+      "rank": 48
+    },
+    {
+      "symbol": "US.WYNN",
+      "name": "永利度假村",
+      "score": 0.0015342262,
+      "prior_close": 83.0199966431,
+      "rank": 49
+    },
+    {
+      "symbol": "US.NTSK",
+      "name": "Netskope",
+      "score": 0.0015329729,
+      "prior_close": 22.2999992371,
+      "rank": 50
+    }
+  ]
+}

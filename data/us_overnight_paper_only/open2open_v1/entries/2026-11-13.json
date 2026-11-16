@@ -1,0 +1,105 @@
+{
+  "positions": [
+    {
+      "symbol": "US.BMNR",
+      "name": "Bitmine Immersion Technologies",
+      "score": 0.0067345965,
+      "prior_close": 18.4599990845,
+      "rank": 1,
+      "entry_open": 17.790000915527344,
+      "allocation_usd": 10000,
+      "shares": 562.1135180084151
+    },
+    {
+      "symbol": "US.TEAM",
+      "name": "Atlassian",
+      "score": 0.0042604352,
+      "prior_close": 152.2899932861,
+      "rank": 2,
+      "entry_open": 154.24000549316406,
+      "allocation_usd": 10000,
+      "shares": 64.83402258724117
+    },
+    {
+      "symbol": "US.MRNA",
+      "name": "Moderna",
+      "score": 0.0040923231,
+      "prior_close": 231.3500061035,
+      "rank": 3,
+      "entry_open": 224.91250610351562,
+      "allocation_usd": 10000,
+      "shares": 44.46173391264208
+    },
+    {
+      "symbol": "US.VSXY",
+      "name": "维多利亚的秘密",
+      "score": 0.0038604517,
+      "prior_close": 104.5800018311,
+      "rank": 4,
+      "entry_open": 106.97000122070312,
+      "allocation_usd": 10000,
+      "shares": 93.48415336901563
+    },
+    {
+      "symbol": "US.CBOE",
+      "name": "芝加哥期权交易所",
+      "score": 0.003428187,
+      "prior_close": 369.3200073242,
+      "rank": 5,
+      "entry_open": 374.7300109863281,
+      "allocation_usd": 10000,
+      "shares": 26.685879718250924
+    },
+    {
+      "symbol": "US.GPN",
+      "name": "环汇有限公司",
+      "score": 0.0033495862,
+      "prior_close": 88.1750030518,
+      "rank": 6,
+      "entry_open": 100.0,
+      "allocation_usd": 10000,
+      "shares": 100.0
+    },
+    {
+      "symbol": "US.ILMN",
+      "name": "Illumina",
+      "score": 0.0031167074,
+      "prior_close": 209.5500030518,
+      "rank": 7,
+      "entry_open": 209.0800018310547,
+      "allocation_usd": 10000,
+      "shares": 47.82858194195165
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0031028987,
+      "prior_close": 19.4799995422,
+      "rank": 8,
+      "entry_open": 19.104999542236328,
+      "allocation_usd": 10000,
+      "shares": 523.4232001886484
+    },
+    {
+      "symbol": "US.AEIS",
+      "name": "先进能源工业",
+      "score": 0.0030042822,
+      "prior_close": 228.7799987793,
+      "rank": 9,
+      "entry_open": 226.17999267578125,
+      "allocation_usd": 10000,
+      "shares": 44.2125754877645
+    },
+    {
+      "symbol": "US.SMMT",
+      "name": "Summit Therapeutics",
+      "score": 0.0030035898,
+      "prior_close": 15.0749998093,
+      "rank": 10,
+      "entry_open": 15.199999809265137,
+      "allocation_usd": 10000,
+      "shares": 657.8947450975963
+    }
+  ],
+  "recorded_at": "2026-11-13T14:32:10.210157+00:00"
+}

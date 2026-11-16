@@ -1,0 +1,10 @@
+# Isolated optimizer interpreter only; never install over MoneyMore's .venv.
+cvxportfolio==1.5.0
+cvxpy==1.7.2
+clarabel==0.11.1
+numpy==2.5.4
+pandas==3.1.1
+scipy==1.18.1
+scs==3.3.1
+matplotlib==3.11.2
+curl-cffi==0.17.0

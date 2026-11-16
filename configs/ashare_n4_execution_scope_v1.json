@@ -1,0 +1,7 @@
+{
+  "reason": "One known-before-start cross-security merger is unsupported by the unchanged dividend-only broker; common research execution exclusion, not missing-price fabrication or completed merger support.",
+  "events": [{"symbol": "601989.SH", "available_from": "20240920", "announcement_date": "20240919", "type": "ANNOUNCED_CROSS_SECURITY_ABSORPTION", "source": "https://www.sse.com.cn/disclosure/listedinfo/announcement/c/new/2024-09-19/601989_20240919_1HV3.pdf"}],
+  "applies_to": "all four N4 sleeves uniformly, only after documented announcement availability; prediction training remains frozen",
+  "not_a_complete_merger_event_database": true,
+  "production_modified": false
+}

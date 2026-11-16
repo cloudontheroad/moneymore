@@ -16,6 +16,26 @@ def read_record(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
 
 
+def ledger_record(directory: Path, day: str, plan: dict) -> dict:
+    entry = read_record(directory / "entries" / f"{day}.json")
+    settled = read_record(directory / "settled" / f"{day}.json")
+    cost = settled.get("cost_usd")
+    if settled and cost is None:
+        cost = sum(row.get("cost_usd", 0) for row in settled.get("realized", []))
+    return {
+        "trade_session": day,
+        "exit_session": plan.get("exit_session"),
+        "status": "SETTLED" if settled else (
+            "OPEN" if entry and plan["status"] == "READY" else plan["status"]
+        ),
+        "positions": settled.get("realized", entry.get("positions", plan.get("candidates", []))),
+        "daily_return": settled.get("daily_return"),
+        "pnl_usd": settled.get("pnl_usd"),
+        "cost_usd": cost,
+        "fee_model": settled.get("fee_model", "legacy_bps" if settled else "futu_hk_us_fixed"),
+    }
+
+
 def dashboard_snapshot(root: str | Path, session: str | None = None) -> dict[str, object]:
     root = Path(root)
     config = USOvernightConfig.from_yaml(root / "configs/us_overnight_paper_only.yaml")
@@ -46,19 +66,26 @@ def dashboard_snapshot(root: str | Path, session: str | None = None) -> dict[str
     selected_day = session or max(recorded, default=str(expected.date()))
     historical_plan = read_record(recorded[selected_day]) if selected_day in recorded else {}
     ledger = None
+    comparison = None
     if historical_plan:
-        entry = read_record(book_dir / "entries" / f"{selected_day}.json")
-        settled = read_record(book_dir / "settled" / f"{selected_day}.json")
-        ledger = {
-            "trade_session": selected_day,
-            "exit_session": historical_plan.get("exit_session"),
-            "status": "SETTLED" if settled else (
-                "OPEN" if entry and historical_plan["status"] == "READY" else historical_plan["status"]
-            ),
-            "positions": settled.get("realized", entry.get("positions", historical_plan.get("candidates", []))),
-            "daily_return": settled.get("daily_return"),
-            "pnl_usd": settled.get("pnl_usd"),
-        }
+        ledger = ledger_record(book_dir, selected_day, historical_plan)
+        review_dir = book_dir / "premarket"
+        reviewed = read_record(review_dir / "plans" / f"{selected_day}.json")
+        if reviewed:
+            extra = (ledger_record(review_dir, selected_day, reviewed)
+                     if reviewed["review_status"] == "CHANGED" else None)
+            comparison = {
+                "status": reviewed["review_status"], "added": reviewed["added"],
+                "removed": reviewed["removed"], "quote_count": reviewed["quote_count"],
+                "record": extra,
+                "pnl_delta_usd": (extra["pnl_usd"] - ledger["pnl_usd"] if extra and
+                                  extra["pnl_usd"] is not None and ledger["pnl_usd"] is not None else None),
+                "return_delta": (extra["daily_return"] - ledger["daily_return"] if extra and
+                                 extra["daily_return"] is not None and ledger["daily_return"] is not None else None),
+            }
+        elif historical_plan.get("review_pool"):
+            decision = pd.Timestamp(historical_plan["cutoff"])
+            comparison = {"status": "PENDING" if now < decision else "MISSED"}
     universe_files = sorted(universe_dir.glob("top1000-*.parquet"), reverse=True)
     universe = pd.read_parquet(universe_files[0]) if universe_files else pd.DataFrame()
     return {
@@ -71,7 +98,7 @@ def dashboard_snapshot(root: str | Path, session: str | None = None) -> dict[str
         "market_forecast_bps": plan.get("market_forecast_bps"),
         "paper_book": book | {
             "available_sessions": sorted(recorded, reverse=True), "selected_session": selected_day,
-            "record": ledger,
+            "record": ledger, "comparison": comparison,
         },
         "server_time": datetime.now(ZoneInfo(config.timezone)).isoformat(),
         "schedule": {

@@ -1,0 +1,16 @@
+{
+  "version": "simple_rules_v1",
+  "window": ["20260101", "20260930"],
+  "initial_cash": 10000000,
+  "slippage_bps": [10, 20],
+  "cases": ["doubleensemble_full--rank_cap", "raw_reversal--rank_cap", "adjusted_reversal--rank_cap", "core_timing--rank_cap", "conservative_dividend--rules", "fcf_rules--rules"],
+  "conservative": {"lookback_months":36,"low_vol_count":500,"topk":100,"momentum":"12_minus_1_month","payout":"historical_daily_basic_dv_ttm_NOT_net_payout","weighting":"equal","rebalance":"first_session_of_calendar_quarter"},
+  "reversal": {"lookback_sessions":5,"cadence":5,"industry_adjustment":"equal_weight_mean_same_day_industry_return","earnings_filter":"exclude_announcements_in_the_last_5_sessions_from_optional_selection","topk":50},
+  "timing": {"base":"doubleensemble_full--rank_cap","cadence":20,"max_delay_sessions":3,"delay_buy":"positive_industry_adjusted_5_session_return","delay_sell":"negative_industry_adjusted_5_session_return","missing_or_announcement":"execute_without_timing_delay","mandatory_exits":"never_delayed","pending_quantity":"split_adjusted_fixed_signal_share_target_no_future_price_selection"},
+  "fcf": {"topk":100,"fcf":"TTM_Tushare_fcff","enterprise_value":"market_cap_yuan_plus_netdebt_yuan","roe_stability":"negative_std_of_12_consecutive_quarter_q_roe","liquidity":"past_126_session_average_amount_bottom20_excluded","industries_excluded":["801780.SI","801790.SI","801180.SI"],"annual_ocf_positive_years":3,"cash_conversion":"TTM_operating_cashflow_divided_by_TTM_operating_profit_bottom30_excluded","weighting":"positive_TTM_fcff_capped_at_5_percent","rebalance":"first_session_after_second_Friday_March_June_September_December"},
+  "max_stock_weight":0.05,
+  "financial_report_max_age_days":180,
+  "research_only":true,
+  "production_enabled":false,
+  "limitations":["historical_top1000_pool_is_existing_reconstructed_research_pool_not_full_exchange_survivorship_free_archive","all_2026_returns_previously_inspected_not_out_of_sample_validation","conservative_dividend_is_not_original_Robeco_net_payout_formula","fcf_is_CNI_inspired_not_index_replication_including_industry_classification_universe_qualitative_filters_and_weight_cap_differences","reversal_is_industry_adjusted_with_announcement_exclusion_not_FF3_residual_replication_or_complete_news_adjustment","financial_ann_date_filter_does_not_prove_original_unrevised_vintage"]
+}

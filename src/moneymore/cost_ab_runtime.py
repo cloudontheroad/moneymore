@@ -23,16 +23,9 @@ def reserve_execution_attempt(root,tag,day,timestamp):
         write_diagnostic(path,{**state,'attempts':state['attempts']+1,'last_attempt':timestamp,'max_attempts':maximum,'cooldown_seconds':300})
     return None
 
-def account_actions(store,broker,account):
-    from .research.replay_actions import official_replay_actions
-    with sqlite3.connect(broker.database) as db:
-        symbols={r[0] for r in db.execute('SELECT symbol FROM positions WHERE account_id=? UNION SELECT symbol FROM corporate_entitlements WHERE account_id=?',(account,account))}
-    try:raw=store.read('dividend')
-    except FileNotFoundError:
-        if symbols:raise ValueError('COST_CORPORATE_ACTION_REFERENCE_MISSING')
-        raw=pd.DataFrame()
-    if not raw.empty:raw=raw.loc[raw.ts_code.isin(symbols)]
-    return official_replay_actions(raw)
+def account_actions(store,broker,account,as_of=None):
+    from .research.replay_actions import account_replay_actions
+    return account_replay_actions(store,broker,account,as_of)
 
 def cost_candidates(root):
     from .execution.paper import PaperBroker
@@ -81,7 +74,7 @@ def prepare_cost_daily(*,root,store,broker,config,candidate,trade_date,input_roo
     marks=bars.loc[bars.trade_date.eq(trade_date)].set_index('ts_code').close.to_dict()
     broker.settle_corporate_actions(account,trade_date);broker.settle_available_positions(account,trade_date)
     held={p['symbol']:int(p['quantity']) for p in broker.account_snapshot({},account)['positions'] if p['quantity']>0}
-    actions=account_actions(store,broker,account)
+    actions=account_actions(store,broker,account,trade_date)
     for action in actions.loc[actions.record_date.eq(pd.Timestamp(trade_date))].itertuples():
         broker.register_corporate_entitlement(account_id=account,symbol=action.symbol,action_key=action.action_key,record_date=trade_date,
             cash_per_share=action.cash_per_share,stock_ratio=action.stock_ratio,cash_pay_date=None if pd.isna(action.cash_pay_date) else action.cash_pay_date.strftime('%Y%m%d'),

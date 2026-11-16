@@ -10,6 +10,33 @@ import numpy as np
 import pandas as pd
 
 
+def account_replay_actions(store, broker, account, as_of=None):
+    """Validate only events in the account's actual ownership lifetime.
+
+    A 1990s dividend cannot create rights in an account first funded in 2026.
+    Relevant incomplete events still fail the normal settlement validation.
+    """
+    with sqlite3.connect(broker.database) as db:
+        symbols = {r[0] for r in db.execute(
+            'SELECT symbol FROM positions WHERE account_id=? UNION SELECT symbol FROM corporate_entitlements WHERE account_id=?',
+            (account, account))}
+        first = db.execute('SELECT MIN(trade_date) FROM fills WHERE account_id=?', (account,)).fetchone()[0]
+        entitlement_first = db.execute('SELECT MIN(record_date) FROM corporate_entitlements WHERE account_id=?', (account,)).fetchone()[0]
+    starts = [str(v) for v in (first, entitlement_first) if v is not None]
+    if not starts:
+        return official_replay_actions(pd.DataFrame())
+    raw = store.read('dividend')
+    if not raw.empty:
+        raw = raw.loc[raw.ts_code.isin(symbols)]
+    if not raw.empty:
+        record = pd.to_datetime(raw.record_date, errors='coerce')
+        relevant = raw.ts_code.isin(symbols) & (record.ge(pd.Timestamp(min(starts))) | record.isna())
+        if as_of is not None:
+            relevant &= record.le(pd.Timestamp(as_of)) | record.isna()
+        raw = raw.loc[relevant]
+    return official_replay_actions(raw)
+
+
 def official_replay_actions(raw: pd.DataFrame) -> pd.DataFrame:
     """Only implemented, unambiguous events; stk_div already includes transfers."""
     columns = ["symbol", "action_key", "record_date", "ex_date", "cash_per_share",

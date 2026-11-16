@@ -1,0 +1,1588 @@
+{
+  "strategy_id": "us-open2open-v1",
+  "spec_sha256": "7b7f32f207d46ae5c64aee69e0e4e8c01d4000e576259629261883c6286e57eb",
+  "trade_session": "2026-11-11",
+  "exit_session": "2026-11-12",
+  "feature_session": "2026-11-10",
+  "cutoff": "2026-11-11T14:25:00+00:00",
+  "prior_close_at": "2026-11-10T21:00:00+00:00",
+  "generated_at": "2026-11-11T14:20:35.950615+00:00",
+  "real_orders_enabled": false,
+  "cost_bps": 20,
+  "universe_status": "RECENT_SNAPSHOT",
+  "market_forecast_bps": -3.258923254318969,
+  "universe_snapshot": "top1000-2026-11-10T210227Z.parquet",
+  "universe_sha256": "f686105da089e4d5564f4c42ac704562a49e9f79d864ef866230b510e0575a10",
+  "training_panel_sha256": "473c3d6a9971ad1807a43f0bf6b6d0695e07c4d8f4b8eb1f0884e209826095cd",
+  "stock_anchor": "2026-11-09T05:00:00+00:00",
+  "market_anchor": "2026-11-04T05:00:00+00:00",
+  "market_training_last_label_end": "2026-11-03T05:00:00+00:00",
+  "status": "READY",
+  "market_gate_passed": false,
+  "stock_training_last_label_end": "2026-11-05T05:00:00+00:00",
+  "review_status": "CHANGED",
+  "baseline_generated_at": "2026-11-10T21:08:06.918612+00:00",
+  "information_cutoff": "2026-11-11T14:20:00+00:00",
+  "added": [
+    "US.LITE"
+  ],
+  "removed": [
+    "US.ASTS"
+  ],
+  "candidates": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0215649959,
+      "prior_close": 859.9899902344,
+      "rank": 1,
+      "review_score": 0.9822222222222223
+    },
+    {
+      "symbol": "US.NBIS",
+      "name": "NEBIUS",
+      "score": 0.0107261585,
+      "prior_close": 134.0,
+      "rank": 2,
+      "review_score": 0.968
+    },
+    {
+      "symbol": "US.TWST",
+      "name": "Twist Bioscience",
+      "score": 0.0106729293,
+      "prior_close": 132.1300048828,
+      "rank": 3,
+      "review_score": 0.912
+    },
+    {
+      "symbol": "US.BE",
+      "name": "Bloom Energy",
+      "score": 0.0097246584,
+      "prior_close": 185.5,
+      "rank": 4,
+      "review_score": 0.904888888888889
+    },
+    {
+      "symbol": "US.DELL",
+      "name": "戴尔科技",
+      "score": 0.0094375299,
+      "prior_close": 334.3150024414,
+      "rank": 5,
+      "review_score": 0.8844444444444446
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0093390045,
+      "prior_close": 19.7299995422,
+      "rank": 6,
+      "review_score": 0.8506666666666667
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0109522336,
+      "prior_close": 62.9000015259,
+      "rank": 7,
+      "review_score": 0.8373333333333334
+    },
+    {
+      "symbol": "US.CRDO",
+      "name": "Credo Technology",
+      "score": 0.0088934399,
+      "prior_close": 129.8000030518,
+      "rank": 8,
+      "review_score": 0.8302222222222223
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.007684429,
+      "prior_close": 585.5700073242,
+      "rank": 9,
+      "review_score": 0.8151111111111112
+    },
+    {
+      "symbol": "US.TSEM",
+      "name": "Tower半导体",
+      "score": 0.0080374257,
+      "prior_close": 147.6000061035,
+      "rank": 10,
+      "review_score": 0.7671111111111112
+    }
+  ],
+  "observations": [
+    {
+      "symbol": "US.SNDK",
+      "gap": 0.08453785577874484,
+      "news": [
+        {
+          "title": "Seagate Spikes 9%, Sandisk Surges 8% as CoreWeave’s Results Revive AI Trade; Micron Climbs 7%",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/seagate-spikes-9-sandisk-surges-140842780.html",
+          "published_at": "2026-11-11T14:08:42+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        },
+        {
+          "title": "Top 3 Value Stocks To Watch In November 2026",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/top-3-value-stocks-watch-130909150.html",
+          "published_at": "2026-11-11T13:09:09+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        },
+        {
+          "title": "AI Villain Turns Hero but Stock Market Chaos Is Just Getting Started",
+          "url": "https://finance.yahoo.com/m/4d1fb3de-7b87-344c-bdbf-eb0bef41aa9c/ai-villain-turns-hero-but.html",
+          "published_at": "2026-11-11T12:36:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        },
+        {
+          "title": "Sandisk Leads Memory Stock Rally. The AI Recovery Has Far to Go.",
+          "url": "https://finance.yahoo.com/m/0bde82d2-8807-3c45-be12-2524a5a41953/sandisk-leads-memory-stock.html",
+          "published_at": "2026-11-11T12:29:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        },
+        {
+          "title": "CoreWeave Boosts the AI Trade. These Power Stocks Are the Big Winners.",
+          "url": "https://finance.yahoo.com/m/c12b4fca-a964-33aa-9068-2d288d14fe29/coreweave-boosts-the-ai.html",
+          "published_at": "2026-11-11T11:39:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        },
+        {
+          "title": "Nvidia, CoreWeave, Marvell, Dell, Costco, and More Stocks That Explain Today’s Market",
+          "url": "https://finance.yahoo.com/m/37147cf1-aa70-3e70-9d7d-f8d6cb4dcbb8/nvidia%2C-coreweave%2C-marvell%2C.html",
+          "published_at": "2026-11-11T11:27:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        },
+        {
+          "title": "Sandisk (SNDK) Dropped, So What Is Behind Its Latest Move?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sandisk-sndk-dropped-behind-latest-111152442.html",
+          "published_at": "2026-11-11T11:11:52+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        },
+        {
+          "title": "1 Stock-Split AI Stock to Buy Before It Soars 328%, According to a Wall Street Analyst",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/1-stock-split-ai-stock-100402492.html",
+          "published_at": "2026-11-11T10:04:02+00:00",
+          "observed_at": "2026-11-11T14:20:33.220862+00:00"
+        }
+      ],
+      "after_hours_price": 878.3336,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 932.6917,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.681354+00:00"
+    },
+    {
+      "symbol": "US.TXG",
+      "gap": 0.032589800069494856,
+      "news": [],
+      "after_hours_price": 62.91,
+      "after_hours_bar_end": "2026-11-11T00:55:00+00:00",
+      "price": 64.9499,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.659352+00:00"
+    },
+    {
+      "symbol": "US.NBIS",
+      "gap": 0.1100746268656716,
+      "news": [
+        {
+          "title": "CoreWeave Surges 16% as Beat-and-Raise Quarter Eases Financing Fears; Nebius Gains 13%, Oracle Advances 5%",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/coreweave-surges-16-beat-raise-140335828.html",
+          "published_at": "2026-11-11T14:03:35+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        },
+        {
+          "title": "Plurai raises $13M to build the simulation infrastructure for trustworthy, self-improving AI agents",
+          "url": "https://finance.yahoo.com/technology/ai/articles/plurai-raises-13m-build-simulation-140000227.html",
+          "published_at": "2026-11-11T14:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        },
+        {
+          "title": "Wall Street set for higher open as CoreWeave results temper AI spending concerns",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/p-500-nasdaq-futures-rise-104431138.html",
+          "published_at": "2026-11-11T13:52:04+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        },
+        {
+          "title": "Why CoreWeave Sparked 'Sigh Of Relief In The AI Market'",
+          "url": "https://finance.yahoo.com/m/ad611b90-19b3-3483-8e63-8cdb59726707/why-coreweave-sparked-%27sigh.html",
+          "published_at": "2026-11-11T13:47:47+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        },
+        {
+          "title": "Stock Futures Rise Amid CoreWeave's Strong Financial Results",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/stock-futures-rise-amid-coreweave-130117941.html",
+          "published_at": "2026-11-11T13:01:17+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        },
+        {
+          "title": "Social Buzz: Wallstreetbets Stocks Advance Premarket Wednesday; CoreWeave, Nebius Group to Open Higher",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/social-buzz-wallstreetbets-stocks-advance-114134140.html",
+          "published_at": "2026-11-11T11:41:34+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        },
+        {
+          "title": "Neocloud Stocks Rally as CoreWeave Earnings Ease AI Infrastructure Concerns",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/neocloud-stocks-rally-coreweave-earnings-111042919.html",
+          "published_at": "2026-11-11T11:10:42+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        },
+        {
+          "title": "Neoclouds Like Nebius Are Much Better Investments Than Colocation Companies Like TeraWulf. Here's Why.",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/neoclouds-nebius-much-better-investments-104000346.html",
+          "published_at": "2026-11-11T10:40:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.247471+00:00"
+        }
+      ],
+      "after_hours_price": 145.25,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 148.75,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.687362+00:00"
+    },
+    {
+      "symbol": "US.TWST",
+      "gap": 0.07469912020327807,
+      "news": [
+        {
+          "title": "Twist Bioscience Corporation Announces Inducement Grants under NASDAQ Listing Rule 5635(c)(4)",
+          "url": "https://finance.yahoo.com/healthcare/articles/twist-bioscience-corporation-announces-inducement-130000067.html",
+          "published_at": "2026-11-11T13:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.229872+00:00"
+        }
+      ],
+      "after_hours_price": 132.13,
+      "after_hours_bar_end": "2026-11-10T21:55:00+00:00",
+      "price": 142.0,
+      "bar_end": "2026-11-11T09:10:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.665352+00:00"
+    },
+    {
+      "symbol": "US.BE",
+      "gap": 0.07681940700808632,
+      "news": [
+        {
+          "title": "Why You Should Think About Bloom Energy Differently Now",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-think-bloom-energy-differently-132822114.html",
+          "published_at": "2026-11-11T13:28:22+00:00",
+          "observed_at": "2026-11-11T14:20:33.139351+00:00"
+        },
+        {
+          "title": "10 Stocks Rode Trump Era — What Happens As MAGA 'Disintegrates'?",
+          "url": "https://finance.yahoo.com/m/9d3d9ff7-f5a4-3b60-bd0f-2fc1ae3c6226/10-stocks-rode-trump-era-%E2%80%94.html",
+          "published_at": "2026-11-11T13:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.139351+00:00"
+        },
+        {
+          "title": "AI Villain Turns Hero but Stock Market Chaos Is Just Getting Started",
+          "url": "https://finance.yahoo.com/m/4d1fb3de-7b87-344c-bdbf-eb0bef41aa9c/ai-villain-turns-hero-but.html",
+          "published_at": "2026-11-11T12:36:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.139351+00:00"
+        },
+        {
+          "title": "CoreWeave Boosts the AI Trade. These Power Stocks Are the Big Winners.",
+          "url": "https://finance.yahoo.com/m/c12b4fca-a964-33aa-9068-2d288d14fe29/coreweave-boosts-the-ai.html",
+          "published_at": "2026-11-11T11:39:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.139351+00:00"
+        },
+        {
+          "title": "Nvidia, CoreWeave, Marvell, Dell, Costco, and More Stocks That Explain Today’s Market",
+          "url": "https://finance.yahoo.com/m/37147cf1-aa70-3e70-9d7d-f8d6cb4dcbb8/nvidia%2C-coreweave%2C-marvell%2C.html",
+          "published_at": "2026-11-11T11:27:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.139351+00:00"
+        },
+        {
+          "title": "Can Bloom Energy (BE) Justify Its Price on Future Cash Flow?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/bloom-energy-justify-price-future-061406494.html",
+          "published_at": "2026-11-11T06:14:06+00:00",
+          "observed_at": "2026-11-11T14:20:33.139351+00:00"
+        },
+        {
+          "title": "GE Vernova Falls 4% as SoftBank’s Ohio Data Center Undergoes “A Thorough Reassessment”",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ge-vernova-falls-4-softbank-211730358.html",
+          "published_at": "2026-11-10T21:17:30+00:00",
+          "observed_at": "2026-11-11T14:20:33.139351+00:00"
+        }
+      ],
+      "after_hours_price": 189.6,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 199.75,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.684352+00:00"
+    },
+    {
+      "symbol": "US.DELL",
+      "gap": 0.07596128613178621,
+      "news": [
+        {
+          "title": "KIOXIA and Dell Technologies Collaborate on the Industry’s First 157 PB Single-Rack Object Store, Redefining Storage Economics",
+          "url": "https://finance.yahoo.com/technology/articles/kioxia-dell-technologies-collaborate-industry-140000728.html",
+          "published_at": "2026-11-11T14:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        },
+        {
+          "title": "University of Alabama Builds Statewide High Performance Computing Center with Dell Technologies",
+          "url": "https://finance.yahoo.com/technology/ai/articles/university-alabama-builds-statewide-high-140000961.html",
+          "published_at": "2026-11-11T14:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        },
+        {
+          "title": "10 Stocks Rode Trump Era — What Happens As MAGA 'Disintegrates'?",
+          "url": "https://finance.yahoo.com/m/9d3d9ff7-f5a4-3b60-bd0f-2fc1ae3c6226/10-stocks-rode-trump-era-%E2%80%94.html",
+          "published_at": "2026-11-11T13:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        },
+        {
+          "title": "Nvidia, CoreWeave, Marvell, Dell, Costco, and More Stocks That Explain Today’s Market",
+          "url": "https://finance.yahoo.com/m/37147cf1-aa70-3e70-9d7d-f8d6cb4dcbb8/nvidia%2C-coreweave%2C-marvell%2C.html",
+          "published_at": "2026-11-11T11:27:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        },
+        {
+          "title": "Exclusive-Military-linked Chinese university bought Nvidia H200 chips despite US blacklist, records show",
+          "url": "https://finance.yahoo.com/news/exclusive-pla-linked-chinese-university-051308504.html",
+          "published_at": "2026-11-11T08:40:44+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        },
+        {
+          "title": "Is Seagate A Better Way Than Apple To Own AI Hardware Demand?",
+          "url": "https://finance.yahoo.com/technology/articles/seagate-better-way-apple-own-015049114.html",
+          "published_at": "2026-11-11T01:50:49+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        },
+        {
+          "title": "Dell Sinks 12% in a Week on Texas Data Center Fears: “A Moratorium, a Ban”",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/dell-sinks-12-week-texas-233009122.html",
+          "published_at": "2026-11-10T23:30:09+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        },
+        {
+          "title": "Dell Technologies (DELL) Registers a Bigger Fall Than the Market: Important Facts to Note",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/dell-technologies-dell-registers-bigger-214502778.html",
+          "published_at": "2026-11-10T21:45:02+00:00",
+          "observed_at": "2026-11-11T14:20:33.223862+00:00"
+        }
+      ],
+      "after_hours_price": 343.5,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 359.71,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.669352+00:00"
+    },
+    {
+      "symbol": "US.IREN",
+      "gap": 0.07105932540957727,
+      "news": [
+        {
+          "title": "CoreWeave Surges 16% as Beat-and-Raise Quarter Eases Financing Fears; Nebius Gains 13%, Oracle Advances 5%",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/coreweave-surges-16-beat-raise-140335828.html",
+          "published_at": "2026-11-11T14:03:35+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        },
+        {
+          "title": "Stock Futures Rise Amid CoreWeave's Strong Financial Results",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/stock-futures-rise-amid-coreweave-130117941.html",
+          "published_at": "2026-11-11T13:01:17+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        },
+        {
+          "title": "1 Unstoppable AI Stock to Buy Hand Over Fist Before the Next Leg Higher",
+          "url": "https://finance.yahoo.com/technology/ai/articles/1-unstoppable-ai-stock-buy-121500355.html",
+          "published_at": "2026-11-11T12:15:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        },
+        {
+          "title": "Neocloud Stocks Rally as CoreWeave Earnings Ease AI Infrastructure Concerns",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/neocloud-stocks-rally-coreweave-earnings-111042919.html",
+          "published_at": "2026-11-11T11:10:42+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        },
+        {
+          "title": "Nebius Sinks 12% in a Week: “Not All of These Companies Are Going to Make It”",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/nebius-sinks-12-week-not-043558120.html",
+          "published_at": "2026-11-11T04:35:58+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        },
+        {
+          "title": "“That Stops When I’m Governor”: Cipher Digital and CleanSpark Sink Nearly 20% in a Week",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/stops-m-governor-cipher-digital-025900654.html",
+          "published_at": "2026-11-11T02:59:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        },
+        {
+          "title": "CoreWeave Says Demand Is Outstripping Capacity – CFO Defends AI Expansion: ‘Today’s Environment Very Profitable’ For Differentiated Technology",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/coreweave-says-demand-outstripping-capacity-022740451.html",
+          "published_at": "2026-11-11T02:27:40+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        },
+        {
+          "title": "IREN Stock Falls Even as JPMorgan Goes Bullish",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/iren-stock-falls-even-jpmorgan-224457686.html",
+          "published_at": "2026-11-10T22:44:57+00:00",
+          "observed_at": "2026-11-11T14:20:33.196862+00:00"
+        }
+      ],
+      "after_hours_price": 20.4,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 21.132,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.688353+00:00"
+    },
+    {
+      "symbol": "US.CRDO",
+      "gap": 0.07087824909009077,
+      "news": [
+        {
+          "title": "Credo Schedules Second Quarter Fiscal Year 2027 Financial Results Conference Call",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/credo-schedules-second-quarter-fiscal-140000718.html",
+          "published_at": "2026-11-11T14:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.216862+00:00"
+        },
+        {
+          "title": "Credo and Lumentum Sink 14% in a Week as Democrats’ Sweep Hits AI Data Centers",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/credo-lumentum-sink-14-week-025530146.html",
+          "published_at": "2026-11-11T02:55:30+00:00",
+          "observed_at": "2026-11-11T14:20:33.216862+00:00"
+        }
+      ],
+      "after_hours_price": 133.5127,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 139.0,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.656352+00:00"
+    },
+    {
+      "symbol": "US.ASTS",
+      "gap": 0.031190306207588225,
+      "news": [
+        {
+          "title": "Firefly Stock’s Rally Hits a Wall. Even an Earnings Beat Isn’t Enough.",
+          "url": "https://finance.yahoo.com/m/ce155a95-f921-3ce0-ac33-035a5a66e2ce/firefly-stock%E2%80%99s-rally-hits-a.html",
+          "published_at": "2026-11-11T10:42:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        },
+        {
+          "title": "$10,000 in AST SpaceMobile Stock at Its Record High Is Worth About $2,770 Today. Here's What Gets That Money Back.",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/10-000-ast-spacemobile-stock-101100769.html",
+          "published_at": "2026-11-11T10:11:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        },
+        {
+          "title": "ASTS Stock Jumps Overnight: Analyst Estimates $50M Each For 3 Early BlueBirds — Retail Bulls Defend Spending",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/asts-stock-jumps-overnight-analyst-051408779.html",
+          "published_at": "2026-11-11T05:14:08+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        },
+        {
+          "title": "AST SpaceMobile: 3 Key Takeaways for Long-Term Investors",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ast-spacemobile-3-key-takeaways-044407851.html",
+          "published_at": "2026-11-11T04:44:07+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        },
+        {
+          "title": "What Firefly Aerospace (FLY) Said on Its Q3 Earnings Call",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/firefly-aerospace-fly-said-q3-021441989.html",
+          "published_at": "2026-11-11T02:14:41+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        },
+        {
+          "title": "AST SpaceMobile Has Fallen for 3 Straight Weeks and Sits More Than 75% Below Its High. Here's What $5,000 Invested Today Will Be Worth If It Gets Back There.",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ast-spacemobile-fallen-3-straight-002500588.html",
+          "published_at": "2026-11-11T00:25:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        },
+        {
+          "title": "AST SpaceMobile (ASTS) Stock Price Faces Q3 Results And Cash Burn",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ast-spacemobile-asts-stock-price-231820431.html",
+          "published_at": "2026-11-10T23:18:20+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        },
+        {
+          "title": "Why AST SpaceMobile Plunged Today",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/why-ast-spacemobile-plunged-today-215040398.html",
+          "published_at": "2026-11-10T21:50:40+00:00",
+          "observed_at": "2026-11-11T14:20:33.212862+00:00"
+        }
+      ],
+      "after_hours_price": 34.03,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 34.7408,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.674415+00:00"
+    },
+    {
+      "symbol": "US.TSEM",
+      "gap": 0.06422759826888136,
+      "news": [],
+      "after_hours_price": 147.6,
+      "after_hours_bar_end": "2026-11-11T00:20:00+00:00",
+      "price": 157.08,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.680346+00:00"
+    },
+    {
+      "symbol": "US.CBRS",
+      "gap": 0.0442023935087168,
+      "news": [
+        {
+          "title": "Cerebras Systems Inc (CBRS) Q3 2026 Earnings Report Preview: What To Look For",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/cerebras-systems-inc-cbrs-q3-122420494.html",
+          "published_at": "2026-11-11T12:24:20+00:00",
+          "observed_at": "2026-11-11T14:20:33.120221+00:00"
+        },
+        {
+          "title": "Fed Speakers, Tech Earnings: What to Watch the Rest of the Week",
+          "url": "https://finance.yahoo.com/m/49b5120f-56dc-3f3c-9f77-1afa68e24a46/fed-speakers%2C-tech-earnings%3A.html",
+          "published_at": "2026-11-11T08:16:06+00:00",
+          "observed_at": "2026-11-11T14:20:33.120221+00:00"
+        },
+        {
+          "title": "3 Growth Stocks With Earnings Growth Reaching 120%",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/3-growth-stocks-earnings-growth-061648888.html",
+          "published_at": "2026-11-11T06:16:48+00:00",
+          "observed_at": "2026-11-11T14:20:33.120221+00:00"
+        }
+      ],
+      "after_hours_price": 95.45,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 97.8,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.672437+00:00"
+    },
+    {
+      "symbol": "US.LITE",
+      "gap": 0.09124441485647772,
+      "news": [
+        {
+          "title": "3 Beaten-Down Stocks With a Real Catalyst for a Comeback",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/3-beaten-down-stocks-real-132916185.html",
+          "published_at": "2026-11-11T13:29:16+00:00",
+          "observed_at": "2026-11-11T14:20:33.164862+00:00"
+        },
+        {
+          "title": "10 Stocks Rode Trump Era — What Happens As MAGA 'Disintegrates'?",
+          "url": "https://finance.yahoo.com/m/9d3d9ff7-f5a4-3b60-bd0f-2fc1ae3c6226/10-stocks-rode-trump-era-%E2%80%94.html",
+          "published_at": "2026-11-11T13:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.164862+00:00"
+        },
+        {
+          "title": "Credo and Lumentum Sink 14% in a Week as Democrats’ Sweep Hits AI Data Centers",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/credo-lumentum-sink-14-week-025530146.html",
+          "published_at": "2026-11-11T02:55:30+00:00",
+          "observed_at": "2026-11-11T14:20:33.164862+00:00"
+        }
+      ],
+      "after_hours_price": 601.35,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 639.0,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:32.715431+00:00"
+    },
+    {
+      "symbol": "US.MU",
+      "gap": 0.06708225735550144,
+      "news": [
+        {
+          "title": "An AI Developer Starts Its IPO Roadshow, and Its Filing Names Chip and Cloud Partners",
+          "url": "https://finance.yahoo.com/technology/ai/articles/ai-developer-starts-ipo-roadshow-141000135.html",
+          "published_at": "2026-11-11T14:10:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        },
+        {
+          "title": "Seagate Spikes 9%, Sandisk Surges 8% as CoreWeave’s Results Revive AI Trade; Micron Climbs 7%",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/seagate-spikes-9-sandisk-surges-140842780.html",
+          "published_at": "2026-11-11T14:08:42+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        },
+        {
+          "title": "SK Hynix Crumbled 25% Over The Last Month: 200% Returns Are a Distinct Possibility According to This Wall Street Firm",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sk-hynix-crumbled-25-over-134504212.html",
+          "published_at": "2026-11-11T13:45:04+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        },
+        {
+          "title": "MU, AMD, AVGO, Other Chip Stocks Surge As CoreWeave Earnings Reignite AI Trade — Nasdaq-100 Futures Jump",
+          "url": "https://finance.yahoo.com/technology/ai/articles/mu-amd-avgo-other-chip-134142335.html",
+          "published_at": "2026-11-11T13:41:42+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        },
+        {
+          "title": "10 Stocks Rode Trump Era — What Happens As MAGA 'Disintegrates'?",
+          "url": "https://finance.yahoo.com/m/9d3d9ff7-f5a4-3b60-bd0f-2fc1ae3c6226/10-stocks-rode-trump-era-%E2%80%94.html",
+          "published_at": "2026-11-11T13:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        },
+        {
+          "title": "Only One Analyst Says Sell Micron, and It’s a Strong Sell. Should Investors Listen?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/only-one-analyst-says-sell-123820444.html",
+          "published_at": "2026-11-11T12:38:20+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        },
+        {
+          "title": "Sandisk Leads Memory Stock Rally. The AI Recovery Has Far to Go.",
+          "url": "https://finance.yahoo.com/m/0bde82d2-8807-3c45-be12-2524a5a41953/sandisk-leads-memory-stock.html",
+          "published_at": "2026-11-11T12:29:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        },
+        {
+          "title": "Nvidia, chip stocks rebound premarket after CoreWeave lifts revenue outlook",
+          "url": "https://finance.yahoo.com/technology/articles/nvidia-chip-stocks-rebound-premarket-120006021.html",
+          "published_at": "2026-11-11T12:00:06+00:00",
+          "observed_at": "2026-11-11T14:20:33.944192+00:00"
+        }
+      ],
+      "after_hours_price": 736.0013,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 773.752,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.372777+00:00"
+    },
+    {
+      "symbol": "US.AMKR",
+      "gap": 0.061792825757745806,
+      "news": [],
+      "after_hours_price": 35.0,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 36.6,
+      "bar_end": "2026-11-11T09:15:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.353873+00:00"
+    },
+    {
+      "symbol": "US.STX",
+      "gap": 0.08797497171636737,
+      "news": [
+        {
+          "title": "Seagate Spikes 9%, Sandisk Surges 8% as CoreWeave’s Results Revive AI Trade; Micron Climbs 7%",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/seagate-spikes-9-sandisk-surges-140842780.html",
+          "published_at": "2026-11-11T14:08:42+00:00",
+          "observed_at": "2026-11-11T14:20:33.796662+00:00"
+        },
+        {
+          "title": "Sandisk Leads Memory Stock Rally. The AI Recovery Has Far to Go.",
+          "url": "https://finance.yahoo.com/m/0bde82d2-8807-3c45-be12-2524a5a41953/sandisk-leads-memory-stock.html",
+          "published_at": "2026-11-11T12:29:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.796662+00:00"
+        },
+        {
+          "title": "Is Seagate A Better Way Than Apple To Own AI Hardware Demand?",
+          "url": "https://finance.yahoo.com/technology/articles/seagate-better-way-apple-own-015049114.html",
+          "published_at": "2026-11-11T01:50:49+00:00",
+          "observed_at": "2026-11-11T14:20:33.796662+00:00"
+        }
+      ],
+      "after_hours_price": 509.0,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 545.75,
+      "bar_end": "2026-11-11T09:15:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.365777+00:00"
+    },
+    {
+      "symbol": "US.WDC",
+      "gap": 0.07968598485571654,
+      "news": [
+        {
+          "title": "Seagate Spikes 9%, Sandisk Surges 8% as CoreWeave’s Results Revive AI Trade; Micron Climbs 7%",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/seagate-spikes-9-sandisk-surges-140842780.html",
+          "published_at": "2026-11-11T14:08:42+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "SK Hynix Crumbled 25% Over The Last Month: 200% Returns Are a Distinct Possibility According to This Wall Street Firm",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/sk-hynix-crumbled-25-over-134504212.html",
+          "published_at": "2026-11-11T13:45:04+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "Sandisk Leads Memory Stock Rally. The AI Recovery Has Far to Go.",
+          "url": "https://finance.yahoo.com/m/0bde82d2-8807-3c45-be12-2524a5a41953/sandisk-leads-memory-stock.html",
+          "published_at": "2026-11-11T12:29:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "Zacks.com featured highlights include Arista, Western Digital and Quanta",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/zacks-com-featured-highlights-arista-054500099.html",
+          "published_at": "2026-11-11T05:45:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "Is Seagate A Better Way Than Apple To Own AI Hardware Demand?",
+          "url": "https://finance.yahoo.com/technology/articles/seagate-better-way-apple-own-015049114.html",
+          "published_at": "2026-11-11T01:50:49+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        }
+      ],
+      "after_hours_price": 293.2981,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 312.2452,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.395984+00:00"
+    },
+    {
+      "symbol": "US.FIG",
+      "gap": 0.011007264647841186,
+      "news": [],
+      "after_hours_price": 18.5946,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 18.8199,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.370785+00:00"
+    },
+    {
+      "symbol": "US.RBRK",
+      "gap": 0.04484053441574232,
+      "news": [
+        {
+          "title": "Rubrik to Report Third Quarter Fiscal 2027 Financial Results on November 30, 2026",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/rubrik-report-third-quarter-fiscal-130000880.html",
+          "published_at": "2026-11-11T13:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.938187+00:00"
+        }
+      ],
+      "after_hours_price": 111.4016,
+      "after_hours_bar_end": "2026-11-11T00:50:00+00:00",
+      "price": 114.3369,
+      "bar_end": "2026-11-11T09:05:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.402212+00:00"
+    },
+    {
+      "symbol": "US.SITM",
+      "gap": 0.09393629575052231,
+      "news": [],
+      "after_hours_price": 453.2,
+      "after_hours_bar_end": "2026-11-11T00:00:00+00:00",
+      "price": 486.2,
+      "bar_end": "2026-11-11T08:50:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.407225+00:00"
+    },
+    {
+      "symbol": "US.MTZ",
+      "gap": 0.07008727831940287,
+      "news": [
+        {
+          "title": "3 Data Center Infrastructure Stocks Retail Investors Are Watching Beyond Nvidia",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/3-data-center-infrastructure-stocks-043250014.html",
+          "published_at": "2026-11-11T04:32:50+00:00",
+          "observed_at": "2026-11-11T14:20:33.906165+00:00"
+        }
+      ],
+      "after_hours_price": 180.84,
+      "after_hours_bar_end": "2026-11-10T21:05:00+00:00",
+      "price": 193.75,
+      "bar_end": "2026-11-11T08:50:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.438902+00:00"
+    },
+    {
+      "symbol": "US.P",
+      "gap": 0.05950980392156846,
+      "news": [],
+      "after_hours_price": 104.0802,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 108.07,
+      "bar_end": "2026-11-11T09:10:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.443903+00:00"
+    },
+    {
+      "symbol": "US.FIX",
+      "gap": 0.07292255211690524,
+      "news": [],
+      "after_hours_price": 1114.84,
+      "after_hours_bar_end": "2026-11-11T00:20:00+00:00",
+      "price": 1185.0,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.429466+00:00"
+    },
+    {
+      "symbol": "US.VRT",
+      "gap": 0.06489416241911217,
+      "news": [
+        {
+          "title": "GEV, VRT, HUBB In Focus — JPMorgan Sees Potential AI Stock Rebound, But Remains Cautious On Electrical Equipment Sector",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/gev-vrt-hubb-focus-jpmorgan-115118357.html",
+          "published_at": "2026-11-11T11:51:18+00:00",
+          "observed_at": "2026-11-11T14:20:33.994410+00:00"
+        },
+        {
+          "title": "Zacks.com featured highlights include Stride, Ralph Lauren, Cardinal Health and Vertiv",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/zacks-com-featured-highlights-stride-061000612.html",
+          "published_at": "2026-11-11T06:10:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.994410+00:00"
+        },
+        {
+          "title": "GE Vernova Falls 4% as SoftBank’s Ohio Data Center Undergoes “A Thorough Reassessment”",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ge-vernova-falls-4-softbank-211730358.html",
+          "published_at": "2026-11-10T21:17:30+00:00",
+          "observed_at": "2026-11-11T14:20:33.994410+00:00"
+        },
+        {
+          "title": "Vertiv Holdings Co (VRT) Secures Infineon Supply Deal, Is The Valuation Gap Still Compelling?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/vertiv-holdings-co-vrt-secures-211107866.html",
+          "published_at": "2026-11-10T21:11:07+00:00",
+          "observed_at": "2026-11-11T14:20:33.994410+00:00"
+        }
+      ],
+      "after_hours_price": 199.02,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 206.7918,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.474772+00:00"
+    },
+    {
+      "symbol": "US.MRNA",
+      "gap": 0.01156160805218498,
+      "news": [
+        {
+          "title": "Rothschild & Co Redburn Adjusts Price Target on Moderna to $82 From $81",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/rothschild-co-redburn-adjusts-price-140345234.html",
+          "published_at": "2026-11-11T14:03:45+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "Moderna Stock Jumped 10% in 5 Sessions: Take Profits, or Buy More?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/moderna-stock-jumped-10-5-133953666.html",
+          "published_at": "2026-11-11T13:39:53+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "US Stock Market Today: S&P 500 Futures Rebound On Stubborn Inflation Higher-For-Longer Risk",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/us-stock-market-today-p-131416924.html",
+          "published_at": "2026-11-11T13:14:16+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "10 Stocks Rode Trump Era — What Happens As MAGA 'Disintegrates'?",
+          "url": "https://finance.yahoo.com/m/9d3d9ff7-f5a4-3b60-bd0f-2fc1ae3c6226/10-stocks-rode-trump-era-%E2%80%94.html",
+          "published_at": "2026-11-11T13:00:00+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "Moderna’s CEO eyes Keytruda-eclipsing future for personalised cancer vaccine",
+          "url": "https://finance.yahoo.com/news/moderna-ceo-eyes-keytruda-eclipsing-122705206.html",
+          "published_at": "2026-11-11T12:27:05+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "iShares Biotechnology ETF (IBB) Adds Gilead and Amgen on Nov. 9",
+          "url": "https://finance.yahoo.com/healthcare/articles/ishares-biotechnology-etf-ibb-adds-110418132.html",
+          "published_at": "2026-11-11T11:04:18+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        },
+        {
+          "title": "“More Cancers Than Melanoma”: Moderna Is Up 750% in 2026. Take Profits, or Buy More?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/more-cancers-melanoma-moderna-750-034730685.html",
+          "published_at": "2026-11-11T03:47:30+00:00",
+          "observed_at": "2026-11-11T14:20:33.853666+00:00"
+        }
+      ],
+      "after_hours_price": 252.9,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 253.73,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.432902+00:00"
+    },
+    {
+      "symbol": "US.FLEX",
+      "gap": 0.06978977418421772,
+      "news": [
+        {
+          "title": "Anthropic IPO Puts Wiwynn Stock And AI Data Center Shares In Focus",
+          "url": "https://finance.yahoo.com/technology/ai/articles/anthropic-ipo-puts-wiwynn-stock-111416952.html",
+          "published_at": "2026-11-11T11:14:16+00:00",
+          "observed_at": "2026-11-11T14:20:34.167261+00:00"
+        },
+        {
+          "title": "Goldman Sachs Adjusts Price Target on Flex to $160 From $159",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/goldman-sachs-adjusts-price-target-104133818.html",
+          "published_at": "2026-11-11T10:41:33+00:00",
+          "observed_at": "2026-11-11T14:20:34.167261+00:00"
+        }
+      ],
+      "after_hours_price": 76.4099,
+      "after_hours_bar_end": "2026-11-10T23:50:00+00:00",
+      "price": 81.4003,
+      "bar_end": "2026-11-11T09:05:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:33.637069+00:00"
+    },
+    {
+      "symbol": "US.TEM",
+      "gap": 0.03054381743900092,
+      "news": [
+        {
+          "title": "Tempus to Present Six Abstracts Accepted at the 2026 Connective Tissue Oncology Society Annual Meeting",
+          "url": "https://finance.yahoo.com/healthcare/articles/tempus-present-six-abstracts-accepted-133000140.html",
+          "published_at": "2026-11-11T13:30:00+00:00",
+          "observed_at": "2026-11-11T14:20:34.890524+00:00"
+        }
+      ],
+      "after_hours_price": 80.4201,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 83.0,
+      "bar_end": "2026-11-11T09:15:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.008530+00:00"
+    },
+    {
+      "symbol": "US.CRS",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 299.94,
+      "after_hours_bar_end": "2026-11-10T23:50:00+00:00"
+    },
+    {
+      "symbol": "US.NVMI",
+      "gap": 0.051857498188441875,
+      "news": [],
+      "after_hours_price": 325.7,
+      "after_hours_bar_end": "2026-11-10T21:05:00+00:00",
+      "price": 342.59,
+      "bar_end": "2026-11-11T09:00:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.073656+00:00"
+    },
+    {
+      "symbol": "US.ENTG",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 138.57,
+      "after_hours_bar_end": "2026-11-10T21:10:00+00:00"
+    },
+    {
+      "symbol": "US.INTC",
+      "gap": 0.06038188314822146,
+      "news": [
+        {
+          "title": "Server CPU strength persists as AMD and Arm gain share: UBS",
+          "url": "https://finance.yahoo.com/technology/articles/server-cpu-strength-persists-amd-132222608.html",
+          "published_at": "2026-11-11T13:22:22+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        },
+        {
+          "title": "Nvidia, chip stocks rebound premarket after CoreWeave lifts revenue outlook",
+          "url": "https://finance.yahoo.com/technology/articles/nvidia-chip-stocks-rebound-premarket-120006021.html",
+          "published_at": "2026-11-11T12:00:06+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        },
+        {
+          "title": "iShares PHLX SOX Semiconductor (SOXX) Buys $394.7 Million More AMD on Nov. 9",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ishares-phlx-sox-semiconductor-soxx-110312093.html",
+          "published_at": "2026-11-11T11:03:12+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        },
+        {
+          "title": "ETFs Bought $360.9 Million of Intel (INTC) on Nov. 9",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/etfs-bought-360-9-million-110129710.html",
+          "published_at": "2026-11-11T11:01:29+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        },
+        {
+          "title": "Stocks to Watch: CoreWeave, Nvidia, TSMC",
+          "url": "https://finance.yahoo.com/m/9baa9fe0-b046-3213-882b-244e35d1973f/stocks-to-watch%3A-coreweave%2C.html",
+          "published_at": "2026-11-11T10:31:07+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        },
+        {
+          "title": "“Demand Is Higher Than Supply”: AMD Has Ripped 141% in 2026. Is It Too Late to Buy?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/demand-higher-supply-amd-ripped-073514339.html",
+          "published_at": "2026-11-11T07:35:14+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        },
+        {
+          "title": "Intel vs. SK Hynix: Which Technology Stock Is a Better Buy?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/intel-vs-sk-hynix-technology-032002803.html",
+          "published_at": "2026-11-11T03:20:02+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        },
+        {
+          "title": "Quantum Computing’s Next Winners May Not Be Quantum Stocks",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/quantum-computing-next-winners-may-022442514.html",
+          "published_at": "2026-11-11T02:24:42+00:00",
+          "observed_at": "2026-11-11T14:20:34.733525+00:00"
+        }
+      ],
+      "after_hours_price": 58.8,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 61.64,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.128192+00:00"
+    },
+    {
+      "symbol": "US.EGO",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 35.85,
+      "after_hours_bar_end": "2026-11-11T00:20:00+00:00"
+    },
+    {
+      "symbol": "US.STRL",
+      "gap": 0.08267717448282919,
+      "news": [],
+      "after_hours_price": 294.67,
+      "after_hours_bar_end": "2026-11-11T00:00:00+00:00",
+      "price": 313.5,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.224271+00:00"
+    },
+    {
+      "symbol": "US.VST",
+      "gap": 0.033096888245210954,
+      "news": [],
+      "after_hours_price": 131.98,
+      "after_hours_bar_end": "2026-11-11T00:50:00+00:00",
+      "price": 135.47,
+      "bar_end": "2026-11-11T09:15:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.154192+00:00"
+    },
+    {
+      "symbol": "US.HBM",
+      "gap": 0.029860977891440488,
+      "news": [],
+      "after_hours_price": 22.0,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 22.59,
+      "bar_end": "2026-11-11T09:00:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.175192+00:00"
+    },
+    {
+      "symbol": "US.GLW",
+      "gap": 0.07114832451272934,
+      "news": [],
+      "after_hours_price": 113.25,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 120.14,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.230322+00:00"
+    },
+    {
+      "symbol": "US.RMBS",
+      "gap": 0.05869239398738624,
+      "news": [],
+      "after_hours_price": 80.84,
+      "after_hours_bar_end": "2026-11-10T22:20:00+00:00",
+      "price": 85.5,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.227457+00:00"
+    },
+    {
+      "symbol": "US.CDE",
+      "gap": 0.007513864260487946,
+      "news": [],
+      "after_hours_price": 15.47,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 15.42,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.403151+00:00"
+    },
+    {
+      "symbol": "US.UMC",
+      "gap": 0.05620220559870015,
+      "news": [],
+      "after_hours_price": 15.22,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 15.88,
+      "bar_end": "2026-11-11T08:50:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.564524+00:00"
+    },
+    {
+      "symbol": "US.CRWD",
+      "gap": 0.03695608476349732,
+      "news": [
+        {
+          "title": "iShares Expanded Tech-Software (IGV) Buys $22.9 Million More Microsoft on Nov. 9",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ishares-expanded-tech-software-igv-110406148.html",
+          "published_at": "2026-11-11T11:04:06+00:00",
+          "observed_at": "2026-11-11T14:20:35.252943+00:00"
+        },
+        {
+          "title": "CrowdStrike Holdings Insider Sold Shares Worth $4,447,090, According to a Recent SEC Filing",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/crowdstrike-holdings-insider-sold-shares-085325894.html",
+          "published_at": "2026-11-11T08:53:25+00:00",
+          "observed_at": "2026-11-11T14:20:35.252943+00:00"
+        },
+        {
+          "title": "Should You Buy The Dip In Datadog Stock?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/buy-dip-datadog-stock-015615913.html",
+          "published_at": "2026-11-11T01:56:15+00:00",
+          "observed_at": "2026-11-11T14:20:35.252943+00:00"
+        },
+        {
+          "title": "Marvell Technology And 2 Other Growth Stocks To Watch",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/marvell-technology-2-other-growth-001813988.html",
+          "published_at": "2026-11-11T00:18:13+00:00",
+          "observed_at": "2026-11-11T14:20:35.252943+00:00"
+        },
+        {
+          "title": "CrowdStrike Holdings (CRWD) Suffers a Larger Drop Than the General Market: Key Insights",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/crowdstrike-holdings-crwd-suffers-larger-214502486.html",
+          "published_at": "2026-11-10T21:45:02+00:00",
+          "observed_at": "2026-11-11T14:20:35.252943+00:00"
+        }
+      ],
+      "after_hours_price": 226.51,
+      "after_hours_bar_end": "2026-11-11T00:40:00+00:00",
+      "price": 234.1032,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.811525+00:00"
+    },
+    {
+      "symbol": "US.SMCI",
+      "gap": 0.06255484085034357,
+      "news": [
+        {
+          "title": "Supermicro Now Shipping Next-Generation Servers Powered by 6th Gen AMD EPYC™ 9006 Series CPUs for Cloud, HPC, and Agentic AI Workloads",
+          "url": "https://finance.yahoo.com/technology/ai/articles/supermicro-now-shipping-next-generation-140500879.html",
+          "published_at": "2026-11-11T14:05:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.354965+00:00"
+        },
+        {
+          "title": "Supermicro Now Shipping Next-Generation Servers Powered by 6th Gen AMD EPYC™ 9006 Series CPUs for Cloud, HPC, and Agentic AI Workloads",
+          "url": "https://finance.yahoo.com/technology/ai/articles/supermicro-now-shipping-next-generation-140500238.html",
+          "published_at": "2026-11-11T14:05:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.354965+00:00"
+        },
+        {
+          "title": "Nvidia, CoreWeave, Marvell, Dell, Costco, and More Stocks That Explain Today’s Market",
+          "url": "https://finance.yahoo.com/m/37147cf1-aa70-3e70-9d7d-f8d6cb4dcbb8/nvidia%2C-coreweave%2C-marvell%2C.html",
+          "published_at": "2026-11-11T11:27:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.354965+00:00"
+        },
+        {
+          "title": "Exclusive-Military-linked Chinese university bought Nvidia H200 chips despite US blacklist, records show",
+          "url": "https://finance.yahoo.com/news/exclusive-pla-linked-chinese-university-051308504.html",
+          "published_at": "2026-11-11T08:40:44+00:00",
+          "observed_at": "2026-11-11T14:20:35.354965+00:00"
+        },
+        {
+          "title": "Dell Sinks 12% in a Week on Texas Data Center Fears: “A Moratorium, a Ban”",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/dell-sinks-12-week-texas-233009122.html",
+          "published_at": "2026-11-10T23:30:09+00:00",
+          "observed_at": "2026-11-11T14:20:35.354965+00:00"
+        },
+        {
+          "title": "2 scandals, 1 destination—Why Nvidia can’t shake China smuggling allegations",
+          "url": "https://finance.yahoo.com/technology/ai/articles/2-scandals-1-destination-why-225122827.html",
+          "published_at": "2026-11-10T22:51:22+00:00",
+          "observed_at": "2026-11-11T14:20:35.354965+00:00"
+        },
+        {
+          "title": "Supermicro Announces Participation in Upcoming Investor Events",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/supermicro-announces-participation-upcoming-investor-210500597.html",
+          "published_at": "2026-11-10T21:05:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.354965+00:00"
+        }
+      ],
+      "after_hours_price": 28.2394,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 29.5284,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.831631+00:00"
+    },
+    {
+      "symbol": "US.MPWR",
+      "gap": 0.05443431477833305,
+      "news": [
+        {
+          "title": "iShares A.I. Innovation and Tech Active ETF (BAI) Adds MPWR and NET on Monday",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/ishares-innovation-tech-active-etf-110344160.html",
+          "published_at": "2026-11-11T11:03:44+00:00",
+          "observed_at": "2026-11-11T14:20:35.455703+00:00"
+        },
+        {
+          "title": "36 ETFs Add to Monolithic Power (MPWR) on Monday",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/36-etfs-add-monolithic-power-110155248.html",
+          "published_at": "2026-11-11T11:01:55+00:00",
+          "observed_at": "2026-11-11T14:20:35.455703+00:00"
+        }
+      ],
+      "after_hours_price": 1378.3252,
+      "after_hours_bar_end": "2026-11-11T00:30:00+00:00",
+      "price": 1431.5,
+      "bar_end": "2026-11-11T09:05:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.866634+00:00"
+    },
+    {
+      "symbol": "US.CLS",
+      "gap": 0.06807471556501454,
+      "news": [
+        {
+          "title": "Celestica: 3 Key Takeaways for Long-Term Investors",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/celestica-3-key-takeaways-long-052424262.html",
+          "published_at": "2026-11-11T05:24:24+00:00",
+          "observed_at": "2026-11-11T14:20:35.426770+00:00"
+        },
+        {
+          "title": "Top 3 Canadian Growth Stocks To Watch In November 2026",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/top-3-canadian-growth-stocks-011301781.html",
+          "published_at": "2026-11-11T01:13:01+00:00",
+          "observed_at": "2026-11-11T14:20:35.426770+00:00"
+        }
+      ],
+      "after_hours_price": 229.1464,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 239.19,
+      "bar_end": "2026-11-11T09:15:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.902524+00:00"
+    },
+    {
+      "symbol": "US.RDDT",
+      "gap": 0.018950138721285148,
+      "news": [
+        {
+          "title": "Reddit Finds Strategy To Cash In On Candor",
+          "url": "https://finance.yahoo.com/media-advertising/articles/reddit-finds-strategy-cash-candor-134428736.html",
+          "published_at": "2026-11-11T13:44:28+00:00",
+          "observed_at": "2026-11-11T14:20:35.560002+00:00"
+        },
+        {
+          "title": "42% Upside for Reddit? Guggenheim Thinks So, and Here’s How",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/42-upside-reddit-guggenheim-thinks-030603675.html",
+          "published_at": "2026-11-11T03:06:03+00:00",
+          "observed_at": "2026-11-11T14:20:35.560002+00:00"
+        }
+      ],
+      "after_hours_price": 99.25,
+      "after_hours_bar_end": "2026-11-11T00:55:00+00:00",
+      "price": 100.55,
+      "bar_end": "2026-11-11T09:15:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.972520+00:00"
+    },
+    {
+      "symbol": "US.FN",
+      "gap": 0.06997904587925663,
+      "news": [
+        {
+          "title": "The Zacks Analyst Blog Highlights Arista Networks, Fabrinet, Analog Devices, Advanced Micro Devices and NVIDIA",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/zacks-analyst-blog-highlights-arista-062800269.html",
+          "published_at": "2026-11-11T06:28:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.376054+00:00"
+        }
+      ],
+      "after_hours_price": 351.15,
+      "after_hours_bar_end": "2026-11-11T00:20:00+00:00",
+      "price": 373.03,
+      "bar_end": "2026-11-11T08:55:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:34.968525+00:00"
+    },
+    {
+      "symbol": "US.FTAI",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 189.7305,
+      "after_hours_bar_end": "2026-11-11T00:45:00+00:00"
+    },
+    {
+      "symbol": "US.GFI",
+      "gap": -0.0061622743370494115,
+      "news": [],
+      "after_hours_price": 38.25,
+      "after_hours_bar_end": "2026-11-11T00:45:00+00:00",
+      "price": 37.9,
+      "bar_end": "2026-11-11T09:15:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:35.005527+00:00"
+    },
+    {
+      "symbol": "US.DDOG",
+      "gap": 0.028658667479922517,
+      "news": [
+        {
+          "title": "Daiwa Securities Adjusts Price Target on Datadog to $270 From $300",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/daiwa-securities-adjusts-price-target-105501701.html",
+          "published_at": "2026-11-11T10:55:01+00:00",
+          "observed_at": "2026-11-11T14:20:35.563997+00:00"
+        },
+        {
+          "title": "Should You Buy The Dip In Datadog Stock?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/buy-dip-datadog-stock-015615913.html",
+          "published_at": "2026-11-11T01:56:15+00:00",
+          "observed_at": "2026-11-11T14:20:35.563997+00:00"
+        },
+        {
+          "title": "“Missing Forest-for-the-Trees”: Datadog Sinks 17% in a Week as Its Biggest AI Customer Cuts Back",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/missing-forest-trees-datadog-sinks-233133577.html",
+          "published_at": "2026-11-10T23:31:33+00:00",
+          "observed_at": "2026-11-11T14:20:35.563997+00:00"
+        },
+        {
+          "title": "What Are ServiceNow Stock Bears Missing?",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/servicenow-stock-bears-missing-221348566.html",
+          "published_at": "2026-11-10T22:13:48+00:00",
+          "observed_at": "2026-11-11T14:20:35.563997+00:00"
+        },
+        {
+          "title": "Datadog (DDOG) Stock Gets Fair Value Trim After Mixed Views On Q4 And AI Demand",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/datadog-ddog-stock-gets-fair-210831422.html",
+          "published_at": "2026-11-10T21:08:31+00:00",
+          "observed_at": "2026-11-11T14:20:35.563997+00:00"
+        }
+      ],
+      "after_hours_price": 179.4,
+      "after_hours_bar_end": "2026-11-11T00:50:00+00:00",
+      "price": 183.5127,
+      "bar_end": "2026-11-11T09:10:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:35.131059+00:00"
+    },
+    {
+      "symbol": "US.HOOD",
+      "gap": 0.021148384731036307,
+      "news": [
+        {
+          "title": "Robinhood's Latest Earnings Report Tells You All You Need to Know About the Future of Crypto. These 2 Numbers Really Stood Out.",
+          "url": "https://finance.yahoo.com/markets/crypto/articles/robinhoods-latest-earnings-report-tells-055000723.html",
+          "published_at": "2026-11-11T05:50:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.729157+00:00"
+        },
+        {
+          "title": "5 Best AI-Powered Financial Stocks to Buy According to Analysts",
+          "url": "https://finance.yahoo.com/technology/ai/articles/5-best-ai-powered-financial-225218465.html",
+          "published_at": "2026-11-10T22:52:18+00:00",
+          "observed_at": "2026-11-11T14:20:35.729157+00:00"
+        }
+      ],
+      "after_hours_price": 81.4924,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 83.05,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:35.246915+00:00"
+    },
+    {
+      "symbol": "US.IONQ",
+      "gap": 0.026887898744733185,
+      "news": [
+        {
+          "title": "Quantum Computing Stocks: Rigetti Earnings, Sales Miss",
+          "url": "https://finance.yahoo.com/m/f355f544-0e2a-3f2d-af5a-816ffb46514e/quantum-computing-stocks%3A.html",
+          "published_at": "2026-11-11T13:24:42+00:00",
+          "observed_at": "2026-11-11T14:20:35.911687+00:00"
+        },
+        {
+          "title": "Rigetti Computing CEO Says Focus on Quantum Milestones, Not Sales Numbers",
+          "url": "https://finance.yahoo.com/m/0c055226-baeb-3257-9de5-6e076ddf19fa/rigetti-computing-ceo-says.html",
+          "published_at": "2026-11-11T12:27:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.911687+00:00"
+        },
+        {
+          "title": "D-Wave Quantum Crashed 60% in 2026 But This Major Investment Bank Expects Shares to Quadruple",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/d-wave-quantum-crashed-60-121507323.html",
+          "published_at": "2026-11-11T12:15:07+00:00",
+          "observed_at": "2026-11-11T14:20:35.911687+00:00"
+        },
+        {
+          "title": "Raised Guidance Might Change The Case For Investing In IonQ Stock (IONQ)",
+          "url": "https://finance.yahoo.com/markets/stocks/articles/raised-guidance-might-change-case-031412621.html",
+          "published_at": "2026-11-11T03:14:12+00:00",
+          "observed_at": "2026-11-11T14:20:35.911687+00:00"
+        },
+        {
+          "title": "D-Wave Stock Sinks as Earnings Lay Bare Quantum’s Commercial Growing Pains",
+          "url": "https://finance.yahoo.com/m/922cb527-cf19-3373-b115-b6b85e09a874/d-wave-stock-sinks-as.html",
+          "published_at": "2026-11-10T21:17:00+00:00",
+          "observed_at": "2026-11-11T14:20:35.911687+00:00"
+        }
+      ],
+      "after_hours_price": 35.16,
+      "after_hours_bar_end": "2026-11-11T01:00:00+00:00",
+      "price": 35.9,
+      "bar_end": "2026-11-11T09:20:00-05:00",
+      "quote_observed_at": "2026-11-11T14:20:35.419798+00:00"
+    },
+    {
+      "symbol": "US.BRKR",
+      "gap": null,
+      "news": [],
+      "after_hours_price": 62.24,
+      "after_hours_bar_end": "2026-11-10T22:35:00+00:00"
+    }
+  ],
+  "events": {
+    "status": "OPEND_UNAVAILABLE",
+    "earnings": [],
+    "economic": []
+  },
+  "quote_count": 45,
+  "settled_at": "2026-11-12T14:33:04.246625+00:00",
+  "realized": [
+    {
+      "symbol": "US.SNDK",
+      "name": "闪迪",
+      "score": 0.0215649959,
+      "prior_close": 859.9899902344,
+      "rank": 1,
+      "review_score": 0.9822222222222223,
+      "entry_open": 928.0599975585938,
+      "allocation_usd": 10000,
+      "shares": 10.77516542713462,
+      "exit_open": 888.10498046875,
+      "dividend_per_share": 0.0,
+      "net_return": -0.04347719187870573,
+      "pnl_usd": -434.7719187870573,
+      "cost_usd": 4.25,
+      "buy_fee_usd": 2.02,
+      "sell_fee_usd": 2.23
+    },
+    {
+      "symbol": "US.NBIS",
+      "name": "NEBIUS",
+      "score": 0.0107261585,
+      "prior_close": 134.0,
+      "rank": 2,
+      "review_score": 0.968,
+      "entry_open": 149.72000122070312,
+      "allocation_usd": 10000,
+      "shares": 66.79134329727223,
+      "exit_open": 119.87999725341797,
+      "dividend_per_share": 0.0,
+      "net_return": -0.19976039489709083,
+      "pnl_usd": -1997.6039489709083,
+      "cost_usd": 4.55,
+      "buy_fee_usd": 2.19,
+      "sell_fee_usd": 2.36
+    },
+    {
+      "symbol": "US.TWST",
+      "name": "Twist Bioscience",
+      "score": 0.0106729293,
+      "prior_close": 132.1300048828,
+      "rank": 3,
+      "review_score": 0.912,
+      "entry_open": 140.97999572753906,
+      "allocation_usd": 10000,
+      "shares": 70.93204924850625,
+      "exit_open": 99.58999633789062,
+      "dividend_per_share": 0.0,
+      "net_return": -0.29404374751021867,
+      "pnl_usd": -2940.4374751021865,
+      "cost_usd": 4.56,
+      "buy_fee_usd": 2.2,
+      "sell_fee_usd": 2.36
+    },
+    {
+      "symbol": "US.BE",
+      "name": "Bloom Energy",
+      "score": 0.0097246584,
+      "prior_close": 185.5,
+      "rank": 4,
+      "review_score": 0.904888888888889,
+      "entry_open": 199.52000427246094,
+      "allocation_usd": 10000,
+      "shares": 50.12028761960219,
+      "exit_open": 199.52000427246094,
+      "dividend_per_share": 0.0,
+      "net_return": -0.00045,
+      "pnl_usd": -4.5,
+      "cost_usd": 4.5,
+      "buy_fee_usd": 2.14,
+      "sell_fee_usd": 2.36
+    },
+    {
+      "symbol": "US.DELL",
+      "name": "戴尔科技",
+      "score": 0.0094375299,
+      "prior_close": 334.3150024414,
+      "rank": 5,
+      "review_score": 0.8844444444444446,
+      "entry_open": 360.3999938964844,
+      "allocation_usd": 10000,
+      "shares": 27.746948305643542,
+      "exit_open": 360.3999938964844,
+      "dividend_per_share": 0.0,
+      "net_return": -0.000436,
+      "pnl_usd": -4.36,
+      "cost_usd": 4.36,
+      "buy_fee_usd": 2.07,
+      "sell_fee_usd": 2.29
+    },
+    {
+      "symbol": "US.IREN",
+      "name": "IREN Ltd",
+      "score": 0.0093390045,
+      "prior_close": 19.7299995422,
+      "rank": 6,
+      "review_score": 0.8506666666666667,
+      "entry_open": 20.920000076293945,
+      "allocation_usd": 10000,
+      "shares": 478.01147053205636,
+      "exit_open": 19.020000457763672,
+      "dividend_per_share": 0.0,
+      "net_return": -0.09208216116640021,
+      "pnl_usd": -920.8216116640021,
+      "cost_usd": 12.6,
+      "buy_fee_usd": 6.16,
+      "sell_fee_usd": 6.44
+    },
+    {
+      "symbol": "US.TXG",
+      "name": "10x Genomics",
+      "score": 0.0109522336,
+      "prior_close": 62.9000015259,
+      "rank": 7,
+      "review_score": 0.8373333333333334,
+      "entry_open": 66.5,
+      "allocation_usd": 10000,
+      "shares": 150.37593984962405,
+      "exit_open": 57.869998931884766,
+      "dividend_per_share": 0.0,
+      "net_return": -0.13028345215210876,
+      "pnl_usd": -1302.8345215210877,
+      "cost_usd": 5.09,
+      "buy_fee_usd": 2.44,
+      "sell_fee_usd": 2.65
+    },
+    {
+      "symbol": "US.CRDO",
+      "name": "Credo Technology",
+      "score": 0.0088934399,
+      "prior_close": 129.8000030518,
+      "rank": 8,
+      "review_score": 0.8302222222222223,
+      "entry_open": 139.8800048828125,
+      "allocation_usd": 10000,
+      "shares": 71.48984594601434,
+      "exit_open": 132.31500244140625,
+      "dividend_per_share": 0.0,
+      "net_return": -0.054542085911735524,
+      "pnl_usd": -545.4208591173552,
+      "cost_usd": 4.6,
+      "buy_fee_usd": 2.2,
+      "sell_fee_usd": 2.4
+    },
+    {
+      "symbol": "US.LITE",
+      "name": "Lumentum",
+      "score": 0.007684429,
+      "prior_close": 585.5700073242,
+      "rank": 9,
+      "review_score": 0.8151111111111112,
+      "entry_open": 641.5,
+      "allocation_usd": 10000,
+      "shares": 15.58846453624318,
+      "exit_open": 593.094970703125,
+      "dividend_per_share": 0.0,
+      "net_return": -0.0758840082570148,
+      "pnl_usd": -758.8400825701481,
+      "cost_usd": 4.28,
+      "buy_fee_usd": 2.04,
+      "sell_fee_usd": 2.24
+    },
+    {
+      "symbol": "US.TSEM",
+      "name": "Tower半导体",
+      "score": 0.0080374257,
+      "prior_close": 147.6000061035,
+      "rank": 10,
+      "review_score": 0.7671111111111112,
+      "entry_open": 157.30999755859375,
+      "allocation_usd": 10000,
+      "shares": 63.56875058926416,
+      "exit_open": 149.16000366210938,
+      "dividend_per_share": 0.0,
+      "net_return": -0.052265492930964046,
+      "pnl_usd": -522.6549293096405,
+      "cost_usd": 4.57,
+      "buy_fee_usd": 2.18,
+      "sell_fee_usd": 2.39
+    }
+  ],
+  "fee_model": "futu_hk_us_fixed",
+  "cost_usd": 53.36,
+  "capital_usd": 100000,
+  "pnl_usd": -9432.245347042386,
+  "daily_return": -0.09432245347042387,
+  "top1_net_return": -0.04347719187870573,
+  "top10_net_return": -0.09432245347042387
+}
